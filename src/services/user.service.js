@@ -2,31 +2,46 @@ const prisma = require("../database/database");
 
 class UserService {
   async createUser(data) {
-    try {
-      const newUser = await prisma.user.create({
-        data: {
-          username: data.username,
-          email: data.email,
-          password_hash: data.password_hash,
-          role_id: data.role_id,
-        },
-      });
-      return newUser;
-    } catch (error) {
-      throw new Error(
-        `Error occurred while creating the user: ${error.message}`
-      );
-    }
+    const db = prisma;
+
+    const transaction = await db.$transaction(async (prisma) => {
+      try {
+        const newUser = await prisma.user.create({
+          data: {
+            username: data.username,
+            email: data.email,
+            password_hash: data.password_hash,
+            role_id: data.role_id,
+          },
+        });
+        await prisma.$executeRaw`SELECT setval('user_id_seq', (SELECT MAX(id) FROM "User"))`;
+        return newUser;
+      } catch (error) {
+        throw new Error(
+          `Error occurred while creating the user: ${error.message}`
+        );
+      }
+    });
+
+    return transaction;
   }
 
-  async getAllUsers() {
+  async getAllUsers(limit, offset) {
     try {
       const users = await prisma.user.findMany({
         include: {
           role: true,
         },
+        skip: offset,
+        take: limit,
       });
-      return users;
+
+      const totalUsers = await prisma.user.count();
+
+      return {
+        users,
+        totalUsers,
+      };
     } catch (error) {
       throw new Error(
         `Error occurred while retrieving users: ${error.message}`
@@ -57,7 +72,6 @@ class UserService {
         data: {
           username: data.username,
           email: data.email,
-          password_hash: data.password_hash,
           role_id: data.role_id,
           last_login: data.last_login,
         },

@@ -1,10 +1,30 @@
 const createResponse = require("../../utils/api.response");
 const userService = require("../services/user.service");
+const roleService = require("../services/role.service");
+const bcrypt = require("bcryptjs");
 
 exports.getAllUser = async (req, res) => {
   try {
-    const users = await userService.getAllUsers();
-    res.status(200).json(createResponse("User fetched successfully", users));
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const offset = (page - 1) * limit;
+
+    const { users, totalUsers } = await userService.getAllUsers(limit, offset);
+
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    res.status(200).json(
+      createResponse("User fetched successfully", {
+        users,
+        pagination: {
+          page,
+          limit,
+          totalPages,
+          totalUsers,
+        },
+      })
+    );
   } catch (error) {
     res
       .status(500)
@@ -33,9 +53,15 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const { username, email, password_hash, role_id } = req.body;
-
+  const { username, email, password, role_id } = req.body;
   try {
+    const roleCheck = await roleService.getRoleById(role_id);
+
+    if (!roleCheck) {
+      return res.status(400).json(createResponse("Invalid role ID"));
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
     const newUser = await userService.createUser({
       username,
       email,
@@ -57,13 +83,12 @@ exports.updateUser = async (req, res) => {
     return res.status(400).json(createResponse("Invalid user ID"));
   }
 
-  const { username, email, password_hash, role_id, last_login } = req.body;
+  const { username, email, role_id, last_login } = req.body;
 
   try {
     const updatedUser = await userService.updateUser(Number(id), {
       username,
       email,
-      password_hash,
       role_id,
       last_login,
     });

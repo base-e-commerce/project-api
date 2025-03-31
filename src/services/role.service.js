@@ -2,18 +2,24 @@ const prisma = require("../database/database");
 
 class RoleService {
   async createRole(data) {
-    try {
-      const newRole = await prisma.role.create({
-        data: {
-          name: data.name.toUpperCase(),
-        },
-      });
-      return newRole;
-    } catch (error) {
-      throw new Error(
-        `Error occurred while creating the role: ${error.message}`
-      );
-    }
+    const db = prisma;
+
+    const transaction = await db.$transaction(async (prisma) => {
+      try {
+        const newRole = await prisma.role.create({
+          data: {
+            name: data.name.toUpperCase(),
+          },
+        });
+        return newRole;
+      } catch (error) {
+        throw new Error(
+          `Error occurred while creating the role: ${error.message}`
+        );
+      }
+    });
+
+    return transaction;
   }
 
   async getAllRoles() {

@@ -15,12 +15,29 @@ const router = express.Router();
  * @swagger
  * /user/:
  *   get:
- *     summary: Get all users in administration
+ *     summary: Get all users in administration with pagination
  *     tags:
- *      - User
+ *       - User
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         description: The page number to retrieve (default is 1)
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - name: limit
+ *         in: query
+ *         description: The number of users per page (default is 10)
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
  *     responses:
  *       200:
- *         description: Get all users in administration
+ *         description: List of users in the administration with pagination metadata
+ *       500:
+ *         description: Internal server error
  */
 router.get("/", getAllUser);
 
@@ -64,7 +81,7 @@ router.get("/:id", getUserById);
  *                 type: string
  *               email:
  *                 type: string
- *               password_hash:
+ *               password:
  *                 type: string
  *               role_id:
  *                 type: integer
