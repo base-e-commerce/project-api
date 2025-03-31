@@ -1,7 +1,9 @@
 const express = require("express");
-const exampleRoutes = require("./routes/exampe.route");
+const userRoutes = require("./src/routes/user.route");
+const roleRoutes = require("./src/routes/role.route");
 
 const app = express();
-app.use("/example", exampleRoutes);
+app.use("/user", userRoutes);
+app.use("/role", roleRoutes);
 
 module.exports = app;
