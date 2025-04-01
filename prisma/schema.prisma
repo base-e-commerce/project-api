@@ -30,3 +30,22 @@ model User {
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
 }
+
+model Service {
+  service_id  Int         @id @default(autoincrement())
+  name        String
+  description String?
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+  categories  Categorie[]
+}
+
+model Categorie {
+  categorie_id Int      @id @default(autoincrement())
+  name         String
+  description  String?
+  service_id   Int
+  service      Service  @relation(fields: [service_id], references: [service_id])
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
