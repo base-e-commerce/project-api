@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const secretKey = process.env.JWT_SECRET;
 
-function generateToken(user) {
+const generateToken = (user) => {
   const payload = {
     userId: user.user_id,
     email: user.email,
@@ -14,14 +14,14 @@ function generateToken(user) {
   };
 
   return jwt.sign(payload, secretKey, options);
-}
+};
 
-function verifyToken(token) {
+const verifyToken = (token) => {
   try {
     return jwt.verify(token, secretKey);
   } catch (error) {
     return null;
   }
-}
+};
 
 module.exports = { generateToken, verifyToken };

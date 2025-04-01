@@ -9,6 +9,7 @@ const {
   deleteRole,
 } = require("../controller/role.controller");
 const authenticateToken = require("../middleware/auth.middleware");
+const authenticateAdmin = require("../middleware/auth.admin.middleware");
 
 const router = express.Router();
 
@@ -45,7 +46,7 @@ const router = express.Router();
  *       200:
  *         description: Get all roles in administration
  */
-router.get("/", authenticateToken, getAllRoles);
+router.get("/", authenticateToken, authenticateAdmin, getAllRoles);
 
 /**
  * @swagger
@@ -62,7 +63,7 @@ router.get("/", authenticateToken, getAllRoles);
  *       404:
  *         description: Role not found
  */
-router.get("/:id", authenticateToken, getRoleById);
+router.get("/:id", authenticateToken, authenticateAdmin, getRoleById);
 
 /**
  * @swagger
@@ -79,7 +80,13 @@ router.get("/:id", authenticateToken, getRoleById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/", authenticateToken, validateDto(createRoleSchema), createRole);
+router.post(
+  "/",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(createRoleSchema),
+  createRole
+);
 
 /**
  * @swagger
@@ -103,6 +110,7 @@ router.post("/", authenticateToken, validateDto(createRoleSchema), createRole);
 router.put(
   "/:id",
   authenticateToken,
+  authenticateAdmin,
   validateDto(updateRoleSchema),
   updateRole
 );
@@ -122,6 +130,6 @@ router.put(
  *       404:
  *         description: Role not found
  */
-router.delete("/:id", authenticateToken, deleteRole);
+router.delete("/:id", authenticateToken, authenticateAdmin, deleteRole);
 
 module.exports = router;

@@ -8,9 +8,10 @@ const {
   deleteUser,
   updateUser,
   login,
-  getCurrentUser
+  getCurrentUser,
 } = require("../controller/user.controller");
 const authenticateToken = require("../middleware/auth.middleware");
+const authenticateAdmin = require("../middleware/auth.admin.middleware");
 
 const router = express.Router();
 
@@ -143,7 +144,13 @@ router.get("/:id", authenticateToken, getUserById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/", authenticateToken, validateDto(createUserSchema), createUser);
+router.post(
+  "/",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(createUserSchema),
+  createUser
+);
 
 /**
  * @swagger
@@ -188,6 +195,7 @@ router.post("/", authenticateToken, validateDto(createUserSchema), createUser);
 router.put(
   "/:id",
   authenticateToken,
+  authenticateAdmin,
   validateDto(updateUserSchema),
   updateUser
 );
@@ -212,6 +220,6 @@ router.put(
  *       404:
  *         description: User not found
  */
-router.delete("/:id", authenticateToken, deleteUser);
+router.delete("/:id", authenticateToken, authenticateAdmin, deleteUser);
 
 module.exports = router;
