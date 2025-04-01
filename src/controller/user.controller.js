@@ -52,6 +52,31 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
+exports.updateCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { username, email, password } = req.body;
+
+    const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
+
+    const updatedUser = await userService.updateUser(userId, {
+      username,
+      email,
+      ...(passwordHash && { password_hash: passwordHash }),
+    });
+
+    res
+      .status(200)
+      .json(
+        createResponse("User information updated successfully", updatedUser)
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message));
+  }
+};
+
 exports.getAllUser = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;

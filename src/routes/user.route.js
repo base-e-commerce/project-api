@@ -9,6 +9,7 @@ const {
   updateUser,
   login,
   getCurrentUser,
+  updateCurrentUser,
 } = require("../controller/user.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -63,6 +64,40 @@ router.post("/login", login);
  *         description: Internal server error
  */
 router.get("/current", authenticateToken, getCurrentUser);
+
+/**
+ * @swagger
+ * /user/current:
+ *   put:
+ *     summary: Update the currently authenticated user's information
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User information updated successfully
+ *       400:
+ *         description: Invalid input data
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+router.put("/current", authenticateToken, updateCurrentUser);
 
 /**
  * @swagger
