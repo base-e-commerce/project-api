@@ -7,9 +7,61 @@ const {
   createUser,
   deleteUser,
   updateUser,
+  login,
+  getCurrentUser
 } = require("../controller/user.controller");
+const authenticateToken = require("../middleware/auth.middleware");
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /user/login:
+ *   post:
+ *     summary: Authenticate a user and generate a JWT token
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid email or password
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/login", login);
+
+/**
+ * @swagger
+ * /user/current:
+ *   get:
+ *     summary: Get the currently authenticated user's information
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user's information retrieved successfully
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/current", authenticateToken, getCurrentUser);
 
 /**
  * @swagger
@@ -39,7 +91,7 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.get("/", getAllUser);
+router.get("/", authenticateToken, getAllUser);
 
 /**
  * @swagger
@@ -61,7 +113,7 @@ router.get("/", getAllUser);
  *       404:
  *         description: User not found
  */
-router.get("/:id", getUserById);
+router.get("/:id", authenticateToken, getUserById);
 
 /**
  * @swagger
@@ -91,7 +143,7 @@ router.get("/:id", getUserById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/", validateDto(createUserSchema), createUser);
+router.post("/", authenticateToken, validateDto(createUserSchema), createUser);
 
 /**
  * @swagger
@@ -133,7 +185,12 @@ router.post("/", validateDto(createUserSchema), createUser);
  *       404:
  *         description: User not found
  */
-router.put("/:id", validateDto(updateUserSchema), updateUser);
+router.put(
+  "/:id",
+  authenticateToken,
+  validateDto(updateUserSchema),
+  updateUser
+);
 
 /**
  * @swagger
@@ -155,6 +212,6 @@ router.put("/:id", validateDto(updateUserSchema), updateUser);
  *       404:
  *         description: User not found
  */
-router.delete("/:id", deleteUser);
+router.delete("/:id", authenticateToken, deleteUser);
 
 module.exports = router;

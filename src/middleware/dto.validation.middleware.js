@@ -1,4 +1,4 @@
-const createResponse = require("../../utils/api.response");
+const createResponse = require("../utils/api.response");
 const validateDto = (schema) => (req, res, next) => {
   const { error } = schema.validate(req.body, { abortEarly: false });
 

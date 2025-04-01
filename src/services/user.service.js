@@ -14,7 +14,7 @@ class UserService {
             role_id: data.role_id,
           },
         });
-        await prisma.$executeRaw`SELECT setval('user_id_seq', (SELECT MAX(id) FROM "User"))`;
+        // await prisma.$executeRaw`SELECT setval('user_id_seq', (SELECT MAX(id) FROM "User"))`;
         return newUser;
       } catch (error) {
         throw new Error(
@@ -26,11 +26,33 @@ class UserService {
     return transaction;
   }
 
+  async getUserByEmail(email) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email: email },
+        include: {
+          role: true,
+        },
+      });
+      return user;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the user: ${error.message}`
+      );
+    }
+  }
+
   async getAllUsers(limit, offset) {
     try {
       const users = await prisma.user.findMany({
-        include: {
+        select: {
+          user_id: true,
+          username: true,
+          email: true,
           role: true,
+          last_login: true,
+          created_at: true,
+          updated_at: true,
         },
         skip: offset,
         take: limit,
@@ -53,8 +75,14 @@ class UserService {
     try {
       const user = await prisma.user.findUnique({
         where: { user_id: userId },
-        include: {
+        select: {
+          user_id: true,
+          username: true,
+          email: true,
           role: true,
+          last_login: true,
+          created_at: true,
+          updated_at: true,
         },
       });
       return user;

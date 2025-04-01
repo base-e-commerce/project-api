@@ -1,7 +1,56 @@
-const createResponse = require("../../utils/api.response");
+const createResponse = require("../utils/api.response");
 const userService = require("../services/user.service");
 const roleService = require("../services/role.service");
 const bcrypt = require("bcryptjs");
+const { generateToken } = require("../utils/jwt");
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await userService.getUserByEmail(email);
+
+    if (!user) {
+      return res.status(401).json(createResponse("Invalid email or password"));
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+    if (!isPasswordValid) {
+      return res.status(401).json(createResponse("Invalid email or password"));
+    }
+
+    user.last_login = new Date();
+    await userService.updateUser(user.user_id, user);
+
+    const token = generateToken(user);
+
+    res.status(200).json(createResponse("Login successful", { token }));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message));
+  }
+};
+
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await userService.getUserById(userId);
+
+    if (!user) {
+      return res.status(404).json(createResponse("User not found"));
+    }
+
+    res
+      .status(200)
+      .json(createResponse("Current user retrieved successfully", user));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message));
+  }
+};
 
 exports.getAllUser = async (req, res) => {
   try {

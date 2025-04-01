@@ -1,4 +1,4 @@
-const createResponse = require("../../utils/api.response");
+const createResponse = require("../utils/api.response");
 const roleService = require("../services/role.service");
 
 exports.getAllRoles = async (req, res) => {
