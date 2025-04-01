@@ -19,3 +19,14 @@
    ```bash
    npm run dev
    ```
+
+## Creating or update model
+
+ ```bash
+   npx prisma migrate dev --name desc
+```
+
+ ```bash
+   npx generate
+```
+

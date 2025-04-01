@@ -41,11 +41,35 @@ model Service {
 }
 
 model Categorie {
-  categorie_id Int      @id @default(autoincrement())
+  categorie_id Int       @id @default(autoincrement())
   name         String
   description  String?
   service_id   Int
-  service      Service  @relation(fields: [service_id], references: [service_id])
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  service      Service   @relation(fields: [service_id], references: [service_id])
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  Product      Product[]
+}
+
+model Product {
+  product_id     Int            @id @default(autoincrement())
+  name           String
+  description    String?
+  price          Decimal
+  stock_quantity Int
+  image_url      String?
+  category_id    Int
+  category       Categorie      @relation(fields: [category_id], references: [categorie_id])
+  is_active      Boolean        @default(true)
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  productImages  ProductImage[]
+}
+
+model ProductImage {
+  product_image_id Int      @id @default(autoincrement())
+  product_id       Int
+  product          Product  @relation(fields: [product_id], references: [product_id])
+  image_url        String
+  created_at       DateTime @default(now())
 }

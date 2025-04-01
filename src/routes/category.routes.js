@@ -18,32 +18,6 @@ const router = express.Router();
 
 /**
  * @swagger
- * components:
- *   parameters:
- *     CategoryIdParam:
- *       name: id
- *       in: path
- *       required: true
- *       description: ID of the category
- *       schema:
- *         type: integer
- *   requestBodies:
- *     CategoryRequestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               service_id:
- *                 type: integer
- */
-
-/**
- * @swagger
  * /category/:
  *   get:
  *     summary: Get all categories
