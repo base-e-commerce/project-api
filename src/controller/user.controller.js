@@ -11,13 +11,17 @@ exports.login = async (req, res) => {
     const user = await userService.getUserByEmail(email);
 
     if (!user) {
-      return res.status(401).json(createResponse("Invalid email or password"));
+      return res
+        .status(401)
+        .json(createResponse("Invalid email or password", null, false));
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
-      return res.status(401).json(createResponse("Invalid email or password"));
+      return res
+        .status(401)
+        .json(createResponse("Invalid email or password", null, false));
     }
 
     user.last_login = new Date();
@@ -25,11 +29,16 @@ exports.login = async (req, res) => {
 
     const token = generateToken(user);
 
-    res.status(200).json(createResponse("Login successful", { token }));
+    dataReturn = {
+      token,
+      role: user.role_id,
+    };
+
+    res.status(200).json(createResponse("Login successful", dataReturn));
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -39,7 +48,9 @@ exports.getCurrentUser = async (req, res) => {
     const user = await userService.getUserById(userId);
 
     if (!user) {
-      return res.status(404).json(createResponse("User not found"));
+      return res
+        .status(404)
+        .json(createResponse("User not found", null, false));
     }
 
     res
@@ -48,7 +59,7 @@ exports.getCurrentUser = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -73,7 +84,7 @@ exports.updateCurrentUser = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -102,7 +113,7 @@ exports.getAllUser = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -110,19 +121,21 @@ exports.getUserById = async (req, res) => {
   const { id } = req.params;
 
   if (isNaN(id)) {
-    return res.status(400).json(createResponse("Invalid user ID"));
+    return res.status(400).json(createResponse("Invalid user ID", null, false));
   }
 
   try {
     const user = await userService.getUserById(Number(id));
     if (!user) {
-      return res.status(404).json(createResponse("User not found"));
+      return res
+        .status(404)
+        .json(createResponse("User not found", null, false));
     }
     res.status(200).json(createResponse("User fetched successfully", user));
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -132,7 +145,9 @@ exports.createUser = async (req, res) => {
     const roleCheck = await roleService.getRoleById(role_id);
 
     if (!roleCheck) {
-      return res.status(400).json(createResponse("Invalid role ID"));
+      return res
+        .status(400)
+        .json(createResponse("Invalid role ID", null, false));
     }
 
     const password_hash = await bcrypt.hash(password, 10);
@@ -146,7 +161,7 @@ exports.createUser = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -154,7 +169,7 @@ exports.updateUser = async (req, res) => {
   const { id } = req.params;
 
   if (isNaN(id)) {
-    return res.status(400).json(createResponse("Invalid user ID"));
+    return res.status(400).json(createResponse("Invalid user ID", null, false));
   }
 
   const { username, email, role_id, last_login } = req.body;
@@ -172,7 +187,7 @@ exports.updateUser = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -187,6 +202,6 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };

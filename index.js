@@ -4,16 +4,16 @@ const cors = require("cors");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const dotenv = require("dotenv");
-const { Sequelize } = require("sequelize");
 const app = require("./app");
 const swaggerOptions = require("./config/swagger");
+const corsOptions = require("./config/cors");
 
 dotenv.config();
 
 const server = express();
 
 server.use(bodyParser.json());
-server.use(cors());
+server.use(cors(corsOptions));
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 server.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));

@@ -10,7 +10,7 @@ exports.getAllServices = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -23,12 +23,12 @@ exports.getServiceById = async (req, res) => {
         .status(200)
         .json(createResponse("Service fetched successfully", service));
     } else {
-      res.status(404).json(createResponse("Service not found", null));
+      res.status(404).json(createResponse("Service not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -41,7 +41,7 @@ exports.createService = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -57,12 +57,12 @@ exports.updateService = async (req, res) => {
         .status(200)
         .json(createResponse("Service updated successfully", updatedService));
     } else {
-      res.status(404).json(createResponse("Service not found", null));
+      res.status(404).json(createResponse("Service not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -75,11 +75,11 @@ exports.deleteService = async (req, res) => {
         .status(200)
         .json(createResponse("Service deleted successfully", deletedService));
     } else {
-      res.status(404).json(createResponse("Service not found", null));
+      res.status(404).json(createResponse("Service not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
