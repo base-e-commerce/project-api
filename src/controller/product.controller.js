@@ -80,7 +80,7 @@ exports.addImageToProduct = async (req, res) => {
 
 exports.deleteProductImage = async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params.productIdImage, 10);
     const productImage = await productService.deleteImageProduct(id);
     if (!productImage) {
       return res

@@ -203,7 +203,7 @@ router.delete("/:id", authenticateToken, authenticateAdmin, deleteProduct);
 
 /**
  * @swagger
- * /product/{id}:
+ * /product/image/{productIdImage}:
  *   delete:
  *     summary: Delete  image by ID
  *     tags:
