@@ -78,6 +78,25 @@ exports.addImageToProduct = async (req, res) => {
   }
 };
 
+exports.deleteProductImage = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const productImage = await productService.deleteImageProduct(id);
+    if (!productImage) {
+      return res
+        .status(404)
+        .json(createResponse("Product image not deleted", null));
+    }
+    res
+      .status(200)
+      .json(createResponse("Product image deleted successfully", productImage));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message));
+  }
+};
+
 exports.createProduct = async (req, res) => {
   try {
     const { name, description, price, category_id } = req.body;

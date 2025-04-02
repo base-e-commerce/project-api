@@ -11,6 +11,7 @@ const {
   updateProduct,
   deleteProduct,
   addImageToProduct,
+  deleteProductImage,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -26,6 +27,13 @@ const router = express.Router();
  *       in: path
  *       required: true
  *       description: ID of the product
+ *       schema:
+ *         type: string
+ *     ProductIdImageParam:
+ *       name: id
+ *       in: path
+ *       required: true
+ *       description: ID of the product image
  *       schema:
  *         type: string
  *   requestBodies:
@@ -168,7 +176,7 @@ router.post("/image", authenticateToken, authenticateAdmin, addImageToProduct);
  *       404:
  *         description: Product not found
  */
-router.patch(
+router.put(
   "/:id",
   authenticateToken,
   authenticateAdmin,
@@ -192,5 +200,27 @@ router.patch(
  *         description: Product not found
  */
 router.delete("/:id", authenticateToken, authenticateAdmin, deleteProduct);
+
+/**
+ * @swagger
+ * /product/{id}:
+ *   delete:
+ *     summary: Delete  image by ID
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - $ref: '#/components/parameters/ProductIdImageParam'
+ *     responses:
+ *       200:
+ *         description: Product Image deleted successfully
+ *       404:
+ *         description: Product Image not found
+ */
+router.delete(
+  "/image/:productIdImage",
+  authenticateToken,
+  authenticateAdmin,
+  deleteProductImage
+);
 
 module.exports = router;

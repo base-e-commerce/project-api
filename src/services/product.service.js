@@ -74,6 +74,27 @@ class ProductService {
     }
   }
 
+  async deleteImageProduct(productImageId) {
+    try {
+      const productImageExists = await prisma.productImage.findUnique({
+        where: { product_image_id: productImageId },
+      });
+      if (!productImageExists) {
+        throw new Error(
+          `Product image with ID ${productImageId} does not exist`
+        );
+      }
+      await prisma.productImage.delete({
+        where: { product_image_id: productImageId },
+      });
+      return productImageExists;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while deleting product image: ${error.message}`
+      );
+    }
+  }
+
   async getProductById(productId) {
     try {
       const product = await prisma.product.findUnique({
@@ -93,14 +114,16 @@ class ProductService {
       const updateData = Object.fromEntries(
         Object.entries(data).filter(([_, value]) => value !== undefined)
       );
-  
+
       const updatedProduct = await prisma.product.update({
         where: { product_id: productId },
         data: updateData,
       });
       return updatedProduct;
     } catch (error) {
-      throw new Error(`Error occurred while updating product: ${error.message}`);
+      throw new Error(
+        `Error occurred while updating product: ${error.message}`
+      );
     }
   }
 
