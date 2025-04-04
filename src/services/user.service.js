@@ -116,6 +116,22 @@ class UserService {
     }
   }
 
+  async resetPassUser(userId, data) {
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { user_id: userId },
+        data: {
+          password_hash: data.password,
+        },
+      });
+      return updatedUser;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while updating the user: ${error.message}`
+      );
+    }
+  }
+
   async deleteUser(userId) {
     try {
       const deletedUser = await prisma.user.delete({

@@ -10,6 +10,7 @@ const {
   login,
   getCurrentUser,
   updateCurrentUser,
+  resetPassUser,
 } = require("../controller/user.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -193,6 +194,54 @@ router.post(
 //   createUser
 // );
 
+
+// router.post(
+//   "/",
+//   authenticateToken,
+//   authenticateAdmin,
+//   validateDto(createUserSchema),
+//   createUser
+// );
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   put:
+ *     summary: Update user pass information by
+ *     tags:
+ *      - User
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user to update pass
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password_hash:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       400:
+ *         description: Invalid input data
+ *       404:
+ *         description: User not found
+ */
+router.put(
+  "/resetpass/:id",
+  authenticateToken,
+  authenticateAdmin,
+  resetPassUser
+);
+
+
 /**
  * @swagger
  * /user/{id}:
@@ -240,6 +289,7 @@ router.put(
   validateDto(updateUserSchema),
   updateUser
 );
+
 
 /**
  * @swagger

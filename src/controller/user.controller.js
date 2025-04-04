@@ -174,7 +174,7 @@ exports.updateUser = async (req, res) => {
     return res.status(400).json(createResponse("Invalid user ID", null, false));
   }
 
-  const { username, email, role_id, last_login } = req.body;
+  const { username, email, role_id, phone } = req.body;
 
   try {
     const updatedUser = await userService.updateUser(Number(id), {
@@ -182,7 +182,30 @@ exports.updateUser = async (req, res) => {
       email,
       phone,
       role_id,
-      last_login,
+    });
+    res
+      .status(200)
+      .json(createResponse("User updated successfully", updatedUser));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.resetPassUser = async (req, res) => {
+  const { id } = req.params;
+
+  if (isNaN(id)) {
+    return res.status(400).json(createResponse("Invalid user ID", null, false));
+  }
+
+  const { password } = req.body;
+  const password_hash = await bcrypt.hash(password, 10);
+
+  try {
+    const updatedUser = await userService.resetPassUser(Number(id), {
+      password: password_hash
     });
     res
       .status(200)
