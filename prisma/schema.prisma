@@ -23,6 +23,7 @@ model User {
   user_id       Int       @id @default(autoincrement())
   username      String?
   email         String    @unique
+  phone         String?
   password_hash String
   role_id       Int
   role          Role      @relation(fields: [role_id], references: [role_id])

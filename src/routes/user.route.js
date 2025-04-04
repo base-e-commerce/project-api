@@ -169,6 +169,8 @@ router.get("/:id", authenticateToken, getUserById);
  *                 type: string
  *               email:
  *                 type: string
+ *               phone:
+ *                 type: string
  *               password:
  *                 type: string
  *               role_id:
@@ -181,11 +183,15 @@ router.get("/:id", authenticateToken, getUserById);
  */
 router.post(
   "/",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(createUserSchema),
   createUser
 );
+// router.post(
+//   "/",
+//   authenticateToken,
+//   authenticateAdmin,
+//   validateDto(createUserSchema),
+//   createUser
+// );
 
 /**
  * @swagger

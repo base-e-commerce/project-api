@@ -16,7 +16,7 @@ server.use(bodyParser.json());
 server.use(cors(corsOptions));
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-server.use("/", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+server.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 server.use("/api", app);
 

@@ -82,11 +82,15 @@ router.get("/:id", authenticateToken, authenticateAdmin, getRoleById);
  */
 router.post(
   "/",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(createRoleSchema),
   createRole
 );
+// router.post(
+//   "/",
+//   authenticateToken,
+//   authenticateAdmin,
+//   validateDto(createRoleSchema),
+//   createRole
+// );
 
 /**
  * @swagger

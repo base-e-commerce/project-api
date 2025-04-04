@@ -73,6 +73,7 @@ exports.updateCurrentUser = async (req, res) => {
     const updatedUser = await userService.updateUser(userId, {
       username,
       email,
+      phone,
       ...(passwordHash && { password_hash: passwordHash }),
     });
 
@@ -140,7 +141,7 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const { username, email, password, role_id } = req.body;
+  const { username, email, password, phone, role_id } = req.body;
   try {
     const roleCheck = await roleService.getRoleById(role_id);
 
@@ -154,6 +155,7 @@ exports.createUser = async (req, res) => {
     const newUser = await userService.createUser({
       username,
       email,
+      phone,
       password_hash,
       role_id,
     });
@@ -178,6 +180,7 @@ exports.updateUser = async (req, res) => {
     const updatedUser = await userService.updateUser(Number(id), {
       username,
       email,
+      phone,
       role_id,
       last_login,
     });

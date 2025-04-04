@@ -10,6 +10,7 @@ class UserService {
           data: {
             username: data.username,
             email: data.email,
+            phone: data.phone,
             password_hash: data.password_hash,
             role_id: data.role_id,
           },
@@ -48,6 +49,7 @@ class UserService {
         select: {
           user_id: true,
           username: true,
+          phone: true,
           email: true,
           role: true,
           last_login: true,
@@ -79,6 +81,7 @@ class UserService {
           user_id: true,
           username: true,
           email: true,
+          phone: true,
           role: true,
           last_login: true,
           created_at: true,
@@ -100,6 +103,7 @@ class UserService {
         data: {
           username: data.username,
           email: data.email,
+          phone: data.phone,
           role_id: data.role_id,
           last_login: data.last_login,
         },
