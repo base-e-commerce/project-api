@@ -73,6 +73,30 @@ class UserService {
     }
   }
 
+  async getUserByIdAll(userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { user_id: userId },
+        select: {
+          user_id: true,
+          username: true,
+          email: true,
+          phone: true,
+          password_hash: true,
+          role: true,
+          last_login: true,
+          created_at: true,
+          updated_at: true,
+        },
+      });
+      return user;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the user: ${error.message}`
+      );
+    }
+  }
+
   async getUserById(userId) {
     try {
       const user = await prisma.user.findUnique({

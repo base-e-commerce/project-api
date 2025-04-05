@@ -11,6 +11,7 @@ const {
   getCurrentUser,
   updateCurrentUser,
   resetPassUser,
+  checkPassUserCurrent,
 } = require("../controller/user.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -46,6 +47,33 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.post("/login", login);
+
+/**
+ * @swagger
+ * /user/checkpass:
+ *   post:
+ *     summary: Check user pass information
+ *     tags:
+ *      - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: 123456789Eric
+ *     responses:
+ *       200:
+ *         description: Password is valid
+ *       400:
+ *         description: Invalid input data
+ *       404:
+ *         description: User not found
+ */
+router.post("/checkpass", authenticateToken, checkPassUserCurrent);
 
 /**
  * @swagger
@@ -182,10 +210,7 @@ router.get("/:id", authenticateToken, getUserById);
  *       400:
  *         description: Invalid input data
  */
-router.post(
-  "/",
-  createUser
-);
+router.post("/", createUser);
 // router.post(
 //   "/",
 //   authenticateToken,
@@ -193,7 +218,6 @@ router.post(
 //   validateDto(createUserSchema),
 //   createUser
 // );
-
 
 // router.post(
 //   "/",
@@ -240,7 +264,6 @@ router.put(
   authenticateAdmin,
   resetPassUser
 );
-
 
 /**
  * @swagger
@@ -289,7 +312,6 @@ router.put(
   validateDto(updateUserSchema),
   updateUser
 );
-
 
 /**
  * @swagger

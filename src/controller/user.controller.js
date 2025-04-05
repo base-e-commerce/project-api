@@ -63,6 +63,37 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
+exports.checkPassUserCurrent = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { password } = req.body;
+    console.log("--------------------------------");
+    console.log(password);
+
+    const user = await userService.getUserByIdAll(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json(createResponse("User not found", null, false));
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+    if (!isPasswordValid) {
+      return res
+        .status(401)
+        .json(createResponse("Invalid password", null, false));
+    }
+
+    res.status(200).json(createResponse("Password is valid", true));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.updateCurrentUser = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -205,7 +236,7 @@ exports.resetPassUser = async (req, res) => {
 
   try {
     const updatedUser = await userService.resetPassUser(Number(id), {
-      password: password_hash
+      password: password_hash,
     });
     res
       .status(200)
