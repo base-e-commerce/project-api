@@ -128,6 +128,7 @@ class UserService {
           username: data.username,
           email: data.email,
           phone: data.phone,
+          password_hash: data.password_hash,
           role_id: data.role_id,
           last_login: data.last_login,
         },

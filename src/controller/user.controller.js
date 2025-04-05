@@ -67,8 +67,6 @@ exports.checkPassUserCurrent = async (req, res) => {
   try {
     const userId = req.user.userId;
     const { password } = req.body;
-    console.log("--------------------------------");
-    console.log(password);
 
     const user = await userService.getUserByIdAll(userId);
 
@@ -79,6 +77,8 @@ exports.checkPassUserCurrent = async (req, res) => {
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+    const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
 
     if (!isPasswordValid) {
       return res
@@ -97,9 +97,10 @@ exports.checkPassUserCurrent = async (req, res) => {
 exports.updateCurrentUser = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { username, email, password } = req.body;
+    const { username, email, phone, password } = req.body;
 
     const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
+
 
     const updatedUser = await userService.updateUser(userId, {
       username,
