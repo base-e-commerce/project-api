@@ -99,8 +99,16 @@ exports.deleteProductImage = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, category_id } = req.body;
-    if (!name || !description || !price || !category_id) {
+    const { name, description, currency, currency_name, price, category_id } =
+      req.body;
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !currency ||
+      !currency_name ||
+      !category_id
+    ) {
       return res
         .status(400)
         .json(createResponse("Bad Request", "All fields are required", false));

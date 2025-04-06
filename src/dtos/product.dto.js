@@ -12,6 +12,9 @@ exports.createProductSchema = Joi.object({
     "string.base": "Description must be a string",
     "string.max": "Description must not exceed 500 characters",
   }),
+  currency: Joi.string().messages({
+    "string.base": "Description must be a string",
+  }),
   price: Joi.number().precision(2).greater(0).required().messages({
     "number.base": "Price must be a number",
     "number.greater": "Price must be greater than 0",
@@ -47,6 +50,9 @@ exports.updateProductSchema = Joi.object({
   description: Joi.string().max(500).optional().messages({
     "string.base": "Description must be a string",
     "string.max": "Description must not exceed 500 characters",
+  }),
+  currency: Joi.string().optional().messages({
+    "string.base": "Description must be a string",
   }),
   price: Joi.number().precision(2).greater(0).optional().messages({
     "number.base": "Price must be a number",

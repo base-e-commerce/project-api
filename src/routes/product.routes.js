@@ -49,6 +49,12 @@ const router = express.Router();
  *               description:
  *                 type: string
  *                 description: The description of the product
+ *               currency:
+ *                 type: string
+ *                 description: The currency of the product
+ *               currency_name:
+ *                 type: string
+ *                 description: The currency name of the product
  *               price:
  *                 type: number
  *               stock_quantity:
