@@ -14,6 +14,22 @@ exports.getAllCategories = async (req, res) => {
   }
 };
 
+exports.getAllCategoriesByService = async (req, res) => {
+  try {
+    const serviceId = parseInt(req.params.id, 10);
+    const categories = await categoryService.getAllCategoriesByService(
+      serviceId
+    );
+    res
+      .status(200)
+      .json(createResponse("Categories fetched successfully", categories));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.getCategoryById = async (req, res) => {
   try {
     const categoryId = parseInt(req.params.id, 10);
