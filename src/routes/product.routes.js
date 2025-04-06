@@ -12,6 +12,7 @@ const {
   deleteProduct,
   addImageToProduct,
   deleteProductImage,
+  getSearchProducts
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -68,6 +69,19 @@ const router = express.Router();
  *               - price
  *               - categoryId
  */
+
+/**
+ * @swagger
+ * /product/search/{key}:
+ *   get:
+ *     summary: Get search products with pagination
+ *     tags:
+ *       - Product
+ *     responses:
+ *       200:
+ *         description: Get search products
+ */
+router.get("/search/:key", getSearchProducts);
 
 /**
  * @swagger

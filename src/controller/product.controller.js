@@ -34,6 +34,24 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+exports.getSearchProducts = async (req, res) => {
+  try {
+    const key = req.params.key;
+    const product = await productService.getSearchProducts(key);
+    if (product) {
+      res
+        .status(200)
+        .json(createResponse("Product fetched successfully", product));
+    } else {
+      res.status(404).json(createResponse("Product not found", null, false));
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.getProductById = async (req, res) => {
   try {
     const productId = parseInt(req.params.id, 10);

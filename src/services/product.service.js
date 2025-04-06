@@ -30,6 +30,21 @@ class ProductService {
     return transaction;
   }
 
+  async getSearchProducts(key) {
+    try {
+      const product = await prisma.product.findMany({
+        where: {
+          OR: [{ name: { contains: key } }, { description: { contains: key } }],
+        },
+      });
+      return product;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while searching for product: ${error.message}`
+      );
+    }
+  }
+
   async getAllProducts(limit, offset) {
     try {
       const products = await prisma.product.findMany({
