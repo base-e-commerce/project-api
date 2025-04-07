@@ -4,7 +4,7 @@ const cors = require("cors");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const dotenv = require("dotenv");
-const path = require("path")
+const path = require("path");
 const { Sequelize } = require("sequelize");
 const app = require("./app");
 const swaggerOptions = require("./config/swagger");
@@ -16,7 +16,7 @@ const server = express();
 
 server.use(bodyParser.json());
 server.use(cors());
-server.use('/',express.static(path.join(__dirname,'uploads','images')))
+server.use("/", express.static(path.join(__dirname, "uploads", "images")));
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 server.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
