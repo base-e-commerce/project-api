@@ -1,8 +1,40 @@
-const express = require('express');
-const upload = require("../middleware/upload.middleware")
-const {createUploadImage} = require('../controller/image.controller');
+const express = require("express");
+const upload = require("../middleware/upload.middleware");
+const { createUploadImage } = require("../controller/image.controller");
 const router = express.Router();
 
-router.post('/image',upload.array("image_url",5),createUploadImage);
+/**
+ * @swagger
+ * /upload/image:
+ *   post:
+ *     summary: Upload images
+ *     tags:
+ *       - Image
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               product_id:
+ *                 type: number
+ *                 description: The ID of the product associated with the images
+ *                 example: 123
+ *               image_url:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Array of images to upload
+ *     responses:
+ *       200:
+ *         description: Images uploaded successfully
+ *       400:
+ *         description: Bad request, invalid input
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/image", upload.array("image_url", 5), createUploadImage);
 
-module.exports=router
+module.exports = router;
