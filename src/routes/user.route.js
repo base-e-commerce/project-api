@@ -63,7 +63,7 @@ router.post("/login", login);
  *       500:
  *         description: Internal server error
  */
-router.get("/current", authenticateToken, getCurrentUser);
+router.get("/current",getCurrentUser);
 
 /**
  * @swagger
@@ -97,7 +97,7 @@ router.get("/current", authenticateToken, getCurrentUser);
  *       500:
  *         description: Internal server error
  */
-router.put("/current", authenticateToken, updateCurrentUser);
+router.put("/current",updateCurrentUser);
 
 /**
  * @swagger
@@ -127,7 +127,7 @@ router.put("/current", authenticateToken, updateCurrentUser);
  *       500:
  *         description: Internal server error
  */
-router.get("/", authenticateToken, getAllUser);
+router.get("/",getAllUser);
 
 /**
  * @swagger
@@ -149,7 +149,7 @@ router.get("/", authenticateToken, getAllUser);
  *       404:
  *         description: User not found
  */
-router.get("/:id", authenticateToken, getUserById);
+router.get("/:id",getUserById);
 
 /**
  * @swagger
@@ -181,8 +181,6 @@ router.get("/:id", authenticateToken, getUserById);
  */
 router.post(
   "/",
-  authenticateToken,
-  authenticateAdmin,
   validateDto(createUserSchema),
   createUser
 );
@@ -229,8 +227,6 @@ router.post(
  */
 router.put(
   "/:id",
-  authenticateToken,
-  authenticateAdmin,
   validateDto(updateUserSchema),
   updateUser
 );
@@ -255,6 +251,6 @@ router.put(
  *       404:
  *         description: User not found
  */
-router.delete("/:id", authenticateToken, authenticateAdmin, deleteUser);
+router.delete("/:id",deleteUser);
 
 module.exports = router;

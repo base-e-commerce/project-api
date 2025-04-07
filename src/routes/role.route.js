@@ -46,7 +46,7 @@ const router = express.Router();
  *       200:
  *         description: Get all roles in administration
  */
-router.get("/", authenticateToken, authenticateAdmin, getAllRoles);
+router.get("/", getAllRoles);
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ router.get("/", authenticateToken, authenticateAdmin, getAllRoles);
  *       404:
  *         description: Role not found
  */
-router.get("/:id", authenticateToken, authenticateAdmin, getRoleById);
+router.get("/:id", getRoleById);
 
 /**
  * @swagger
@@ -80,13 +80,7 @@ router.get("/:id", authenticateToken, authenticateAdmin, getRoleById);
  *       400:
  *         description: Invalid input data
  */
-router.post(
-  "/",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(createRoleSchema),
-  createRole
-);
+router.post("/", validateDto(createRoleSchema), createRole);
 
 /**
  * @swagger
@@ -107,13 +101,7 @@ router.post(
  *       404:
  *         description: Role not found
  */
-router.put(
-  "/:id",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(updateRoleSchema),
-  updateRole
-);
+router.put("/:id", validateDto(updateRoleSchema), updateRole);
 
 /**
  * @swagger
@@ -130,6 +118,6 @@ router.put(
  *       404:
  *         description: Role not found
  */
-router.delete("/:id", authenticateToken, authenticateAdmin, deleteRole);
+router.delete("/:id", deleteRole);
 
 module.exports = router;

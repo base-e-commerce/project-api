@@ -11,6 +11,7 @@ const {
   updateProduct,
   deleteProduct,
   addImageToProduct,
+  deleteProductImage,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -26,6 +27,13 @@ const router = express.Router();
  *       in: path
  *       required: true
  *       description: ID of the product
+ *       schema:
+ *         type: string
+ *     ProductIdImageParam:
+ *       name: id
+ *       in: path
+ *       required: true
+ *       description: ID of the product image
  *       schema:
  *         type: string
  *   requestBodies:
@@ -111,13 +119,7 @@ router.get("/:id", getProductById);
  *       400:
  *         description: Invalid input data
  */
-router.post(
-  "/",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(createProductSchema),
-  createProduct
-);
+router.post("/create-product", validateDto(createProductSchema), createProduct);
 
 /**
  * @swagger
@@ -147,7 +149,7 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.post("/image", authenticateToken, authenticateAdmin, addImageToProduct);
+router.post("/image", addImageToProduct);
 
 /**
  * @swagger
@@ -168,13 +170,7 @@ router.post("/image", authenticateToken, authenticateAdmin, addImageToProduct);
  *       404:
  *         description: Product not found
  */
-router.patch(
-  "/:id",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(updateProductSchema),
-  updateProduct
-);
+router.put("/:id", validateDto(updateProductSchema), updateProduct);
 
 /**
  * @swagger
@@ -191,6 +187,23 @@ router.patch(
  *       404:
  *         description: Product not found
  */
-router.delete("/:id", authenticateToken, authenticateAdmin, deleteProduct);
+router.delete("/:id", deleteProduct);
+
+/**
+ * @swagger
+ * /product/image/{productIdImage}:
+ *   delete:
+ *     summary: Delete  image by ID
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - $ref: '#/components/parameters/ProductIdImageParam'
+ *     responses:
+ *       200:
+ *         description: Product Image deleted successfully
+ *       404:
+ *         description: Product Image not found
+ */
+router.delete("/image/:productIdImage", deleteProductImage);
 
 module.exports = router;

@@ -51,7 +51,7 @@ const router = express.Router();
  *       200:
  *         description: Get all services
  */
-router.get("/", authenticateToken, authenticateAdmin, getAllServices);
+router.get("/", getAllServices);
 
 /**
  * @swagger
@@ -68,7 +68,7 @@ router.get("/", authenticateToken, authenticateAdmin, getAllServices);
  *       404:
  *         description: Service not found
  */
-router.get("/:id", authenticateToken, authenticateAdmin, getServiceById);
+router.get("/:id", getServiceById);
 
 /**
  * @swagger
@@ -85,13 +85,7 @@ router.get("/:id", authenticateToken, authenticateAdmin, getServiceById);
  *       400:
  *         description: Invalid input data
  */
-router.post(
-  "/",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(createServiceSchema),
-  createService
-);
+router.post("/create-service", validateDto(createServiceSchema), createService);
 
 /**
  * @swagger
@@ -112,13 +106,7 @@ router.post(
  *       404:
  *         description: Service not found
  */
-router.put(
-  "/:id",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(updateServiceSchema),
-  updateService
-);
+router.put("/:id", validateDto(updateServiceSchema), updateService);
 
 /**
  * @swagger
@@ -135,6 +123,6 @@ router.put(
  *       404:
  *         description: Service not found
  */
-router.delete("/:id", authenticateToken, authenticateAdmin, deleteService);
+router.delete("/:id", deleteService);
 
 module.exports = router;
