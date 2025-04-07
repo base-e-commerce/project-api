@@ -30,7 +30,25 @@ exports.getAllProducts = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.getSearchProducts = async (req, res) => {
+  try {
+    const key = req.params.key;
+    const product = await productService.getSearchProducts(key);
+    if (product) {
+      res
+        .status(200)
+        .json(createResponse("Product fetched successfully", product));
+    } else {
+      res.status(404).json(createResponse("Product not found", null, false));
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -43,12 +61,12 @@ exports.getProductById = async (req, res) => {
         .status(200)
         .json(createResponse("Product fetched successfully", product));
     } else {
-      res.status(404).json(createResponse("Product not found", null));
+      res.status(404).json(createResponse("Product not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -74,7 +92,26 @@ exports.addImageToProduct = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.deleteProductImage = async (req, res) => {
+  try {
+    const id = parseInt(req.params.productIdImage, 10);
+    const productImage = await productService.deleteImageProduct(id);
+    if (!productImage) {
+      return res
+        .status(404)
+        .json(createResponse("Product image not deleted", null, false));
+    }
+    res
+      .status(200)
+      .json(createResponse("Product image deleted successfully", productImage));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -99,16 +136,26 @@ exports.deleteProductImage = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, category_id ,stock_quantity} = req.body;
-    if (!name || !description || !price || !category_id  || !stock_quantity) {
+    const { name, description, currency, currency_name, price, category_id } =
+      req.body;
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !currency ||
+      !currency_name ||
+      !category_id
+    ) {
       return res
         .status(400)
-        .json(createResponse("Bad Request", "All fields are required"));
+        .json(createResponse("Bad Request", "All fields are required", false));
     }
 
     const category = await categoryService.getCategoryById(category_id);
     if (!category) {
-      return res.status(404).json(createResponse("Category not found", null));
+      return res
+        .status(404)
+        .json(createResponse("Category not found", null, false));
     }
 
     const newProduct = await productService.createProduct(req.body);
@@ -118,7 +165,7 @@ exports.createProduct = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -134,12 +181,12 @@ exports.updateProduct = async (req, res) => {
         .status(200)
         .json(createResponse("Product updated successfully", updatedProduct));
     } else {
-      res.status(404).json(createResponse("Product not found", null));
+      res.status(404).json(createResponse("Product not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -152,11 +199,11 @@ exports.deleteProduct = async (req, res) => {
         .status(200)
         .json(createResponse("Product deleted successfully", deletedProduct));
     } else {
-      res.status(404).json(createResponse("Product not found", null));
+      res.status(404).json(createResponse("Product not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };

@@ -49,6 +49,12 @@ const router = express.Router();
  *               description:
  *                 type: string
  *                 description: The description of the product
+ *               currency:
+ *                 type: string
+ *                 description: The currency of the product
+ *               currency_name:
+ *                 type: string
+ *                 description: The currency name of the product
  *               price:
  *                 type: number
  *               stock_quantity:
@@ -62,6 +68,19 @@ const router = express.Router();
  *               - price
  *               - categoryId
  */
+
+/**
+ * @swagger
+ * /product/search/{key}:
+ *   get:
+ *     summary: Get search products with pagination
+ *     tags:
+ *       - Product
+ *     responses:
+ *       200:
+ *         description: Get search products
+ */
+router.get("/search/:key", getSearchProducts);
 
 /**
  * @swagger
@@ -170,7 +189,13 @@ router.post("/image", addImageToProduct);
  *       404:
  *         description: Product not found
  */
-router.put("/:id", validateDto(updateProductSchema), updateProduct);
+router.put(
+  "/:id",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(updateProductSchema),
+  updateProduct
+);
 
 /**
  * @swagger
@@ -205,5 +230,27 @@ router.delete("/:id", deleteProduct);
  *         description: Product Image not found
  */
 router.delete("/image/:productIdImage", deleteProductImage);
+
+/**
+ * @swagger
+ * /product/image/{productIdImage}:
+ *   delete:
+ *     summary: Delete  image by ID
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - $ref: '#/components/parameters/ProductIdImageParam'
+ *     responses:
+ *       200:
+ *         description: Product Image deleted successfully
+ *       404:
+ *         description: Product Image not found
+ */
+router.delete(
+  "/image/:productIdImage",
+  authenticateToken,
+  authenticateAdmin,
+  deleteProductImage
+);
 
 module.exports = router;

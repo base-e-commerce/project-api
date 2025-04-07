@@ -8,6 +8,7 @@ const path = require("path")
 const { Sequelize } = require("sequelize");
 const app = require("./app");
 const swaggerOptions = require("./config/swagger");
+const corsOptions = require("./config/cors");
 
 dotenv.config();
 

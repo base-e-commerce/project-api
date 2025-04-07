@@ -10,11 +10,66 @@ const {
   createCategory,
   updateCategory,
   deleteCategory,
+  getAllCategoriesByService,
 } = require("../controller/category.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * components:
+ *   parameters:
+ *     CategoryIdParam:
+ *       name: id
+ *       in: path
+ *       required: true
+ *       description: ID of the category
+ *       schema:
+ *         type: integer
+ *     ServiceIdParam:
+ *       name: id
+ *       in: path
+ *       required: true
+ *       description: ID of the service
+ *       schema:
+ *         type: integer
+ *   requestBodies:
+ *     CategoryRequestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               service_id:
+ *                 type: number
+ *                 description: The ID of the service
+ */
+
+/**
+ * @swagger
+ * /category/service/{id}:
+ *   get:
+ *     summary: Get all categories by service
+ *     tags:
+ *       - Category
+ *     parameters:
+ *       - $ref: '#/components/parameters/ServiceIdParam'
+ *     responses:
+ *       200:
+ *         description: Get all categories
+ */
+router.get(
+  "/service/:id",
+  authenticateToken,
+  authenticateAdmin,
+  getAllCategoriesByService
+);
 
 /**
  * @swagger

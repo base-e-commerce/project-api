@@ -8,7 +8,7 @@ exports.getAllRoles = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -28,7 +28,7 @@ exports.getRoleById = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -41,7 +41,7 @@ exports.createRole = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -49,7 +49,7 @@ exports.updateRole = async (req, res) => {
   const { id } = req.params;
 
   if (isNaN(id)) {
-    return res.status(400).json(createResponse("Invalid role ID"));
+    return res.status(400).json(createResponse("Invalid role ID", null, false));
   }
 
   const { name } = req.body;
@@ -62,7 +62,7 @@ exports.updateRole = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -77,6 +77,6 @@ exports.deleteRole = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };

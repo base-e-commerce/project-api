@@ -4,15 +4,16 @@
  * @param {object} [data] - Optional data to include in the response.
  * @returns {object} Formatted API response object.
  */
-const createResponse = (message, data = null) => {
-    const response = {
-        message,
-    };
+const createResponse = (message, data = null, status = true) => {
+  const response = {
+    message,
+    status,
+  };
 
-    if (data) {
-        response.data = data;
-    }
+  if (data) {
+    response.data = data;
+  }
 
-    return response;
+  return response;
 };
 module.exports = createResponse;

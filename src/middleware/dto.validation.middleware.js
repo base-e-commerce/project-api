@@ -6,7 +6,7 @@ const validateDto = (schema) => (req, res, next) => {
     const errorMessages = error.details.map((detail) => detail.message);
     return res
       .status(400)
-      .json(createResponse("Validation failed", errorMessages));
+      .json(createResponse("Validation failed", errorMessages, false));
   }
 
   next();

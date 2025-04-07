@@ -35,6 +35,19 @@ class CategoryService {
     }
   }
 
+  async getAllCategoriesByService(service_id) {
+    try {
+      const categories = await prisma.categorie.findMany({
+        where: { service_id },
+      });
+      return categories;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving categories by service: ${error.message}`
+      );
+    }
+  }
+
   async getCategoryById(categoryId) {
     try {
       const category = await prisma.categorie.findUnique({

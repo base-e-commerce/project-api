@@ -10,6 +10,8 @@ class ProductService {
           data: {
             name: data.name,
             description: data.description,
+            currency: data.currency,
+            currency_name: data.currency_name,
             price: parseFloat(data.price),
             stock_quantity: data.stock_quantity,
             image_url: data.image_url,
@@ -26,6 +28,21 @@ class ProductService {
     });
 
     return transaction;
+  }
+
+  async getSearchProducts(key) {
+    try {
+      const product = await prisma.product.findMany({
+        where: {
+          OR: [{ name: { contains: key } }, { description: { contains: key } }],
+        },
+      });
+      return product;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while searching for product: ${error.message}`
+      );
+    }
   }
 
   async getAllProducts(limit, offset) {

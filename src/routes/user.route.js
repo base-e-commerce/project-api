@@ -10,6 +10,8 @@ const {
   login,
   getCurrentUser,
   updateCurrentUser,
+  resetPassUser,
+  checkPassUserCurrent,
 } = require("../controller/user.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -48,6 +50,33 @@ router.post("/login", login);
 
 /**
  * @swagger
+ * /user/checkpass:
+ *   post:
+ *     summary: Check user pass information
+ *     tags:
+ *      - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: 123456789Eric
+ *     responses:
+ *       200:
+ *         description: Password is valid
+ *       400:
+ *         description: Invalid input data
+ *       404:
+ *         description: User not found
+ */
+router.post("/checkpass", authenticateToken, checkPassUserCurrent);
+
+/**
+ * @swagger
  * /user/current:
  *   get:
  *     summary: Get the currently authenticated user's information
@@ -63,7 +92,7 @@ router.post("/login", login);
  *       500:
  *         description: Internal server error
  */
-router.get("/current",getCurrentUser);
+router.get("/current", getCurrentUser);
 
 /**
  * @swagger
@@ -97,7 +126,7 @@ router.get("/current",getCurrentUser);
  *       500:
  *         description: Internal server error
  */
-router.put("/current",updateCurrentUser);
+router.put("/current", updateCurrentUser);
 
 /**
  * @swagger
@@ -127,7 +156,7 @@ router.put("/current",updateCurrentUser);
  *       500:
  *         description: Internal server error
  */
-router.get("/",getAllUser);
+router.get("/", getAllUser);
 
 /**
  * @swagger
@@ -149,7 +178,7 @@ router.get("/",getAllUser);
  *       404:
  *         description: User not found
  */
-router.get("/:id",getUserById);
+router.get("/:id", getUserById);
 
 /**
  * @swagger
@@ -169,6 +198,8 @@ router.get("/:id",getUserById);
  *                 type: string
  *               email:
  *                 type: string
+ *               phone:
+ *                 type: string
  *               password:
  *                 type: string
  *               role_id:
@@ -179,10 +210,59 @@ router.get("/:id",getUserById);
  *       400:
  *         description: Invalid input data
  */
-router.post(
-  "/",
-  validateDto(createUserSchema),
-  createUser
+router.post("/", createUser);
+// router.post(
+//   "/",
+//   authenticateToken,
+//   authenticateAdmin,
+//   validateDto(createUserSchema),
+//   createUser
+// );
+
+// router.post(
+//   "/",
+//   authenticateToken,
+//   authenticateAdmin,
+//   validateDto(createUserSchema),
+//   createUser
+// );
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   put:
+ *     summary: Update user pass information by
+ *     tags:
+ *      - User
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user to update pass
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password_hash:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       400:
+ *         description: Invalid input data
+ *       404:
+ *         description: User not found
+ */
+router.put(
+  "/resetpass/:id",
+  authenticateToken,
+  authenticateAdmin,
+  resetPassUser
 );
 
 /**
@@ -225,11 +305,7 @@ router.post(
  *       404:
  *         description: User not found
  */
-router.put(
-  "/:id",
-  validateDto(updateUserSchema),
-  updateUser
-);
+router.put("/:id", validateDto(updateUserSchema), updateUser);
 
 /**
  * @swagger
@@ -251,6 +327,6 @@ router.put(
  *       404:
  *         description: User not found
  */
-router.delete("/:id",deleteUser);
+router.delete("/:id", deleteUser);
 
 module.exports = router;

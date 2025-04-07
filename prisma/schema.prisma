@@ -23,6 +23,7 @@ model User {
   user_id       Int       @id @default(autoincrement())
   username      String?
   email         String    @unique
+  phone         String?
   password_hash String
   role_id       Int
   role          Role      @relation(fields: [role_id], references: [role_id])
@@ -55,6 +56,8 @@ model Product {
   product_id     Int            @id @default(autoincrement())
   name           String
   description    String?
+  currency       String
+  currency_name  String
   price          Decimal
   stock_quantity Int
   image_url      String?

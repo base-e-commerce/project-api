@@ -3,6 +3,7 @@ const Joi = require("joi");
 const createUserSchema = Joi.object({
   username: Joi.string().min(3).max(30).optional(),
   email: Joi.string().email().required(),
+  phone: Joi.string().optional(),
   password: Joi.string()
     .min(8)
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/)
@@ -17,6 +18,7 @@ const createUserSchema = Joi.object({
 
 const updateUserSchema = Joi.object({
   username: Joi.string().min(3).max(30).optional(),
+  phone: Joi.string().optional(),
   email: Joi.string().email().optional(),
   role_id: Joi.number().integer().optional(),
   last_login: Joi.date().optional(),

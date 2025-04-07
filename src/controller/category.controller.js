@@ -10,7 +10,23 @@ exports.getAllCategories = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.getAllCategoriesByService = async (req, res) => {
+  try {
+    const serviceId = parseInt(req.params.id, 10);
+    const categories = await categoryService.getAllCategoriesByService(
+      serviceId
+    );
+    res
+      .status(200)
+      .json(createResponse("Categories fetched successfully", categories));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -23,12 +39,12 @@ exports.getCategoryById = async (req, res) => {
         .status(200)
         .json(createResponse("Category fetched successfully", category));
     } else {
-      res.status(404).json(createResponse("Category not found", null));
+      res.status(404).json(createResponse("Category not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -41,7 +57,7 @@ exports.createCategory = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -57,12 +73,12 @@ exports.updateCategory = async (req, res) => {
         .status(200)
         .json(createResponse("Category updated successfully", updatedCategory));
     } else {
-      res.status(404).json(createResponse("Category not found", null));
+      res.status(404).json(createResponse("Category not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
@@ -75,11 +91,11 @@ exports.deleteCategory = async (req, res) => {
         .status(200)
         .json(createResponse("Category deleted successfully", deletedCategory));
     } else {
-      res.status(404).json(createResponse("Category not found", null));
+      res.status(404).json(createResponse("Category not found", null, false));
     }
   } catch (error) {
     res
       .status(500)
-      .json(createResponse("Internal server error", error.message));
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
