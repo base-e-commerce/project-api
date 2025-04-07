@@ -85,7 +85,7 @@ router.get("/:id", getServiceById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/create-service", validateDto(createServiceSchema), createService);
+router.post("/", validateDto(createServiceSchema), createService);
 
 /**
  * @swagger
