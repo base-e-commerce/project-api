@@ -82,7 +82,7 @@ router.get(
  *       200:
  *         description: Get all categories
  */
-router.get("/",getAllCategories);
+router.get("/", getAllCategories);
 
 /**
  * @swagger
@@ -99,7 +99,7 @@ router.get("/",getAllCategories);
  *       404:
  *         description: Category not found
  */
-router.get("/:id",getCategoryById);
+router.get("/:id", getCategoryById);
 
 /**
  * @swagger
@@ -116,11 +116,7 @@ router.get("/:id",getCategoryById);
  *       400:
  *         description: Invalid input data
  */
-router.post(
-  "/create-category",
-  validateDto(createCategorySchema),
-  createCategory
-);
+router.post("/", validateDto(createCategorySchema), createCategory);
 
 /**
  * @swagger
@@ -141,11 +137,7 @@ router.post(
  *       404:
  *         description: Category not found
  */
-router.put(
-  "/:id",
-  validateDto(updateCategorySchema),
-  updateCategory
-);
+router.put("/:id", validateDto(updateCategorySchema), updateCategory);
 
 /**
  * @swagger
@@ -162,6 +154,6 @@ router.put(
  *       404:
  *         description: Category not found
  */
-router.delete("/:id",deleteCategory);
+router.delete("/:id", deleteCategory);
 
 module.exports = router;
