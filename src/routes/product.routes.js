@@ -12,6 +12,7 @@ const {
   deleteProduct,
   addImageToProduct,
   deleteProductImage,
+  getSearchProducts
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
