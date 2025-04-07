@@ -12,7 +12,7 @@ const {
   deleteProduct,
   addImageToProduct,
   deleteProductImage,
-  getSearchProducts
+  getSearchProducts,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -139,7 +139,7 @@ router.get("/:id", getProductById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/create-product", validateDto(createProductSchema), createProduct);
+router.post("/", validateDto(createProductSchema), createProduct);
 
 /**
  * @swagger
