@@ -92,7 +92,7 @@ router.post("/checkpass", authenticateToken, checkPassUserCurrent);
  *       500:
  *         description: Internal server error
  */
-router.get("/current", getCurrentUser);
+router.get("/current", authenticateToken, getCurrentUser);
 
 /**
  * @swagger
@@ -305,7 +305,13 @@ router.put(
  *       404:
  *         description: User not found
  */
-router.put("/:id", validateDto(updateUserSchema), updateUser);
+router.put(
+  "/:id",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(updateUserSchema),
+  updateUser
+);
 
 /**
  * @swagger
@@ -327,6 +333,6 @@ router.put("/:id", validateDto(updateUserSchema), updateUser);
  *       404:
  *         description: User not found
  */
-router.delete("/:id", deleteUser);
+router.delete("/:id", authenticateToken, authenticateAdmin, deleteUser);
 
 module.exports = router;
