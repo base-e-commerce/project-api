@@ -16,7 +16,7 @@ const server = express();
 
 server.use(bodyParser.json());
 server.use(cors());
-server.use("/", express.static(path.join(__dirname, "uploads", "images")));
+server.use("/api", express.static(path.join(__dirname, "uploads", "images")));
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 server.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
