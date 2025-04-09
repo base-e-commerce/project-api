@@ -1,7 +1,10 @@
 const express = require("express");
 const upload = require("../middleware/upload.middleware");
+const createUploader = require ("../middleware/upload.test.middleware")
 const { createUploadImage } = require("../controller/image.controller");
 const router = express.Router();
+
+
 
 /**
  * @swagger
@@ -36,5 +39,13 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.post("/image", upload.array("image_url", 5), createUploadImage);
+
+// exemple utilisation middleware avec personnalisation du dossier d'upload de l'image 
+// dossier source : uploads (deja definie dans le code)
+// sous-dossier : users
+//Creation automatique du dossier "users au niveau de /uploads"
+const uploadToUserFolder = createUploader("users");
+router.post("/image-test",uploadToUserFolder.array("image_url",5),createUploadImage)
+
 
 module.exports = router;
