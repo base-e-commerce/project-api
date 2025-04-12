@@ -66,6 +66,21 @@ class ProductService {
     }
   }
 
+  async getProductsCategory(idCategory, limit) {
+    try {
+      const products = await prisma.product.findMany({
+        where: { category_id: idCategory },
+        include: { productImages: true, category: true },
+        take: limit,
+      });
+      return products;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving products by category: ${error.message}`
+      );
+    }
+  }
+
   async addImageToProduct(productId, imageUrl) {
     try {
       const productExists = await prisma.product.findUnique({

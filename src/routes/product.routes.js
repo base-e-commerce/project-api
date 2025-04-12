@@ -13,6 +13,7 @@ const {
   addImageToProduct,
   deleteProductImage,
   getSearchProducts,
+  getProductsCategory
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -28,6 +29,20 @@ const router = express.Router();
  *       in: path
  *       required: true
  *       description: ID of the product
+ *       schema:
+ *         type: string
+ *     idCategory:
+ *       name: idCategory
+ *       in: path
+ *       required: true
+ *       description: ID of the category
+ *       schema:
+ *         type: string
+ *     key:
+ *       name: key
+ *       in: path
+ *       required: true
+ *       description: key search
  *       schema:
  *         type: string
  *     ProductIdImageParam:
@@ -72,11 +87,28 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /product/category/{idCategory}:
+ *   get:
+ *     summary: Get products for category
+ *     tags:
+ *       - Product
+ *     parameters:
+ *        - $ref: '#/components/parameters/idCategory'
+ *     responses:
+ *       200:
+ *         description: Get products for category
+ */
+
+router.get("/category/:idCategory", getProductsCategory);
+/**
+ * @swagger
  * /product/search/{key}:
  *   get:
  *     summary: Get search products with pagination
  *     tags:
  *       - Product
+ *     parameters:
+ *        - $ref: '#/components/parameters/key'
  *     responses:
  *       200:
  *         description: Get search products

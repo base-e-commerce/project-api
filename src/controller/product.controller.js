@@ -34,6 +34,18 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+exports.getProductsCategory = async (req, res) => {
+  const idCategory = req.params.idCategory;
+  const product = await productService.getProductsCategory(Number(idCategory), 4);
+  if (product) {
+    res
+      .status(200)
+      .json(createResponse("Product fetched successfully", product));
+  } else {
+    res.status(404).json(createResponse("Product not found", null, false));
+  }
+};
+
 exports.getSearchProducts = async (req, res) => {
   try {
     const key = req.params.key;
