@@ -13,7 +13,8 @@ const {
   addImageToProduct,
   deleteProductImage,
   getSearchProducts,
-  getProductsCategory
+  getProductsCategory,
+  getLastTenProducts
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -138,6 +139,19 @@ router.get("/search/:key", getSearchProducts);
  *         description: Get all products
  */
 router.get("/", getAllProducts);
+
+/**
+ * @swagger
+ * /product/last-ten:
+ *   get:
+ *     summary: Get last ten products
+ *     tags:
+ *       - Product
+ *     responses:
+ *       200:
+ *         description: Get last ten products
+ */
+router.get("/last-ten", getLastTenProducts);
 
 /**
  * @swagger

@@ -66,6 +66,28 @@ class ProductService {
     }
   }
 
+  async getLastTenProducts() {
+    try {
+      const products = await prisma.product.findMany({
+        orderBy: { created_at: "desc" },
+        include: {
+          productImages: true,
+          category: {
+            include: {
+              service: true,
+            },
+          },
+        },
+        take: 10,
+      });
+      return products;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the last ten products: ${error.message}`
+      );
+    }
+  }
+
   async getProductsCategory(idCategory, limit) {
     try {
       const products = await prisma.product.findMany({

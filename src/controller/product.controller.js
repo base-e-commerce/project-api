@@ -46,6 +46,23 @@ exports.getProductsCategory = async (req, res) => {
   }
 };
 
+exports.getLastTenProducts = async (req, res) => {
+  try {
+    const products = await productService.getLastTenProducts();
+    if (products) {
+      res
+        .status(200)
+        .json(createResponse("Last ten products fetched successfully", products));
+    } else {
+      res.status(404).json(createResponse("Products not found", null, false));
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+}
+
 exports.getSearchProducts = async (req, res) => {
   try {
     const key = req.params.key;
