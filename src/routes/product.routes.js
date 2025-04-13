@@ -33,6 +33,13 @@ const router = express.Router();
  *       description: ID of the product
  *       schema:
  *         type: string
+ *     ProductServiceIdParam:
+ *       name: id
+ *       in: path
+ *       required: true
+ *       description: ID of the servoce
+ *       schema:
+ *         type: string
  *     idCategory:
  *       name: idCategory
  *       in: path
@@ -156,12 +163,13 @@ router.get("/last-ten", getLastTenProducts);
 
 /**
  * @swagger
- * /product/service/{idService}:
+ * /product/service/{id}:
  *   get:
  *     summary: Get all products service
  *     tags:
  *       - Product
  *     parameters:
+ *       - $ref: '#/components/parameters/ProductServiceIdParam'
  *       - in: query
  *         name: limit
  *         schema:
