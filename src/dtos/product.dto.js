@@ -11,6 +11,9 @@ exports.createProductSchema = Joi.object({
   description: Joi.string().optional().messages({
     "string.base": "Description must be a string",
   }),
+  descriptionRich: Joi.string().optional().messages({
+    "string.base": "Description Rich must be a string",
+  }),
   currency: Joi.string().messages({
     "string.base": "Description must be a string",
   }),
@@ -56,6 +59,9 @@ exports.updateProductSchema = Joi.object({
   }),
   description: Joi.string().optional().messages({
     "string.base": "Description must be a string",
+  }),
+  descriptionRich: Joi.string().optional().messages({
+    "string.base": "Description Rich must be a string",
   }),
   currency: Joi.string().optional().messages({
     "string.base": "Description must be a string",

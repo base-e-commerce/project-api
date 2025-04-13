@@ -10,6 +10,7 @@ class ProductService {
           data: {
             name: data.name,
             description: data.description,
+            descriptionRich: data.descriptionRich,
             currency: data.currency,
             currency_name: data.currency_name,
             price: parseFloat(data.price),
