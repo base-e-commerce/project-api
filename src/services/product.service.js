@@ -16,6 +16,7 @@ class ProductService {
             stock_quantity: data.stock_quantity,
             image_url: data.image_url,
             category_id: data.category_id,
+            service_id: data.service_id,
             is_active: data.is_active,
           },
         });
@@ -36,6 +37,7 @@ class ProductService {
         where: {
           OR: [{ name: { contains: key } }, { description: { contains: key } }],
         },
+        orderBy: { created_at: "desc" },
       });
       return product;
     } catch (error) {
@@ -48,13 +50,38 @@ class ProductService {
   async getAllProducts(limit, offset) {
     try {
       const products = await prisma.product.findMany({
-        include: { productImages: true, category: true },
+        include: { productImages: true, category: true, service: true },
         skip: offset,
         take: limit,
+        orderBy: { created_at: "desc" },
       });
 
       const totalProducts = await prisma.product.count();
 
+      return {
+        products,
+        totalProducts,
+      };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving products: ${error.message}`
+      );
+    }
+  }
+
+  async getAllServiceProducts(service_id, limit, offset) {
+    try {
+      const products = await prisma.product.findMany({
+        where: { service_id },
+        include: { productImages: true, category: true, service: true },
+        skip: offset,
+        take: limit,
+        orderBy: { created_at: "desc" },
+      });
+
+      const totalProducts = await prisma.product.count({
+        where: { service_id },
+      });
       return {
         products,
         totalProducts,
@@ -92,7 +119,7 @@ class ProductService {
     try {
       const products = await prisma.product.findMany({
         where: { category_id: idCategory },
-        include: { productImages: true, category: true },
+        include: { productImages: true, category: true, service: true },
         take: limit,
       });
       return products;
@@ -153,7 +180,7 @@ class ProductService {
     try {
       const product = await prisma.product.findUnique({
         where: { product_id: productId },
-        include: { productImages: true, category: true },
+        include: { productImages: true, category: true, service: true },
       });
       return product;
     } catch (error) {

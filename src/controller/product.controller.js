@@ -34,6 +34,40 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+exports.getAllServiceProducts = async (req, res) => {
+  try {
+    const serviceId = parseInt(req.params.id, 10);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { products, totalProducts } =
+      await productService.getAllServiceProducts(serviceId, limit, offset);
+
+    if (!products) {
+      return res.status(404).json(createResponse("No products found", null));
+    }
+
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    res.status(200).json(
+      createResponse("Products fetched successfully", {
+        products,
+        pagination: {
+          page,
+          limit,
+          totalPages,
+          totalProducts,
+        },
+      })
+    );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+}
+
 exports.getProductsCategory = async (req, res) => {
   const idCategory = req.params.idCategory;
   const product = await productService.getProductsCategory(Number(idCategory), 4);

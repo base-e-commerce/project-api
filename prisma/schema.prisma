@@ -40,6 +40,7 @@ model Service {
   created_at  DateTime    @default(now())
   updated_at  DateTime    @updatedAt
   categories  Categorie[]
+  Product     Product[]
 }
 
 model Categorie {
@@ -62,6 +63,8 @@ model Product {
   price          Decimal
   stock_quantity Int
   image_url      String?
+  service_id     Int
+  service        Service        @relation(fields: [service_id], references: [service_id])
   category_id    Int
   category       Categorie      @relation(fields: [category_id], references: [categorie_id])
   is_active      Boolean        @default(true)

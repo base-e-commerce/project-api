@@ -37,6 +37,11 @@ exports.createProductSchema = Joi.object({
     "number.integer": "Category ID must be an integer",
     "any.required": "Category ID is required",
   }),
+  service_id: Joi.number().integer().required().messages({
+    "number.base": "Service ID must be a number",
+    "number.integer": "Service ID must be an integer",
+    "any.required": "Service ID is required",
+  }),
   is_active: Joi.boolean().optional().messages({
     "boolean.base": "Is active must be a boolean value",
   }),
@@ -74,6 +79,10 @@ exports.updateProductSchema = Joi.object({
   category_id: Joi.number().integer().optional().messages({
     "number.base": "Category ID must be a number",
     "number.integer": "Category ID must be an integer",
+  }),
+  service_id: Joi.number().integer().optional().messages({
+    "number.base": "Service ID must be a number",
+    "number.integer": "Service ID must be an integer",
   }),
   is_active: Joi.boolean().optional().messages({
     "boolean.base": "Is active must be a boolean value",

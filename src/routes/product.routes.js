@@ -14,7 +14,8 @@ const {
   deleteProductImage,
   getSearchProducts,
   getProductsCategory,
-  getLastTenProducts
+  getLastTenProducts,
+  getAllServiceProducts,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -152,6 +153,30 @@ router.get("/", getAllProducts);
  *         description: Get last ten products
  */
 router.get("/last-ten", getLastTenProducts);
+
+/**
+ * @swagger
+ * /product/service/{idService}:
+ *   get:
+ *     summary: Get all products service
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The number of products to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: The number of products to skip
+ *     responses:
+ *       200:
+ *         description: Get all products service
+ */
+router.get("/service/:id", getAllServiceProducts);
 
 /**
  * @swagger
