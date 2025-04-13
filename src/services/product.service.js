@@ -70,6 +70,24 @@ class ProductService {
     }
   }
 
+  async getOtherProductsInService(serviceId, productId) {
+    try {
+      const products = await prisma.product.findMany({
+        where: {
+          service_id: serviceId,
+          product_id: { not: productId },
+        },
+        include: { productImages: true, category: true, service: true },
+        orderBy: { created_at: "desc" },
+      });
+      return products;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving other products in service: ${error.message}`
+      );
+    }
+  }
+
   async getAllServiceProducts(service_id, limit, offset) {
     try {
       const products = await prisma.product.findMany({

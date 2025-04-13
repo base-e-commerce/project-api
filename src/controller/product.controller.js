@@ -66,11 +66,35 @@ exports.getAllServiceProducts = async (req, res) => {
       .status(500)
       .json(createResponse("Internal server error", error.message, false));
   }
-}
+};
+
+exports.getOtherProductsInService = async (req, res) => {
+  const serviceId = parseInt(req.params.id);
+  const idProduct = parseInt(req.params.idProduct);
+  try {
+    const products = await productService.getOtherProductsInService(
+      serviceId,
+      idProduct
+    );
+    if (!products) {
+      return res.status(404).json(createResponse("No products found", null));
+    }
+    res
+      .status(200)
+      .json(createResponse("Products fetched successfully", products));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
 
 exports.getProductsCategory = async (req, res) => {
   const idCategory = req.params.idCategory;
-  const product = await productService.getProductsCategory(Number(idCategory), 4);
+  const product = await productService.getProductsCategory(
+    Number(idCategory),
+    4
+  );
   if (product) {
     res
       .status(200)
@@ -86,7 +110,9 @@ exports.getLastTenProducts = async (req, res) => {
     if (products) {
       res
         .status(200)
-        .json(createResponse("Last ten products fetched successfully", products));
+        .json(
+          createResponse("Last ten products fetched successfully", products)
+        );
     } else {
       res.status(404).json(createResponse("Products not found", null, false));
     }
@@ -95,7 +121,7 @@ exports.getLastTenProducts = async (req, res) => {
       .status(500)
       .json(createResponse("Internal server error", error.message, false));
   }
-}
+};
 
 exports.getSearchProducts = async (req, res) => {
   try {
