@@ -81,3 +81,14 @@ model ProductImage {
   image_url        String
   created_at       DateTime @default(now())
 }
+
+model ContactInfo {
+  contact_info_id Int      @id @default(autoincrement())
+  name            String
+  email           String
+  phone           String?
+  subject         String
+  message         String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
