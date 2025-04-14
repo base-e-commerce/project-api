@@ -17,7 +17,7 @@ exports.createUploadImage = async (req, res) => {
       req.files.map(async (file) => {
         const data = {
           product_id: productId,
-          image_url: `${process.env.BASE_URL}/api/${file.filename}`,
+          image_url: `${process.env.BASE_URL}/${file.filename}`,
         };
 
         return await imageUploadService.uploadMultipleImage(data);
