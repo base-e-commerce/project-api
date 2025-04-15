@@ -14,6 +14,22 @@ exports.getAllContactInfo = async (req, res) => {
   }
 };
 
+exports.createNewsLetter = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const newData = await commonService.createNewsLetter({
+      email,
+    });
+    res
+      .status(201)
+      .json(createResponse("NewsLetter created successfully", newData));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.createContactInfo = async (req, res) => {
   const { name, email, phone, subject, message } = req.body;
   try {

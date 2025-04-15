@@ -93,6 +93,29 @@ class ProductService {
     }
   }
 
+  async getAllCategoryProducts(category_id, limit, offset) {
+    try {
+      const products = await prisma.product.findMany({
+        where: { category_id },
+        include: { productImages: true, category: true, service: true },
+        skip: offset,
+        take: limit,
+        orderBy: { created_at: "desc" },
+      });
+
+      const totalProducts = await prisma.product.count({
+        where: { category_id },
+      });
+      return {
+        products,
+        totalProducts,
+      };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving products: ${error.message}`
+      );
+    }
+  }
   async getAllServiceProducts(service_id, limit, offset) {
     try {
       const products = await prisma.product.findMany({

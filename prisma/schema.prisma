@@ -92,3 +92,9 @@ model ContactInfo {
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
+
+model NewsLetter {
+  newsletter_id Int      @id @default(autoincrement())
+  email         String   @unique
+  created_at    DateTime @default(now())
+}

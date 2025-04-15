@@ -17,6 +17,7 @@ const {
   getLastTenProducts,
   getAllServiceProducts,
   getOtherProductsInService,
+  getAllCategoryProducts,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -35,6 +36,13 @@ const router = express.Router();
  *       schema:
  *         type: string
  *     ProductServiceIdParam:
+ *       name: id
+ *       in: path
+ *       required: true
+ *       description: ID of the servoce
+ *       schema:
+ *         type: string
+ *     ProductCategoryIdParam:
  *       name: id
  *       in: path
  *       required: true
@@ -109,7 +117,7 @@ const router = express.Router();
  *         description: Get products for category
  */
 
-router.get("/category/:idCategory", getProductsCategory);
+router.get("/category-menu/:idCategory", getProductsCategory);
 /**
  * @swagger
  * /product/search/{key}:
@@ -186,6 +194,31 @@ router.get("/last-ten", getLastTenProducts);
  *         description: Get all products service
  */
 router.get("/service/:id", getAllServiceProducts);
+
+/**
+ * @swagger
+ * /product/category/{id}:
+ *   get:
+ *     summary: Get all products category
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - $ref: '#/components/parameters/ProductCategoryIdParam'
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The number of products to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: The number of products to skip
+ *     responses:
+ *       200:
+ *         description: Get all products service
+ */
+router.get("/category/:id", getAllCategoryProducts);
 
 /**
  * @swagger

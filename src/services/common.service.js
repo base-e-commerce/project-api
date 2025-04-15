@@ -1,6 +1,26 @@
 const prisma = require("../database/database");
 
 class CommonService {
+  async createNewsLetter(data) {
+    const db = prisma;
+
+    const transaction = await db.$transaction(async (prisma) => {
+      try {
+        const newData = await prisma.newsLetter.create({
+          data: {
+            email: data.email,
+          },
+        });
+        return newData;
+      } catch (error) {
+        throw new Error(
+          `Error occurred while creating the category info: ${error.message}`
+        );
+      }
+    });
+
+    return transaction;
+  }
   async createContactInfo(data) {
     const db = prisma;
 
