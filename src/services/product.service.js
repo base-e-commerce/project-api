@@ -38,6 +38,11 @@ class ProductService {
         where: {
           OR: [{ name: { contains: key } }, { description: { contains: key } }],
         },
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+        },
         orderBy: { created_at: "desc" },
       });
       return product;
