@@ -1,6 +1,7 @@
 const createResponse = require("../utils/api.response");
 const productService = require("../services/product.service");
 const categoryService = require("../services/category.service");
+const serviceService = require("../services/service.pro.service.js");
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -59,6 +60,37 @@ exports.getAllCategoryProducts = async (req, res) => {
           totalPages,
           totalProducts,
         },
+      })
+    );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.getAllLastEachServiceProducts = async (req, res) => {
+  try {
+    const dataServices = await serviceService.getAllServices();
+    if (!dataServices) {
+      return res.status(404).json(createResponse("No services found", null));
+    }
+    const serviceData = await Promise.all(
+      dataServices.map(async (service) => {
+        console.log(`Fetching products for service ID: ${service.service_id}`);
+        const lastProducts = await productService.getLastProductByServiceId(
+          service.service_id
+        );
+        console.log(`Last products for service ID ${service.service_id}:`, lastProducts);
+        return {
+          ...service,
+          lastProducts: lastProducts ? lastProducts : [],
+        };
+      })
+    );
+    res.status(200).json(
+      createResponse("Last products by service fetched successfully", {
+        serviceData,
       })
     );
   } catch (error) {

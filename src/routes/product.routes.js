@@ -18,6 +18,7 @@ const {
   getAllServiceProducts,
   getOtherProductsInService,
   getAllCategoryProducts,
+  getAllLastEachServiceProducts,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -169,6 +170,19 @@ router.get("/", getAllProducts);
  *         description: Get last ten products
  */
 router.get("/last-ten", getLastTenProducts);
+
+/**
+ * @swagger
+ * /product/last-product-each-service:
+ *   get:
+ *     summary: Get all products service
+ *     tags:
+ *       - Product
+ *     responses:
+ *       200:
+ *         description: Get all products service
+ */
+router.get("/last-product-each-service", getAllLastEachServiceProducts);
 
 /**
  * @swagger
