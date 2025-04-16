@@ -162,13 +162,34 @@ class ProductService {
     }
   }
 
+  // async getProductsCategory(idCategory, limit) {
+  //   try {
+  //     const products = await prisma.product.findMany({
+  //       where: { category_id: idCategory },
+  //       include: { productImages: true, category: true, service: true },
+  //       take: limit,
+  //     });
+  //     return products;
+  //   } catch (error) {
+  //     throw new Error(
+  //       `Error occurred while retrieving products by category: ${error.message}`
+  //     );
+  //   }
+  // }
   async getProductsCategory(idCategory, limit) {
     try {
+      const whereClause = idCategory === 0 ? {} : { category_id: idCategory };
+
       const products = await prisma.product.findMany({
-        where: { category_id: idCategory },
-        include: { productImages: true, category: true, service: true },
+        where: whereClause,
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+        },
         take: limit,
       });
+
       return products;
     } catch (error) {
       throw new Error(
