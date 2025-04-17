@@ -12,6 +12,9 @@ exports.createServiceSchema = Joi.object({
     "string.base": "Description must be a string",
     "string.max": "Description must not exceed 255 characters",
   }),
+  secure: Joi.boolean().optional().messages({
+    "boolean.base": "secure must be a boolean value",
+  }),
 });
 
 exports.updateServiceSchema = Joi.object({
@@ -24,5 +27,8 @@ exports.updateServiceSchema = Joi.object({
   description: Joi.string().max(255).optional().allow(null, "").messages({
     "string.base": "Description must be a string",
     "string.max": "Description must not exceed 255 characters",
+  }),
+  secure: Joi.boolean().optional().messages({
+    "boolean.base": "secure must be a boolean value",
   }),
 });

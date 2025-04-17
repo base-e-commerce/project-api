@@ -9,6 +9,7 @@ class ServiceProService {
         const newService = await prisma.service.create({
           data: {
             name: data.name,
+            secure: data.secure,
             description: data.description,
           },
         });
