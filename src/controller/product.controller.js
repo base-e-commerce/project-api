@@ -362,3 +362,24 @@ exports.deleteProduct = async (req, res) => {
       .json(createResponse("Internal server error", error.message, false));
   }
 };
+exports.getSearchProductWithSelectedCategory = async(req,res)=>{
+  try {
+    const key = req.params.key;
+    const idCategory = parseInt(req.params.idCategory); // On convertit en entier
+
+    const product = await productService.getSearchProductsWithCategorySelected(key, idCategory);
+
+    if (product) {
+      res
+        .status(200)
+        .json(createResponse("Product fetched successfully", product));
+    } else {
+      res.status(404).json(createResponse("No products found", null, false));
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+
+}

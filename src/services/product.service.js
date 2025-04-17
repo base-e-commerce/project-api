@@ -52,6 +52,44 @@ class ProductService {
       );
     }
   }
+  async getSearchProductsWithCategorySelected(key, idCategory) {
+    try {
+      const baseSearch = {
+        OR: [
+          { name: { contains: key, mode: 'insensitive' } },
+          { description: { contains: key, mode: 'insensitive' } },
+        ],
+      };
+  
+      const whereClause =
+        idCategory === 0
+          ? baseSearch
+          : {
+              AND: [
+                { category_id: idCategory },
+                baseSearch,
+              ],
+            };
+  
+      const product = await prisma.product.findMany({
+        where: whereClause,
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+        },
+        orderBy: { created_at: "desc" },
+      });
+  
+      return product;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while searching for product: ${error.message}`
+      );
+    }
+  }
+  
+  
 
   async getAllProducts(limit, offset) {
     try {

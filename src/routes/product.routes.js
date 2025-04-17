@@ -19,6 +19,7 @@ const {
   getOtherProductsInService,
   getAllCategoryProducts,
   getAllLastEachServiceProducts,
+  getSearchProductWithSelectedCategory
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -396,5 +397,9 @@ router.delete(
   authenticateAdmin,
   deleteProductImage
 );
+
+router.get("/search/:idCategory/:key",getSearchProductWithSelectedCategory)
+
+
 
 module.exports = router;
