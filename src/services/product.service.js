@@ -52,7 +52,7 @@ class ProductService {
       );
     }
   }
-  async getSearchProductsWithCategorySelected(key, idCategory) {
+  async getSearchProductsWithCategorySelected(idCategory,key) {
     try {
       const baseSearch = {
         OR: [
