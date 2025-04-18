@@ -398,7 +398,7 @@ router.delete(
   deleteProductImage
 );
 
-router.get("/search/:idCategory/:key",getSearchProductWithSelectedCategory)
+router.get("/search-filter/:idCategory/",getSearchProductWithSelectedCategory)
 
 
 
