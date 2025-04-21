@@ -52,24 +52,28 @@ class ProductService {
       );
     }
   }
-  async getSearchProductsWithCategorySelected(idCategory,key) {
+  async getSearchProductsWithCategorySelected(idCategory, key) {
     try {
-      const baseSearch = {
-        OR: [
-          { name: { contains: key, mode: 'insensitive' } },
-          { description: { contains: key, mode: 'insensitive' } },
-        ],
-      };
+      const whereClause={};
   
-      const whereClause =
-        idCategory === 0
-          ? baseSearch
-          : {
-              AND: [
-                { category_id: idCategory },
-                baseSearch,
-              ],
-            };
+      if (idCategory !== 0) {
+        whereClause.category_id = idCategory;
+      }
+  
+      if (key && key.trim() !== "") {
+        const keyFilter = {
+          OR: [
+            { name: { contains: key, mode: 'insensitive' } },
+            { description: { contains: key, mode: 'insensitive' } },
+          ],
+        };
+  
+        if (idCategory !== 0) {
+          whereClause.AND = [keyFilter];
+        } else {
+          Object.assign(whereClause, keyFilter);
+        }
+      }
   
       const product = await prisma.product.findMany({
         where: whereClause,
@@ -88,6 +92,7 @@ class ProductService {
       );
     }
   }
+  
   
   
 

@@ -364,8 +364,9 @@ exports.deleteProduct = async (req, res) => {
 };
 exports.getSearchProductWithSelectedCategory = async(req,res)=>{
   try {
-    const key = req.params.key;
+    
     const idCategory = parseInt(req.params.idCategory);
+    const key = req.query.key || '';
 
     const product = await productService.getSearchProductsWithCategorySelected(idCategory,key);
 
