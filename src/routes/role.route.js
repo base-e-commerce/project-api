@@ -80,7 +80,7 @@ router.get("/:id", authenticateToken, authenticateAdmin, getRoleById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/", authenticateToken, authenticateAdmin, createRole);
+router.post("/", createRole);
 // router.post(
 //   "/",
 //   authenticateToken,
