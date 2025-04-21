@@ -64,12 +64,7 @@ const router = express.Router();
  *       200:
  *         description: Get all categories
  */
-router.get(
-  "/service/:id",
-  authenticateToken,
-  authenticateAdmin,
-  getAllCategoriesByService
-);
+router.get("/service/:id", getAllCategoriesByService);
 
 /**
  * @swagger
@@ -116,7 +111,13 @@ router.get("/:id", getCategoryById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/", validateDto(createCategorySchema), createCategory);
+router.post(
+  "/",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(createCategorySchema),
+  createCategory
+);
 
 /**
  * @swagger
@@ -137,7 +138,13 @@ router.post("/", validateDto(createCategorySchema), createCategory);
  *       404:
  *         description: Category not found
  */
-router.put("/:id", validateDto(updateCategorySchema), updateCategory);
+router.put(
+  "/:id",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(updateCategorySchema),
+  updateCategory
+);
 
 /**
  * @swagger
@@ -154,6 +161,6 @@ router.put("/:id", validateDto(updateCategorySchema), updateCategory);
  *       404:
  *         description: Category not found
  */
-router.delete("/:id", deleteCategory);
+router.delete("/:id", authenticateToken, authenticateAdmin, deleteCategory);
 
 module.exports = router;

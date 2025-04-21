@@ -85,7 +85,13 @@ router.get("/:id", getServiceById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/", validateDto(createServiceSchema), createService);
+router.post(
+  "/",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(createServiceSchema),
+  createService
+);
 
 /**
  * @swagger
@@ -106,7 +112,13 @@ router.post("/", validateDto(createServiceSchema), createService);
  *       404:
  *         description: Service not found
  */
-router.put("/:id", validateDto(updateServiceSchema), updateService);
+router.put(
+  "/:id",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(updateServiceSchema),
+  updateService
+);
 
 /**
  * @swagger
@@ -123,6 +135,6 @@ router.put("/:id", validateDto(updateServiceSchema), updateService);
  *       404:
  *         description: Service not found
  */
-router.delete("/:id", deleteService);
+router.delete("/:id", authenticateToken, authenticateAdmin, deleteService);
 
 module.exports = router;

@@ -19,7 +19,7 @@ const {
   getOtherProductsInService,
   getAllCategoryProducts,
   getAllLastEachServiceProducts,
-  getSearchProductWithSelectedCategory
+  getSearchProductWithSelectedCategory,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -283,7 +283,13 @@ router.get("/:id", getProductById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/", validateDto(createProductSchema), createProduct);
+router.post(
+  "/",
+  // authenticateToken,
+  // authenticateAdmin,
+  validateDto(createProductSchema),
+  createProduct
+);
 
 /**
  * @swagger
@@ -313,7 +319,7 @@ router.post("/", validateDto(createProductSchema), createProduct);
  *       500:
  *         description: Internal server error
  */
-router.post("/image", addImageToProduct);
+router.post("/image", authenticateToken, authenticateAdmin, addImageToProduct);
 
 /**
  * @swagger
@@ -357,24 +363,7 @@ router.put(
  *       404:
  *         description: Product not found
  */
-router.delete("/:id", deleteProduct);
-
-/**
- * @swagger
- * /product/image/{productIdImage}:
- *   delete:
- *     summary: Delete  image by ID
- *     tags:
- *       - Product
- *     parameters:
- *       - $ref: '#/components/parameters/ProductIdImageParam'
- *     responses:
- *       200:
- *         description: Product Image deleted successfully
- *       404:
- *         description: Product Image not found
- */
-router.delete("/image/:productIdImage", deleteProductImage);
+router.delete("/:id", authenticateToken, authenticateAdmin, deleteProduct);
 
 /**
  * @swagger
@@ -398,8 +387,28 @@ router.delete(
   deleteProductImage
 );
 
-router.get("/search-filter/:idCategory/",getSearchProductWithSelectedCategory)
+/**
+ * @swagger
+ * /product/image/{productIdImage}:
+ *   delete:
+ *     summary: Delete  image by ID
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - $ref: '#/components/parameters/ProductIdImageParam'
+ *     responses:
+ *       200:
+ *         description: Product Image deleted successfully
+ *       404:
+ *         description: Product Image not found
+ */
+router.delete(
+  "/image/:productIdImage",
+  authenticateToken,
+  authenticateAdmin,
+  deleteProductImage
+);
 
-
+router.get("/search-filter/:idCategory/", getSearchProductWithSelectedCategory);
 
 module.exports = router;
