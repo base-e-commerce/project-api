@@ -210,14 +210,13 @@ router.get("/:id", getUserById);
  *       400:
  *         description: Invalid input data
  */
-router.post("/", createUser);
-// router.post(
-//   "/",
-//   authenticateToken,
-//   authenticateAdmin,
-//   validateDto(createUserSchema),
-//   createUser
-// );
+router.post(
+  "/",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(createUserSchema),
+  createUser
+);
 
 // router.post(
 //   "/",
