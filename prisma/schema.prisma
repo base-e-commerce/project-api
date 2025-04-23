@@ -37,7 +37,7 @@ model Service {
   name        String
   image_url   String?
   description String?
-  secure          Boolean?       @default(false)
+  secure      Boolean?    @default(false)
   created_at  DateTime    @default(now())
   updated_at  DateTime    @updatedAt
   categories  Categorie[]
@@ -48,6 +48,7 @@ model Categorie {
   categorie_id Int       @id @default(autoincrement())
   name         String
   description  String?
+  secure       Boolean?  @default(false)
   service_id   Int
   service      Service   @relation(fields: [service_id], references: [service_id])
   created_at   DateTime  @default(now())

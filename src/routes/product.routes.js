@@ -85,6 +85,9 @@ const router = express.Router();
  *               description:
  *                 type: string
  *                 description: The description of the product
+ *               descriptionRich:
+ *                 type: string
+ *                 description: The description Rich of the product
  *               currency:
  *                 type: string
  *                 description: The currency of the product
@@ -287,7 +290,7 @@ router.post(
   "/",
   // authenticateToken,
   // authenticateAdmin,
-  validateDto(createProductSchema),
+  validateDto(createProductSchema), 
   createProduct
 );
 

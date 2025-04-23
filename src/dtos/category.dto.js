@@ -8,9 +8,12 @@ exports.createCategorySchema = Joi.object({
     "string.max": "Name must not exceed 100 characters",
     "any.required": "Name is required",
   }),
-  description: Joi.string().max(255).optional().allow(null, '').messages({
+  description: Joi.string().max(255).optional().allow(null, "").messages({
     "string.base": "Description must be a string",
     "string.max": "Description must not exceed 255 characters",
+  }),
+  secure: Joi.boolean().optional().messages({
+    "boolean.base": "secure must be a boolean value",
   }),
   service_id: Joi.number().integer().required().messages({
     "number.base": "Service ID must be a number",
@@ -26,9 +29,12 @@ exports.updateCategorySchema = Joi.object({
     "string.min": "Name must have at least 3 characters",
     "string.max": "Name must not exceed 100 characters",
   }),
-  description: Joi.string().max(255).optional().allow(null, '').messages({
+  description: Joi.string().max(255).optional().allow(null, "").messages({
     "string.base": "Description must be a string",
     "string.max": "Description must not exceed 255 characters",
+  }),
+  secure: Joi.boolean().optional().messages({
+    "boolean.base": "secure must be a boolean value",
   }),
   service_id: Joi.number().integer().optional().messages({
     "number.base": "Service ID must be a number",

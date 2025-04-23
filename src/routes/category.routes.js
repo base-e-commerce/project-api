@@ -46,6 +46,8 @@ const router = express.Router();
  *                 type: string
  *               description:
  *                 type: string
+ *               secure:
+ *                 type: boolean
  *               service_id:
  *                 type: number
  *                 description: The ID of the service

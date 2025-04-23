@@ -10,6 +10,7 @@ class CategoryService {
           data: {
             name: data.name,
             description: data.description,
+            secure: data.secure,
             service_id: data.service_id,
           },
         });
@@ -68,6 +69,7 @@ class CategoryService {
         data: {
           name: data.name,
           description: data.description,
+          secure: data.secure,
           service_id: data.service_id,
         },
       });

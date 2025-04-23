@@ -38,6 +38,8 @@ const router = express.Router();
  *                 type: string
  *               description:
  *                 type: string
+ *               secure:
+ *                 type: boolean
  */
 
 /**
