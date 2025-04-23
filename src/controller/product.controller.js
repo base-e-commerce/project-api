@@ -77,11 +77,9 @@ exports.getAllLastEachServiceProducts = async (req, res) => {
     }
     const serviceData = await Promise.all(
       dataServices.map(async (service) => {
-        console.log(`Fetching products for service ID: ${service.service_id}`);
         const lastProducts = await productService.getLastProductByServiceId(
           service.service_id
         );
-        console.log(`Last products for service ID ${service.service_id}:`, lastProducts);
         return {
           ...service,
           lastProducts: lastProducts ? lastProducts : [],
@@ -362,13 +360,15 @@ exports.deleteProduct = async (req, res) => {
       .json(createResponse("Internal server error", error.message, false));
   }
 };
-exports.getSearchProductWithSelectedCategory = async(req,res)=>{
+exports.getSearchProductWithSelectedCategory = async (req, res) => {
   try {
-    
     const idCategory = parseInt(req.params.idCategory);
-    const key = req.query.key || '';
+    const key = req.query.key || "";
 
-    const product = await productService.getSearchProductsWithCategorySelected(idCategory,key);
+    const product = await productService.getSearchProductsWithCategorySelected(
+      idCategory,
+      key
+    );
 
     if (product) {
       res
@@ -382,5 +382,4 @@ exports.getSearchProductWithSelectedCategory = async(req,res)=>{
       .status(500)
       .json(createResponse("Internal server error", error.message, false));
   }
-
-}
+};
