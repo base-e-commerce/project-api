@@ -13,6 +13,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Customer {
+  customer_id        Int               @id @default(autoincrement())
+  first_name         String
+  last_name          String
+  email              String            @unique
+  password_hash      String?
+  oauth_provider     String?
+  oauth_id           String?
+  phone              String?
+  default_address_id Int?              @unique
+  default_address    Adresse?          @relation("DefaultAddress", fields: [default_address_id], references: [address_id])
+  addresses          Adresse[]         @relation("CustomerAddresses")
+  accounts           CustomerAccount[]
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+}
+
+model CustomerAccount {
+  customer_account_id Int       @id @default(autoincrement())
+  customer_id         Int
+  customer            Customer  @relation(fields: [customer_id], references: [customer_id])
+  type                String
+  activate_pro        DateTime?
+  disabled_pro        DateTime?
+}
+
+model Adresse {
+  address_id  Int       @id @default(autoincrement())
+  customer_id Int
+  customer    Customer  @relation("CustomerAddresses", fields: [customer_id], references: [customer_id])
+  line1       String
+  line2       String?
+  city        String
+  postal_code String
+  country     String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  default_for Customer? @relation("DefaultAddress")
+}
+
 model Role {
   role_id Int    @id @default(autoincrement())
   name    String
