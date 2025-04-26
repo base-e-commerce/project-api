@@ -64,6 +64,7 @@ model Product {
   currency        String
   currency_name   String
   price           Decimal
+  price_pro       Decimal        @default(0.00)
   stock_quantity  Int
   image_url       String?
   secure          Boolean?       @default(false)
