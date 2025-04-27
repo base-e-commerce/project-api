@@ -13,6 +13,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Review {
+  review_id   Int      @id @default(autoincrement())
+  product_id  Int
+  product     Product  @relation(fields: [product_id], references: [product_id])
+  customer_id Int
+  customer    Customer @relation(fields: [customer_id], references: [customer_id])
+  rating      Int
+  created_at  DateTime @default(now())
+}
+
 model Customer {
   customer_id        Int               @id @default(autoincrement())
   first_name         String
@@ -26,6 +36,7 @@ model Customer {
   default_address    Adresse?          @relation("DefaultAddress", fields: [default_address_id], references: [address_id])
   addresses          Adresse[]         @relation("CustomerAddresses")
   accounts           CustomerAccount[]
+  reviews            Review[]
   created_at         DateTime          @default(now())
   updated_at         DateTime          @updatedAt
 }
@@ -116,6 +127,7 @@ model Product {
   created_at      DateTime       @default(now())
   updated_at      DateTime       @updatedAt
   productImages   ProductImage[]
+  reviews         Review[]
 }
 
 model ProductImage {
