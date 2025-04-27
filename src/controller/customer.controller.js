@@ -4,11 +4,16 @@ const customerAccountService = require("../services/customer.account.service");
 const adresseService = require("../services/adress.service");
 
 exports.getAllCustomers = async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+
   try {
-    const customers = await customerService.getAllCustomers();
+    const customersData = await customerService.getAllCustomers(
+      Number(page),
+      Number(limit)
+    );
     res
       .status(200)
-      .json(createResponse("Customers fetched successfully", customers));
+      .json(createResponse("Customers fetched successfully", customersData));
   } catch (error) {
     res
       .status(500)

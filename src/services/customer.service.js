@@ -29,10 +29,25 @@ class CustomerService {
     return transaction;
   }
 
-  async getAllCustomers() {
+  async getAllCustomers(page, limit) {
     try {
-      const customers = await prisma.customer.findMany();
-      return customers;
+      const totalCustomers = await prisma.customer.count();
+      const customers = await prisma.customer.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+      const totalPages = Math.ceil(totalCustomers / limit);
+
+      return {
+        customers,
+        pagination: {
+          page: Number(page),
+          totalPages,
+          totalUsers: totalCustomers,
+          limit: Number(limit),
+        },
+      };
     } catch (error) {
       throw new Error(
         `Error occurred while retrieving customers: ${error.message}`
