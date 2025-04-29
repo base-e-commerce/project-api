@@ -20,6 +20,9 @@ exports.createProductSchema = Joi.object({
   currency_name: Joi.string().messages({
     "string.base": "Description must be a string",
   }),
+  is_for_pro: Joi.boolean().optional().messages({
+    "boolean.base": "Is Price Pro must be a boolean value",
+  }),
   price: Joi.number().precision(2).greater(0).required().messages({
     "number.base": "Price must be a number",
     "number.greater": "Price must be greater than 0",
@@ -68,6 +71,9 @@ exports.updateProductSchema = Joi.object({
   }),
   currency_name: Joi.string().optional().messages({
     "string.base": "Description must be a string",
+  }),
+  is_for_pro: Joi.boolean().optional().messages({
+    "boolean.base": "Is Price Pro must be a boolean value",
   }),
   price: Joi.number().precision(2).greater(0).optional().messages({
     "number.base": "Price must be a number",
