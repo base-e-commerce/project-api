@@ -2,32 +2,51 @@ const prisma = require("../database/database");
 
 class CustomerService {
   async createCustomer(data) {
-    const db = prisma;
-
-    const transaction = await db.$transaction(async (prisma) => {
-      try {
-        const newCustomer = await prisma.customer.create({
-          data: {
-            first_name: data.first_name,
-            last_name: data.last_name,
-            email: data.email,
-            password_hash: data.password_hash,
-            oauth_provider: data.oauth_provider,
-            oauth_id: data.oauth_id,
-            phone: data.phone,
-            default_address_id: data.default_address_id,
-          },
-        });
-        return newCustomer;
-      } catch (error) {
-        throw new Error(
-          `Error occurred while creating the customer: ${error.message}`
-        );
+    try {
+      
+      const existingCustomer = await prisma.customer.findUnique({
+        where: {
+          email: data.email,
+        },
+      });
+  
+      if (existingCustomer) {
+        return {
+          status: false,
+          message: "Utilisateur déjà existant",
+          data: existingCustomer, 
+        };
       }
-    });
-
-    return transaction;
+  
+     
+      const newCustomer = await prisma.customer.create({
+        data: {
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          password_hash: data.password_hash,
+          oauth_provider: data.oauth_provider,
+          oauth_id: data.oauth_id,
+          phone: data.phone,
+          default_address_id: data.default_address_id,
+        },
+      });
+  
+      return {
+        status: true,
+        message: "Utilisateur créé avec succès",
+        data: newCustomer,
+      };
+  
+    } catch (error) {
+      return {
+        status: false,
+        message: `Erreur lors de la création du client : ${error.message}`,
+        data: null,
+      };
+    }
   }
+  
 
   async getAllCustomers(page, limit) {
     try {
