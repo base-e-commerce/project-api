@@ -120,6 +120,7 @@ CREATE TABLE `Product` (
     `service_id` INTEGER NOT NULL,
     `category_id` INTEGER NOT NULL,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `is_for_pro` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
