@@ -26,7 +26,6 @@ class ProductService {
             category_id: data.category_id,
             service_id: data.service_id,
             is_active: data.is_active,
-            is_for_pro: data.is_for_pro,
           },
         });
         return newProduct;
