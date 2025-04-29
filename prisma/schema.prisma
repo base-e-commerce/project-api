@@ -119,6 +119,7 @@ model Product {
   stock_quantity  Int
   image_url       String?
   secure          Boolean?       @default(false)
+  is_for_pro      Boolean?       @default(false)
   service_id      Int
   service         Service        @relation(fields: [service_id], references: [service_id])
   category_id     Int

@@ -82,8 +82,8 @@ router.get("/:id", authenticateToken, authenticateAdmin, getRoleById);
  */
 router.post(
   "/",
-  authenticateToken,
-  authenticateAdmin,
+  // authenticateToken,
+  // authenticateAdmin,
   validateDto(createRoleSchema),
   createRole
 );

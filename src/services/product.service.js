@@ -6,6 +6,12 @@ class ProductService {
 
     const transaction = await db.$transaction(async (prisma) => {
       try {
+        let price_final = 0;
+        if (data.is_for_pro) {
+          price_final = parseFloat(data.price) * 5;
+        } else {
+          price_final = data.price;
+        }
         const newProduct = await prisma.product.create({
           data: {
             name: data.name,
@@ -13,13 +19,14 @@ class ProductService {
             descriptionRich: data.descriptionRich,
             currency: data.currency,
             currency_name: data.currency_name,
-            price: parseFloat(data.price) * 5,
+            price: price_final,
             price_pro: parseFloat(data.price),
             stock_quantity: data.stock_quantity,
             image_url: data.image_url,
             category_id: data.category_id,
             service_id: data.service_id,
             is_active: data.is_active,
+            is_for_pro: data.is_for_pro,
           },
         });
         return newProduct;
@@ -55,27 +62,27 @@ class ProductService {
   }
   async getSearchProductsWithCategorySelected(idCategory, key) {
     try {
-      const whereClause={};
-  
+      const whereClause = {};
+
       if (idCategory !== 0) {
         whereClause.category_id = idCategory;
       }
-  
+
       if (key && key.trim() !== "") {
         const keyFilter = {
           OR: [
-            { name: { contains: key, mode: 'insensitive' } },
-            { description: { contains: key, mode: 'insensitive' } },
+            { name: { contains: key, mode: "insensitive" } },
+            { description: { contains: key, mode: "insensitive" } },
           ],
         };
-  
+
         if (idCategory !== 0) {
           whereClause.AND = [keyFilter];
         } else {
           Object.assign(whereClause, keyFilter);
         }
       }
-  
+
       const product = await prisma.product.findMany({
         where: whereClause,
         include: {
@@ -85,7 +92,7 @@ class ProductService {
         },
         orderBy: { created_at: "desc" },
       });
-  
+
       return product;
     } catch (error) {
       throw new Error(
@@ -93,9 +100,6 @@ class ProductService {
       );
     }
   }
-  
-  
-  
 
   async getAllProducts(limit, offset) {
     try {
