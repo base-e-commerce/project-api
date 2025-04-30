@@ -136,9 +136,7 @@ router.get("/:id", authenticateToken, authenticateAdmin, getCustomerById);
  */
 router.post(
   "/",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(createCustomerSchema),
+
   createCustomer
 );
 

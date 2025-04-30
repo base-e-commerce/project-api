@@ -60,36 +60,45 @@ exports.createCustomer = async (req, res) => {
   } = req.body;
 
   try {
-    const transaction = await prisma.$transaction(async (prisma) => {
-      const newCustomer = await customerService.createCustomer({
-        first_name,
-        last_name,
-        email,
-        password_hash,
-        oauth_provider,
-        oauth_id,
-        phone,
-        default_address_id,
-      });
-
-      const newCustomerAccount =
-        await customerAccountService.createCustomerAccount({
-          customer_id: newCustomer.customer_id,
-          type: "standard",
-        });
-
-      return { customer: newCustomer, customerAccount: newCustomerAccount };
+   
+    const result = await customerService.createCustomer({
+      first_name,
+      last_name,
+      email,
+      password_hash,
+      oauth_provider,
+      oauth_id,
+      phone,
+      default_address_id,
     });
 
-    res
-      .status(201)
-      .json(createResponse("Customer created successfully", transaction));
+    
+    if (!result.status && result.message === "Utilisateur déjà existant") {
+      return res
+        .status(200)
+        .json(createResponse(result.message, result.data)); 
+    }
+
+    
+    const newCustomerAccount = await customerAccountService.createCustomerAccount({
+      customer_id: result.data.customer_id,
+      type: "standard",
+    });
+
+    return res.status(201).json(
+      createResponse("Customer created successfully", {
+        customer: result.data,
+        customerAccount: newCustomerAccount,
+      })
+    );
   } catch (error) {
-    res
+    return res
       .status(500)
       .json(createResponse("Internal server error", error.message, false));
   }
 };
+
+
 
 exports.updateCustomer = async (req, res) => {
   const { id } = req.params;
