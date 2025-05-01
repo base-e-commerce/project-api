@@ -17,6 +17,7 @@ const {
   createAddressForCustomer,
   updateAddress,
   deleteAddress,
+  checkAddressIfExists
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -206,6 +207,45 @@ router.get(
 
 /**
  * @swagger
+ * /address/check:
+ *   get:
+ *     summary: Check if an address exists
+ *     tags:
+ *       - Address
+ *     parameters:
+ *       - in: query
+ *         name: line1
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: First line of the address
+ *       - in: query
+ *         name: city
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: City of the address
+ *       - in: query
+ *         name: country
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Country of the address
+ *     responses:
+ *       200:
+ *         description: Address exists
+ *       404:
+ *         description: Address not found
+ */
+router.get(
+  "/address/check",
+  authenticateToken,
+  authenticateAdmin,
+  checkAddressIfExists
+);
+
+/**
+ * @swagger
  * /customer/address/{addressId}:
  *   get:
  *     summary: Get address by ID
@@ -228,7 +268,7 @@ router.get(
 
 /**
  * @swagger
- * /customer/{customerId}/address:
+ * /customer/create-address/{customerId}:
  *   post:
  *     summary: Create a new address for a customer
  *     tags:
@@ -244,7 +284,7 @@ router.get(
  *         description: Invalid input data
  */
 router.post(
-  "/:customerId/address",
+  "/create-address/:customerId",
   authenticateToken,
   authenticateAdmin,
   validateDto(createAddressSchema),

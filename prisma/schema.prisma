@@ -57,7 +57,7 @@ model Adresse {
   line1       String
   line2       String?
   city        String
-  postal_code String
+  postal_code String?
   country     String
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt

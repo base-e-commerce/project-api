@@ -52,9 +52,12 @@ class CustomerService {
     try {
       const totalCustomers = await prisma.customer.count();
       const customers = await prisma.customer.findMany({
+        include: { accounts: true, addresses: true, reviews: true },
         skip: (page - 1) * limit,
         take: limit,
-      });
+      },
+      
+    );
 
       const totalPages = Math.ceil(totalCustomers / limit);
 

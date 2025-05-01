@@ -6,6 +6,12 @@ const adresseService = require("../services/adress.service");
 exports.getAllCustomers = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
+  if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+    return res
+      .status(400)
+      .json(createResponse("Invalid page or limit parameter", false));
+  }
+
   try {
     const customersData = await customerService.getAllCustomers(
       Number(page),
@@ -18,6 +24,34 @@ exports.getAllCustomers = async (req, res) => {
     res
       .status(500)
       .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.checkAddressIfExists = async (req, res) => {
+  try {
+    const { line1, city, country } = req.query;
+
+    if (!line1 || !city || !country) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    const result = await adresseService.checkAddressIfExists(
+      line1,
+      city,
+      country
+    );
+
+    if (result.exists) {
+      return res
+        .status(200)
+        .json({ message: "Address exists", address: result.address });
+    } else {
+      return res.status(404).json({ message: result.message });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: `Error checking address: ${error.message}` });
   }
 };
 
@@ -60,7 +94,6 @@ exports.createCustomer = async (req, res) => {
   } = req.body;
 
   try {
-   
     const result = await customerService.createCustomer({
       first_name,
       last_name,
@@ -72,18 +105,15 @@ exports.createCustomer = async (req, res) => {
       default_address_id,
     });
 
-    
     if (!result.status && result.message === "Utilisateur déjà existant") {
-      return res
-        .status(200)
-        .json(createResponse(result.message, result.data)); 
+      return res.status(200).json(createResponse(result.message, result.data));
     }
 
-    
-    const newCustomerAccount = await customerAccountService.createCustomerAccount({
-      customer_id: result.data.customer_id,
-      type: "standard",
-    });
+    const newCustomerAccount =
+      await customerAccountService.createCustomerAccount({
+        customer_id: result.data.customer_id,
+        type: "standard",
+      });
 
     return res.status(201).json(
       createResponse("Customer created successfully", {
@@ -97,8 +127,6 @@ exports.createCustomer = async (req, res) => {
       .json(createResponse("Internal server error", error.message, false));
   }
 };
-
-
 
 exports.updateCustomer = async (req, res) => {
   const { id } = req.params;
@@ -215,7 +243,7 @@ exports.getAddressById = async (req, res) => {
 
 exports.createAddressForCustomer = async (req, res) => {
   const { customerId } = req.params;
-  const { line1, line2, city, postal_code, country } = req.body;
+  const { line1, city, country } = req.body;
 
   if (isNaN(customerId)) {
     return res
@@ -227,9 +255,7 @@ exports.createAddressForCustomer = async (req, res) => {
     const newAddress = await adresseService.createAdresse({
       customer_id: Number(customerId),
       line1,
-      line2,
       city,
-      postal_code,
       country,
     });
     res
