@@ -81,6 +81,27 @@ exports.getCustomerById = async (req, res) => {
   }
 };
 
+exports.searchCustomers = async (req, res) => {
+  const { searchTerm } = req.query;
+
+  if (!searchTerm) {
+    return res
+      .status(400)
+      .json(createResponse("Search term is required", null, false));
+  }
+
+  try {
+    const customers = await customerService.searchCustomers(searchTerm);
+    res
+      .status(200)
+      .json(createResponse("Customers fetched successfully", customers));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.createCustomer = async (req, res) => {
   const {
     first_name,

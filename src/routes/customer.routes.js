@@ -17,7 +17,8 @@ const {
   createAddressForCustomer,
   updateAddress,
   deleteAddress,
-  checkAddressIfExists
+  checkAddressIfExists,
+  searchCustomers
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -89,6 +90,33 @@ const router = express.Router();
  *               country:
  *                 type: string
  */
+
+/**
+ * @swagger
+ * /search-customer:
+ *   get:
+ *     summary: Search customers by key
+ *     tags:
+ *       - Address
+ *     parameters:
+ *       - in: query
+ *         name: searchTerm
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Key of the search
+ *     responses:
+ *       200:
+ *         description: Customes seach
+ *       404:
+ *         description: Customes not found
+ */
+router.get(
+  "/search-customer",
+  authenticateToken,
+  authenticateAdmin,
+  searchCustomers
+);
 
 /**
  * @swagger
@@ -204,6 +232,7 @@ router.get(
   authenticateAdmin,
   getAllAddressesForCustomer
 );
+
 
 /**
  * @swagger

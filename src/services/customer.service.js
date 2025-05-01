@@ -3,22 +3,20 @@ const prisma = require("../database/database");
 class CustomerService {
   async createCustomer(data) {
     try {
-      
       const existingCustomer = await prisma.customer.findUnique({
         where: {
           email: data.email,
         },
       });
-  
+
       if (existingCustomer) {
         return {
           status: false,
           message: "Utilisateur déjà existant",
-          data: existingCustomer, 
+          data: existingCustomer,
         };
       }
-  
-     
+
       const newCustomer = await prisma.customer.create({
         data: {
           first_name: data.first_name,
@@ -31,13 +29,12 @@ class CustomerService {
           default_address_id: data.default_address_id,
         },
       });
-  
+
       return {
         status: true,
         message: "Utilisateur créé avec succès",
         data: newCustomer,
       };
-  
     } catch (error) {
       return {
         status: false,
@@ -46,7 +43,6 @@ class CustomerService {
       };
     }
   }
-  
 
   async getAllCustomers(page, limit) {
     try {
@@ -55,9 +51,7 @@ class CustomerService {
         include: { accounts: true, addresses: true, reviews: true },
         skip: (page - 1) * limit,
         take: limit,
-      },
-      
-    );
+      });
 
       const totalPages = Math.ceil(totalCustomers / limit);
 
@@ -73,6 +67,26 @@ class CustomerService {
     } catch (error) {
       throw new Error(
         `Error occurred while retrieving customers: ${error.message}`
+      );
+    }
+  }
+
+  async searchCustomers(searchTerm) {
+    try {
+      const customers = await prisma.customer.findMany({
+        where: {
+          OR: [
+            { first_name: { contains: searchTerm.toLowerCase() } },
+            { last_name: { contains: searchTerm.toLowerCase() } },
+            { email: { contains: searchTerm.toLowerCase() } },
+          ],
+        },
+        include: { accounts: true, addresses: true, reviews: true },
+      });
+      return customers;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while searching for customers: ${error.message}`
       );
     }
   }
