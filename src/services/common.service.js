@@ -44,6 +44,33 @@ class CommonService {
     return transaction;
   }
 
+  async getAllNewLetter(page, limit) {
+    try {
+      const newsLetter = await prisma.newsLetter.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+      const totalNewsLetter = await prisma.newsLetter.count();
+
+      const totalPages = Math.ceil(totalNewsLetter / limit);
+
+      return {
+        newsLetter,
+        pagination: {
+          page: Number(page),
+          totalPages,
+          totalNewsLetter,
+          limit: Number(limit),
+        },
+      };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the contact info: ${error.message}`
+      );
+    }
+  }
+
   async getAllContactInfo(page, limit) {
     try {
       const contactInfo = await prisma.contactInfo.findMany({

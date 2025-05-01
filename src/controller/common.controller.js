@@ -1,6 +1,32 @@
 const createResponse = require("../utils/api.response");
 const commonService = require("../services/common.service");
 
+exports.getAllNewLetter = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+      return res
+        .status(400)
+        .json(createResponse("Invalid page or limit parameter", false));
+    }
+
+    const contactInfoData = await commonService.getAllNewLetter(
+      Number(page),
+      Number(limit)
+    );
+    res
+      .status(200)
+      .json(
+        createResponse("News letter fetched successfully", contactInfoData)
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.getAllContactInfo = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;

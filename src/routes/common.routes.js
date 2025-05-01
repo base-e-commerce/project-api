@@ -4,6 +4,7 @@ const {
   createContactInfo,
   createNewsLetter,
   getGlobalStat,
+  getAllNewLetter,
 } = require("../controller/common.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -84,6 +85,30 @@ router.get("/stat", getGlobalStat);
  *         description: Get all contact info in administration
  */
 router.get("/contact-info", getAllContactInfo);
+
+/**
+ * @swagger
+ * /common/new-letter:
+ *   get:
+ *     summary: Get all new letter in administration
+ *     tags:
+ *       - Common
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The number of list to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: The number of list to skip
+ *     responses:
+ *       200:
+ *         description: Get all new letter in administration
+ */
+router.get("/new-letter", getAllNewLetter);
 
 /**
  * @swagger
