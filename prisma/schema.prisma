@@ -87,7 +87,7 @@ model Service {
   service_id  Int         @id @default(autoincrement())
   name        String
   image_url   String?
-  description String?
+  description String?     @db.Text
   secure      Boolean?    @default(false)
   created_at  DateTime    @default(now())
   updated_at  DateTime    @updatedAt
@@ -98,7 +98,7 @@ model Service {
 model Categorie {
   categorie_id Int       @id @default(autoincrement())
   name         String
-  description  String?
+  description  String?   @db.Text
   secure       Boolean?  @default(false)
   service_id   Int
   service      Service   @relation(fields: [service_id], references: [service_id])
@@ -110,8 +110,8 @@ model Categorie {
 model Product {
   product_id      Int            @id @default(autoincrement())
   name            String
-  description     String?
-  descriptionRich String?
+  description     String?        @db.Text
+  descriptionRich String?        @db.Text
   currency        String
   currency_name   String
   price           Decimal
@@ -144,8 +144,8 @@ model ContactInfo {
   name            String
   email           String
   phone           String?
-  subject         String
-  message         String?
+  subject         String   @db.Text
+  message         String?  @db.Text
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }

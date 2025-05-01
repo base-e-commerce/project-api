@@ -63,7 +63,7 @@ router.get("/stat", getGlobalStat);
 
 /**
  * @swagger
- * /common/:
+ * /common/contact-info:
  *   get:
  *     summary: Get all contact info in administration
  *     tags:
@@ -83,7 +83,7 @@ router.get("/stat", getGlobalStat);
  *       200:
  *         description: Get all contact info in administration
  */
-router.get("/", getAllContactInfo);
+router.get("/contact-info", getAllContactInfo);
 
 /**
  * @swagger

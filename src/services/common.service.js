@@ -47,7 +47,6 @@ class CommonService {
   async getAllContactInfo(page, limit) {
     try {
       const contactInfo = await prisma.contactInfo.findMany({
-        include: { customer: true },
         skip: (page - 1) * limit,
         take: limit,
       });
