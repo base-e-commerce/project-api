@@ -1,6 +1,28 @@
 const prisma = require("../database/database");
 
 class CommonService {
+  async getCountProducts() {
+    try {
+      const count = await prisma.product.count();
+      return count;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the product count: ${error.message}`
+      );
+    }
+  }
+
+  async getCountCustomers() {
+    try {
+      const count = await prisma.customer.count();
+      return count;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the customer count: ${error.message}`
+      );
+    }
+  }
+
   async createNewsLetter(data) {
     const db = prisma;
 
@@ -21,6 +43,35 @@ class CommonService {
 
     return transaction;
   }
+
+  async getAllContactInfo(page, limit) {
+    try {
+      const contactInfo = await prisma.contactInfo.findMany({
+        include: { customer: true },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+      const totalContactInfo = await prisma.contactInfo.count();
+
+      const totalPages = Math.ceil(totalContactInfo / limit);
+
+      return {
+        contactInfo,
+        pagination: {
+          page: Number(page),
+          totalPages,
+          totalContactInfo,
+          limit: Number(limit),
+        },
+      };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the contact info: ${error.message}`
+      );
+    }
+  }
+
   async createContactInfo(data) {
     const db = prisma;
 

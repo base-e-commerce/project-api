@@ -3,10 +3,39 @@ const commonService = require("../services/common.service");
 
 exports.getAllContactInfo = async (req, res) => {
   try {
-    const contactInfo = await commonService.getAllContactInfo();
+    const { page = 1, limit = 10 } = req.query;
+
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+      return res
+        .status(400)
+        .json(createResponse("Invalid page or limit parameter", false));
+    }
+
+    const contactInfoData = await commonService.getAllContactInfo(
+      Number(page),
+      Number(limit)
+    );
     res
       .status(200)
-      .json(createResponse("ContactInfo fetched successfully", contactInfo));
+      .json(
+        createResponse("Contact info fetched successfully", contactInfoData)
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.getGlobalStat = async (req, res) => {
+  try {
+    const product = await commonService.getCountProducts();
+    const customer = await commonService.getCountCustomers();
+    resultData = {
+      product: product,
+      customer: customer,
+    };
+    res.status(200).json(createResponse("Stat is here", resultData));
   } catch (error) {
     res
       .status(500)

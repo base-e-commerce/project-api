@@ -3,6 +3,7 @@ const {
   getAllContactInfo,
   createContactInfo,
   createNewsLetter,
+  getGlobalStat,
 } = require("../controller/common.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -49,11 +50,35 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /stat/:
+ *   get:
+ *     summary: Get all stat for administration
+ *     tags:
+ *       - Common
+ *     responses:
+ *       200:
+ *         description: Get all stat for administration
+ */
+router.get("/stat", getGlobalStat);
+
+/**
+ * @swagger
  * /common/:
  *   get:
  *     summary: Get all contact info in administration
  *     tags:
  *       - Common
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The number of list to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: The number of list to skip
  *     responses:
  *       200:
  *         description: Get all contact info in administration
