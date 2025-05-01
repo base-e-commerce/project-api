@@ -289,14 +289,17 @@ exports.deleteProductImage = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, currency, currency_name, price, category_id } =
+    const { name, description, currency, currency_name, price, price_pro, is_for_pro, category_id, service_id } =
       req.body;
     if (
       !name ||
       !description ||
       !price ||
+      !price_pro ||
+      !is_for_pro ||
       !currency ||
       !currency_name ||
+      !service_id ||
       !category_id
     ) {
       return res

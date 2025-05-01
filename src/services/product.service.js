@@ -6,11 +6,11 @@ class ProductService {
 
     const transaction = await db.$transaction(async (prisma) => {
       try {
-        let price_final = 0;
-        if (data.is_for_pro) {
-          price_final = parseFloat(data.price) * 5;
+        let price_final_pro = 0;
+        if (data.price_pro == 0) {
+          price_final_pro = parseFloat(data.price) / 5;
         } else {
-          price_final = data.price;
+          price_final_pro = data.price_pro;
         }
         const newProduct = await prisma.product.create({
           data: {
@@ -19,13 +19,14 @@ class ProductService {
             descriptionRich: data.descriptionRich,
             currency: data.currency,
             currency_name: data.currency_name,
-            price: price_final,
-            price_pro: parseFloat(data.price),
+            price: data.price,
+            price_pro: price_final_pro,
             stock_quantity: data.stock_quantity,
             image_url: data.image_url,
             category_id: data.category_id,
             service_id: data.service_id,
             is_active: data.is_active,
+            is_for_pro: data.is_for_pro,
           },
         });
         return newProduct;
