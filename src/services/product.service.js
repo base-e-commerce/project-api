@@ -70,10 +70,7 @@ class ProductService {
 
       if (key && key.trim() !== "") {
         const keyFilter = {
-          OR: [
-            { name: { contains: key, mode: "insensitive" } },
-            { description: { contains: key, mode: "insensitive" } },
-          ],
+          OR: [{ name: { contains: key } }, { description: { contains: key } }],
         };
 
         if (idCategory !== 0) {

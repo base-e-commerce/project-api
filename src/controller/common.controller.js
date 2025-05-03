@@ -104,3 +104,33 @@ exports.createContactInfo = async (req, res) => {
       .json(createResponse("Internal server error", error.message, false));
   }
 };
+
+exports.patchContactInfo = async (req, res) => {
+  const { id } = req.params;
+  const { name, email, phone, subject, message, seen } = req.body;
+
+  if (!name && !email && !phone && !subject && !message && !seen) {
+    return res
+      .status(400)
+      .json(createResponse("No fields provided to update", null, false));
+  }
+
+  try {
+    const updatedContact = await commonService.updateContactInfo(id, {
+      name,
+      email,
+      phone,
+      subject,
+      seen,
+      message,
+    });
+
+    res
+      .status(200)
+      .json(createResponse("ContactInfo updated successfully", updatedContact));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};

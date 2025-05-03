@@ -70,6 +70,35 @@ class CommonService {
       );
     }
   }
+  async updateContactInfo(id, data) {
+    const db = prisma;
+
+    const transaction = await db.$transaction(async (prisma) => {
+      try {
+        const updateFields = {};
+
+        if (data.name !== undefined) updateFields.name = data.name;
+        if (data.email !== undefined) updateFields.email = data.email;
+        if (data.phone !== undefined) updateFields.phone = data.phone;
+        if (data.subject !== undefined) updateFields.subject = data.subject;
+        if (data.seen !== undefined) updateFields.seen = data.seen;
+        if (data.message !== undefined) updateFields.message = data.message;
+
+        const updatedData = await prisma.contactInfo.update({
+          where: { contact_info_id: Number(id) },
+          data: updateFields,
+        });
+
+        return updatedData;
+      } catch (error) {
+        throw new Error(
+          `Error occurred while updating the contact info: ${error.message}`
+        );
+      }
+    });
+
+    return transaction;
+  }
 
   async getAllContactInfo(page, limit) {
     try {

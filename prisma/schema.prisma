@@ -146,6 +146,7 @@ model ContactInfo {
   phone           String?
   subject         String   @db.Text
   message         String?  @db.Text
+  seen            Boolean? @default(false)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
