@@ -18,7 +18,7 @@ const {
   updateAddress,
   deleteAddress,
   checkAddressIfExists,
-  searchCustomers
+  searchCustomers,
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -232,7 +232,6 @@ router.get(
   authenticateAdmin,
   getAllAddressesForCustomer
 );
-
 
 /**
  * @swagger

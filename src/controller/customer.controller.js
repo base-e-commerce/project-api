@@ -2,6 +2,8 @@ const createResponse = require("../utils/api.response");
 const customerService = require("../services/customer.service");
 const customerAccountService = require("../services/customer.account.service");
 const adresseService = require("../services/adress.service");
+const authService = require("../services/auth.service");
+const bcrypt = require("bcrypt");
 
 exports.getAllCustomers = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
@@ -102,6 +104,22 @@ exports.searchCustomers = async (req, res) => {
   }
 };
 
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const result = await authService.authenticateCustomer(email, password);
+    return res.status(200).json({
+      message: "Authentication successful",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(401).json({
+      message: error.message,
+    });
+  }
+};
+
 exports.createCustomer = async (req, res) => {
   const {
     first_name,
@@ -115,11 +133,17 @@ exports.createCustomer = async (req, res) => {
   } = req.body;
 
   try {
+    let hashedPassword = null;
+    if (password_hash) {
+      const saltRounds = 10;
+      hashedPassword = await bcrypt.hash(password_hash, saltRounds);
+    }
+
     const result = await customerService.createCustomer({
       first_name,
       last_name,
       email,
-      password_hash,
+      password_hash: hashedPassword,
       oauth_provider,
       oauth_id,
       phone,
