@@ -19,9 +19,12 @@ const {
   deleteAddress,
   checkAddressIfExists,
   searchCustomers,
+  login,
+  getCurrentCustomer,
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
+const authenticateCustomer = require("../middleware/auth.client.middleware");
 
 const router = express.Router();
 
@@ -117,6 +120,51 @@ router.get(
   authenticateAdmin,
   searchCustomers
 );
+
+/**
+ * @swagger
+ * /customer/login:
+ *   post:
+ *     summary: Authenticate customer
+ *     tags:
+ *       - Auth Customer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Authentication successful
+ *       401:
+ *         description: Invalid email or password
+ */
+router.post("/login", login);
+
+/**
+ * @swagger
+ * /customer/current:
+ *   get:
+ *     summary: Get the currently authenticated customer's information
+ *     tags:
+ *       - Auth Customer
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current customer's information retrieved successfully
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/current", authenticateCustomer, getCurrentCustomer);
 
 /**
  * @swagger

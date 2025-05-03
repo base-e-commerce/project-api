@@ -29,6 +29,29 @@ exports.getAllCustomers = async (req, res) => {
   }
 };
 
+exports.getCurrentCustomer = async (req, res) => {
+  try {
+    const customer_id = req.customer.customer_id;
+    const customer = await customerService.getCustomerById(customer_id);
+
+    if (!customer) {
+      return res
+        .status(404)
+        .json(createResponse("customer not found", null, false));
+    }
+
+    res
+      .status(200)
+      .json(
+        createResponse("Current customer retrieved successfully", customer)
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.checkAddressIfExists = async (req, res) => {
   try {
     const { line1, city, country } = req.query;
