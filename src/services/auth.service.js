@@ -25,10 +25,6 @@ class AuthService {
         throw new Error("Invalid email or password");
       }
 
-      console.log(customer);
-      console.log(JWT_SECRET);
-      console.log(JWT_EXPIRATION);
-
       const token = jwt.sign(
         { customer_id: customer.customer_id },
         JWT_SECRET,
