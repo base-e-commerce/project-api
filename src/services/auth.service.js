@@ -16,6 +16,18 @@ class AuthService {
         throw new Error("Invalid email or password");
       }
 
+      if (
+        customer.password_hash === null &&
+        customer.oauth_provider === "google"
+      ) {
+        return {
+          token: null,
+          customer: {
+            email: customer.email,
+          },
+        };
+      }
+
       const isPasswordValid = await bcrypt.compare(
         password,
         customer.password_hash
