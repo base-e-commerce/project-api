@@ -1,13 +1,41 @@
 const createResponse = require("../utils/api.response");
 const commandeService = require("../services/commande.service");
 
+// exports.createCommande = async (req, res) => {
+//   try {
+//     const { customerId, details } = req.body;
+//     const commande = await commandeService.createCommande(customerId, details);
+//     res
+//       .status(201)
+//       .json(createResponse(commande, "Commande créée avec succès"));
+//   } catch (error) {
+//     res.status(400).json(createResponse(null, error.message, true));
+//   }
+// };
+
 exports.createCommande = async (req, res) => {
   try {
-    const { customerId, details } = req.body;
-    const commande = await commandeService.createCommande(customerId, details);
-    res
-      .status(201)
-      .json(createResponse(commande, "Commande créée avec succès"));
+    const { customerId, details, paymentDetails } = req.body;
+    const { commande, payment } = await commandeService.createCommande(
+      customerId,
+      details,
+      paymentDetails
+    );
+
+    if (payment) {
+      res
+        .status(201)
+        .json(
+          createResponse(
+            { commande, payment },
+            "Commande et paiement créés avec succès"
+          )
+        );
+    } else {
+      res
+        .status(201)
+        .json(createResponse(commande, "Commande créée avec succès"));
+    }
   } catch (error) {
     res.status(400).json(createResponse(null, error.message, true));
   }

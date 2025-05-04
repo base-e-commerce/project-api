@@ -1,25 +1,65 @@
 const prisma = require("../database/database");
 
 class CommandeService {
-  async createCommande(customerId, details) {
-    const commande = await prisma.commande.create({
-      data: {
-        customer_id: customerId,
-        status: "Envoyer",
-        order_date: new Date(),
-        total_amount: details.reduce(
-          (total, detail) => total + detail.quantity * detail.unit_price,
-          0
-        ),
-        details: {
-          create: details.map((detail) => ({
-            product_id: detail.product_id,
-            quantity: detail.quantity,
-            unit_price: detail.unit_price,
-          })),
+  //   async createCommande(customerId, details) {
+  //     const commande = await prisma.commande.create({
+  //       data: {
+  //         customer_id: customerId,
+  //         status: "Envoyer",
+  //         order_date: new Date(),
+  //         total_amount: details.reduce(
+  //           (total, detail) => total + detail.quantity * detail.unit_price,
+  //           0
+  //         ),
+  //         details: {
+  //           create: details.map((detail) => ({
+  //             product_id: detail.product_id,
+  //             quantity: detail.quantity,
+  //             unit_price: detail.unit_price,
+  //           })),
+  //         },
+  //       },
+  //     });
+  //     return commande;
+  //   }
+
+  async createCommande(customerId, details, paymentDetails = null) {
+    const commande = await prisma.$transaction(async (prisma) => {
+      const newCommande = await prisma.commande.create({
+        data: {
+          customer_id: customerId,
+          status: "Envoyer",
+          order_date: new Date(),
+          total_amount: details.reduce(
+            (total, detail) => total + detail.quantity * detail.unit_price,
+            0
+          ),
+          details: {
+            create: details.map((detail) => ({
+              product_id: detail.product_id,
+              quantity: detail.quantity,
+              unit_price: detail.unit_price,
+            })),
+          },
         },
-      },
+      });
+
+      let payment = null;
+      if (paymentDetails) {
+        payment = await prisma.payment.create({
+          data: {
+            commande_id: newCommande.commande_id,
+            amount: newCommande.total_amount,
+            payment_method: paymentDetails.payment_method,
+            status: "Completed",
+            transaction_date: new Date(),
+          },
+        });
+      }
+
+      return { commande: newCommande, payment: payment };
     });
+
     return commande;
   }
 

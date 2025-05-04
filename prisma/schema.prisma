@@ -179,7 +179,7 @@ model Commande {
   order_date                DateTime
   status                    String
   total_amount              Decimal
-  payment_method            String
+  payment_method            String?
   shipping_address          String?
   shipping_address_id       Int?
   shipping_address_relation Adresse?         @relation(fields: [shipping_address_id], references: [address_id])
