@@ -7,6 +7,7 @@ const productRoutes = require("./src/routes/product.routes");
 const commonRoutes = require("./src/routes/common.routes");
 const uploadRoutes = require("./src/routes/upload.route");
 const customerRoutes = require("./src/routes/customer.routes");
+const commandeRoutes = require("./src/routes/commande.routes");
 
 const app = express();
 app.use("/user", userRoutes);
@@ -17,5 +18,6 @@ app.use("/common", commonRoutes);
 app.use("/service", serviceRoutes);
 app.use("/upload", uploadRoutes);
 app.use("/customer", customerRoutes);
+app.use("/commande", commandeRoutes);
 
 module.exports = app;
