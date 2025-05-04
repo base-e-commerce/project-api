@@ -39,6 +39,7 @@ model Customer {
   reviews            Review[]
   created_at         DateTime          @default(now())
   updated_at         DateTime          @updatedAt
+  Commande           Commande[]
 }
 
 model CustomerAccount {
@@ -51,17 +52,18 @@ model CustomerAccount {
 }
 
 model Adresse {
-  address_id  Int       @id @default(autoincrement())
+  address_id  Int        @id @default(autoincrement())
   customer_id Int
-  customer    Customer  @relation("CustomerAddresses", fields: [customer_id], references: [customer_id])
+  customer    Customer   @relation("CustomerAddresses", fields: [customer_id], references: [customer_id])
   line1       String
   line2       String?
   city        String
   postal_code String?
   country     String
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  default_for Customer? @relation("DefaultAddress")
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  default_for Customer?  @relation("DefaultAddress")
+  Commande    Commande[]
 }
 
 model Role {
@@ -71,16 +73,17 @@ model Role {
 }
 
 model User {
-  user_id       Int       @id @default(autoincrement())
+  user_id       Int        @id @default(autoincrement())
   username      String?
-  email         String    @unique
+  email         String     @unique
   phone         String?
   password_hash String
   role_id       Int
-  role          Role      @relation(fields: [role_id], references: [role_id])
+  role          Role       @relation(fields: [role_id], references: [role_id])
   last_login    DateTime?
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  Commande      Commande[]
 }
 
 model Service {
@@ -108,27 +111,28 @@ model Categorie {
 }
 
 model Product {
-  product_id      Int            @id @default(autoincrement())
+  product_id      Int              @id @default(autoincrement())
   name            String
-  description     String?        @db.Text
-  descriptionRich String?        @db.Text
+  description     String?          @db.Text
+  descriptionRich String?          @db.Text
   currency        String
   currency_name   String
   price           Decimal
-  price_pro       Decimal        @default(0.00)
+  price_pro       Decimal          @default(0.00)
   stock_quantity  Int
   image_url       String?
-  secure          Boolean?       @default(false)
-  is_for_pro      Boolean?       @default(false)
+  secure          Boolean?         @default(false)
+  is_for_pro      Boolean?         @default(false)
   service_id      Int
-  service         Service        @relation(fields: [service_id], references: [service_id])
+  service         Service          @relation(fields: [service_id], references: [service_id])
   category_id     Int
-  category        Categorie      @relation(fields: [category_id], references: [categorie_id])
-  is_active       Boolean        @default(true)
-  created_at      DateTime       @default(now())
-  updated_at      DateTime       @updatedAt
+  category        Categorie        @relation(fields: [category_id], references: [categorie_id])
+  is_active       Boolean          @default(true)
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
   productImages   ProductImage[]
   reviews         Review[]
+  CommandeDetail  CommandeDetail[]
 }
 
 model ProductImage {
@@ -155,4 +159,44 @@ model NewsLetter {
   newsletter_id Int      @id @default(autoincrement())
   email         String   @unique
   created_at    DateTime @default(now())
+}
+
+model CommandeDetail {
+  detail_id   Int      @id @default(autoincrement())
+  commande_id Int
+  commande    Commande @relation(fields: [commande_id], references: [commande_id])
+  product_id  Int
+  product     Product  @relation(fields: [product_id], references: [product_id])
+  quantity    Int
+  unit_price  Decimal
+  created_at  DateTime @default(now())
+}
+
+model Commande {
+  commande_id               Int              @id @default(autoincrement())
+  customer_id               Int
+  customer                  Customer         @relation(fields: [customer_id], references: [customer_id])
+  order_date                DateTime
+  status                    String
+  total_amount              Decimal
+  payment_method            String
+  shipping_address          String?
+  shipping_address_id       Int?
+  shipping_address_relation Adresse?         @relation(fields: [shipping_address_id], references: [address_id])
+  created_at                DateTime         @default(now())
+  updated_at                DateTime         @updatedAt
+  admin_id                  Int?
+  admin                     User?            @relation(fields: [admin_id], references: [user_id])
+  details                   CommandeDetail[]
+  payments                  Payment[]
+}
+
+model Payment {
+  payment_id       Int      @id @default(autoincrement())
+  commande_id      Int
+  commande         Commande @relation(fields: [commande_id], references: [commande_id])
+  amount           Decimal
+  payment_method   String
+  status           String
+  transaction_date DateTime
 }
