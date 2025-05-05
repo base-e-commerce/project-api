@@ -173,10 +173,20 @@ exports.createCustomer = async (req, res) => {
       default_address_id,
     });
 
+    
     if (!result.status && result.message === "Utilisateur déjà existant") {
-      return res.status(200).json(createResponse(result.message, result.data));
+      const existingCustomer = result.data;
+      return res.status(200).json(
+        createResponse("Utilisateur déjà existant", {
+          customer_id: existingCustomer.customer_id,
+          email: existingCustomer.email,
+          first_name: existingCustomer.first_name,
+          last_name: existingCustomer.last_name,
+        })
+      );
     }
 
+   
     const newCustomerAccount =
       await customerAccountService.createCustomerAccount({
         customer_id: result.data.customer_id,
@@ -185,7 +195,10 @@ exports.createCustomer = async (req, res) => {
 
     return res.status(201).json(
       createResponse("Customer created successfully", {
-        customer: result.data,
+        customer_id: result.data.customer_id,
+        email: result.data.email,
+        first_name: result.data.first_name,
+        last_name: result.data.last_name,
         customerAccount: newCustomerAccount,
       })
     );
@@ -195,6 +208,7 @@ exports.createCustomer = async (req, res) => {
       .json(createResponse("Internal server error", error.message, false));
   }
 };
+
 
 exports.updateCustomer = async (req, res) => {
   const { id } = req.params;
