@@ -16,6 +16,7 @@ const commandeService = require("../services/commande.service");
 exports.createCommande = async (req, res) => {
   try {
     const { customerId, details, paymentDetails } = req.body;
+    console.log("body",req.body)
     const { commande, payment } = await commandeService.createCommande(
       customerId,
       details,
