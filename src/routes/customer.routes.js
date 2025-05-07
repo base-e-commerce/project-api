@@ -21,6 +21,7 @@ const {
   searchCustomers,
   login,
   getCurrentCustomer,
+  customerGoogleLogin
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -415,5 +416,7 @@ router.delete(
   authenticateAdmin,
   deleteAddress
 );
+
+router.post('/google-login',customerGoogleLogin);
 
 module.exports = router;

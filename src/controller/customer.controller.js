@@ -403,3 +403,21 @@ exports.deleteAddress = async (req, res) => {
       .json(createResponse("Internal server error", error.message, false));
   }
 };
+exports.customerGoogleLogin = async (req, res) => {
+  try {
+    const { id_token } = req.body;
+
+    if (!id_token) {
+      return res.status(400).json({ message: "Token Google manquant." });
+    }
+
+    const { token, customer } = await authService.authenticateGmailCustomer(id_token);
+
+    return res.json({ token, customer });
+  } catch (err) {
+    console.error("Erreur de login Google :", err.message);
+    return res
+      .status(401)
+      .json({ message: "Échec de la connexion Google", error: err.message });
+  }
+};
