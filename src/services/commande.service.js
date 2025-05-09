@@ -100,32 +100,59 @@ class CommandeService {
     }
   }
 
-  async getAllCommandes(page = 1, pageSize = 10) {
-    const skip = (page - 1) * pageSize;
-    const commandes = await prisma.commande.findMany({
-      skip,
-      take: pageSize,
-      include: { details: true, admin: true },
-    });
-    return commandes;
+  async getAllCommandes(limit, offset) {
+    try {
+      const commandes = await prisma.commande.findMany({
+        include: {
+          details: {
+            include: {
+              product: {
+                include: {
+                  productImages: true,
+                  category: true,
+                  service: true,
+                },
+              },
+            },
+          },
+          admin: true,
+          customer: true,
+        },
+        skip: offset,
+        take: limit,
+        orderBy: { created_at: "desc" },
+      });
+
+      const totalCommandes = await prisma.commande.count();
+
+      return {
+        commandes,
+        totalCommandes,
+      };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving commandes: ${error.message}`
+      );
+    }
   }
 
   async receiveCommande(commandeId, adminId) {
     const commande = await prisma.commande.update({
       where: { commande_id: commandeId },
       data: {
-        status: "Reçu",
+        status: "Confirmé",
         admin_id: adminId,
       },
     });
     return commande;
   }
 
-  async cancelCommande(commandeId) {
+  async cancelCommande(commandeId, adminId) {
     const commande = await prisma.commande.update({
       where: { commande_id: commandeId },
       data: {
         status: "Annulé",
+        admin_id: adminId,
       },
     });
     return commande;
