@@ -17,9 +17,16 @@ const {
   createAddressForCustomer,
   updateAddress,
   deleteAddress,
+  checkAddressIfExists,
+  searchCustomers,
+  login,
+  getCurrentCustomer,
+  customerGoogleLogin,
+  getLastTenCustomers,
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
+const authenticateCustomer = require("../middleware/auth.client.middleware");
 
 const router = express.Router();
 
@@ -91,6 +98,96 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /search-customer:
+ *   get:
+ *     summary: Search customers by key
+ *     tags:
+ *       - Address
+ *     parameters:
+ *       - in: query
+ *         name: searchTerm
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Key of the search
+ *     responses:
+ *       200:
+ *         description: Customes seach
+ *       404:
+ *         description: Customes not found
+ */
+router.get(
+  "/search-customer",
+  authenticateToken,
+  authenticateAdmin,
+  searchCustomers
+);
+
+/**
+ * @swagger
+ * /customer/login:
+ *   post:
+ *     summary: Authenticate customer
+ *     tags:
+ *       - Auth Customer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Authentication successful
+ *       401:
+ *         description: Invalid email or password
+ */
+router.post("/login", login);
+
+/**
+ * @swagger
+ * /customer/current:
+ *   get:
+ *     summary: Get the currently authenticated customer's information
+ *     tags:
+ *       - Auth Customer
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current customer's information retrieved successfully
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/current", authenticateCustomer, getCurrentCustomer);
+
+/**
+ * @swagger
+ * /customer/last-ten:
+ *   get:
+ *     summary: Get last ten customers
+ *     tags:
+ *       - Customer
+ *     responses:
+ *       200:
+ *         description: Get last ten customers
+ */
+router.get(
+  "/last-ten",
+  authenticateToken,
+  authenticateAdmin,
+  getLastTenCustomers
+);
+
+/**
+ * @swagger
  * /customer/:
  *   get:
  *     summary: Get all customers
@@ -136,9 +233,7 @@ router.get("/:id", authenticateToken, authenticateAdmin, getCustomerById);
  */
 router.post(
   "/",
-  authenticateToken,
-  authenticateAdmin,
-  validateDto(createCustomerSchema),
+
   createCustomer
 );
 
@@ -208,6 +303,45 @@ router.get(
 
 /**
  * @swagger
+ * /address/check:
+ *   get:
+ *     summary: Check if an address exists
+ *     tags:
+ *       - Address
+ *     parameters:
+ *       - in: query
+ *         name: line1
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: First line of the address
+ *       - in: query
+ *         name: city
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: City of the address
+ *       - in: query
+ *         name: country
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Country of the address
+ *     responses:
+ *       200:
+ *         description: Address exists
+ *       404:
+ *         description: Address not found
+ */
+router.get(
+  "/address/check",
+  authenticateToken,
+  authenticateAdmin,
+  checkAddressIfExists
+);
+
+/**
+ * @swagger
  * /customer/address/{addressId}:
  *   get:
  *     summary: Get address by ID
@@ -230,7 +364,7 @@ router.get(
 
 /**
  * @swagger
- * /customer/{customerId}/address:
+ * /customer/create-address/{customerId}:
  *   post:
  *     summary: Create a new address for a customer
  *     tags:
@@ -246,7 +380,7 @@ router.get(
  *         description: Invalid input data
  */
 router.post(
-  "/:customerId/address",
+  "/create-address/:customerId",
   authenticateToken,
   authenticateAdmin,
   validateDto(createAddressSchema),
@@ -301,5 +435,7 @@ router.delete(
   authenticateAdmin,
   deleteAddress
 );
+
+router.post("/google-login", customerGoogleLogin);
 
 module.exports = router;

@@ -28,6 +28,10 @@ exports.createProductSchema = Joi.object({
     "number.greater": "Price must be greater than 0",
     "any.required": "Price is required",
   }),
+  price_pro: Joi.number().precision(2).greater(0).optional().messages({
+    "number.base": "Price Pro must be a number",
+    "number.greater": "Price Pro must be greater than 0",
+  }),
   stock_quantity: Joi.number().integer().min(0).required().messages({
     "number.base": "Stock quantity must be a number",
     "number.integer": "Stock quantity must be an integer",
@@ -78,6 +82,10 @@ exports.updateProductSchema = Joi.object({
   price: Joi.number().precision(2).greater(0).optional().messages({
     "number.base": "Price must be a number",
     "number.greater": "Price must be greater than 0",
+  }),
+  price_pro: Joi.number().precision(2).greater(0).optional().messages({
+    "number.base": "Price Pro must be a number",
+    "number.greater": "Price Pro must be greater than 0",
   }),
   stock_quantity: Joi.number().integer().min(0).optional().messages({
     "number.base": "Stock quantity must be a number",

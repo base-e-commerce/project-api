@@ -94,12 +94,11 @@ exports.createAddressSchema = Joi.object({
     "string.max": "City must not exceed 50 characters",
     "any.required": "City is required",
   }),
-  postal_code: Joi.string().min(1).max(20).required().messages({
+  postal_code: Joi.string().min(1).max(20).optional().messages({
     "string.base": "Postal code must be a string",
     "string.empty": "Postal code cannot be empty",
     "string.min": "Postal code must have at least 1 character",
     "string.max": "Postal code must not exceed 20 characters",
-    "any.required": "Postal code is required",
   }),
   country: Joi.string().min(1).max(50).required().messages({
     "string.base": "Country must be a string",

@@ -12,7 +12,6 @@ class AdresseService {
             line1: data.line1,
             line2: data.line2,
             city: data.city,
-            postal_code: data.postal_code,
             country: data.country,
           },
         });
@@ -34,6 +33,28 @@ class AdresseService {
     } catch (error) {
       throw new Error(
         `Error occurred while retrieving addresses: ${error.message}`
+      );
+    }
+  }
+
+  async checkAddressIfExists(line1, city, country) {
+    try {
+      const address = await prisma.adresse.findFirst({
+        where: {
+          line1: line1,
+          city: city,
+          country: country,
+        },
+      });
+
+      if (!address) {
+        return { exists: false, message: "Address not found" };
+      }
+
+      return { exists: true, address: address };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while checking the address: ${error.message}`
       );
     }
   }

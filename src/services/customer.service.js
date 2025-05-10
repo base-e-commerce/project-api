@@ -2,37 +2,53 @@ const prisma = require("../database/database");
 
 class CustomerService {
   async createCustomer(data) {
-    const db = prisma;
+    try {
+      const existingCustomer = await prisma.customer.findUnique({
+        where: {
+          email: data.email,
+        },
+      });
 
-    const transaction = await db.$transaction(async (prisma) => {
-      try {
-        const newCustomer = await prisma.customer.create({
-          data: {
-            first_name: data.first_name,
-            last_name: data.last_name,
-            email: data.email,
-            password_hash: data.password_hash,
-            oauth_provider: data.oauth_provider,
-            oauth_id: data.oauth_id,
-            phone: data.phone,
-            default_address_id: data.default_address_id,
-          },
-        });
-        return newCustomer;
-      } catch (error) {
-        throw new Error(
-          `Error occurred while creating the customer: ${error.message}`
-        );
+      if (existingCustomer) {
+        return {
+          status: false,
+          message: "Utilisateur déjà existant",
+          data: existingCustomer,
+        };
       }
-    });
 
-    return transaction;
+      const newCustomer = await prisma.customer.create({
+        data: {
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          password_hash: data.password_hash,
+          oauth_provider: data.oauth_provider,
+          oauth_id: data.oauth_id,
+          phone: data.phone,
+          default_address_id: data.default_address_id,
+        },
+      });
+
+      return {
+        status: true,
+        message: "Utilisateur créé avec succès",
+        data: newCustomer,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        message: `Erreur lors de la création du client : ${error.message}`,
+        data: null,
+      };
+    }
   }
 
   async getAllCustomers(page, limit) {
     try {
       const totalCustomers = await prisma.customer.count();
       const customers = await prisma.customer.findMany({
+        include: { accounts: true, addresses: true, reviews: true },
         skip: (page - 1) * limit,
         take: limit,
       });
@@ -51,6 +67,41 @@ class CustomerService {
     } catch (error) {
       throw new Error(
         `Error occurred while retrieving customers: ${error.message}`
+      );
+    }
+  }
+
+  async getLastTenCustomers() {
+    try {
+      const customers = await prisma.customer.findMany({
+        orderBy: { created_at: "desc" },
+        include: { accounts: true, addresses: true, reviews: true },
+        take: 10,
+      });
+      return customers;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the last ten customers: ${error.message}`
+      );
+    }
+  }
+
+  async searchCustomers(searchTerm) {
+    try {
+      const customers = await prisma.customer.findMany({
+        where: {
+          OR: [
+            { first_name: { contains: searchTerm.toLowerCase() } },
+            { last_name: { contains: searchTerm.toLowerCase() } },
+            { email: { contains: searchTerm.toLowerCase() } },
+          ],
+        },
+        include: { accounts: true, addresses: true, reviews: true },
+      });
+      return customers;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while searching for customers: ${error.message}`
       );
     }
   }
