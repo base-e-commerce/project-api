@@ -1,6 +1,10 @@
 const express = require("express");
 const { validateDto } = require("../middleware/dto.validation.middleware");
-const { createCommandeSchema, resendCommandeSchema, receiveCommandeSchema } = require("../dtos/commande.dto");
+const {
+  createCommandeSchema,
+  resendCommandeSchema,
+  receiveCommandeSchema,
+} = require("../dtos/commande.dto");
 const {
   createCommande,
   getCommandesByCustomer,
@@ -8,6 +12,9 @@ const {
   getAllCommandes,
   receiveCommande,
   cancelCommande,
+  searchCommandes,
+  getLastTenCommandes,
+  getAllCommandeByState,
 } = require("../controller/commande.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -48,7 +55,12 @@ const router = express.Router();
  *       400:
  *         description: Invalid input data
  */
-router.post("/", authenticateCustomer, validateDto(createCommandeSchema), createCommande);
+router.post(
+  "/",
+  authenticateCustomer,
+  validateDto(createCommandeSchema),
+  createCommande
+);
 
 /**
  * @swagger
@@ -70,29 +82,87 @@ router.post("/", authenticateCustomer, validateDto(createCommandeSchema), create
  *       404:
  *         description: Customer not found
  */
-router.get("/customer/:customerId", authenticateCustomer, getCommandesByCustomer);
+router.get(
+  "/customer/:customerId",
+  authenticateCustomer,
+  getCommandesByCustomer
+);
 
 /**
  * @swagger
- * /commande/resend/{commandeId}:
- *   post:
- *     summary: Resend a commande if it was canceled by the admin
+ * /commande/state/{status}:
+ *   get:
+ *     summary: Get all commandes ny status with pagination
  *     tags:
  *       - Commande
  *     parameters:
- *       - name: commandeId
+ *       - name: status
  *         in: path
  *         required: true
- *         description: ID of the commande to resend
+ *         description: Status of the commande to receive
+ *         schema:
+ *           type: string
+ *       - name: page
+ *         in: query
+ *         description: The page number to retrieve (default is 1)
+ *         required: false
  *         schema:
  *           type: integer
+ *           default: 1
+ *       - name: pageSize
+ *         in: query
+ *         description: The number of commandes per page (default is 10)
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
  *     responses:
  *       200:
- *         description: Commande resent successfully
- *       400:
- *         description: Commande cannot be resent
+ *         description: List of commandes with pagination metadata
+ *       500:
+ *         description: Internal server error
  */
-router.post("/resend/:commandeId", authenticateCustomer, validateDto(resendCommandeSchema), resendCommande);
+router.get(
+  "/state/:status",
+  getAllCommandeByState
+);
+
+/**
+ * @swagger
+ * /commande/last/:
+ *   get:
+ *     summary: Get last ten
+ *     tags:
+ *       - Commande
+ *     responses:
+ *       200:
+ *         description: List of last ten
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/last", getLastTenCommandes);
+
+/**
+ * @swagger
+ * /commande/search/:
+ *   get:
+ *     summary: Get search
+ *     tags:
+ *       - Commande
+ *     parameters:
+ *       - name: searchTerm
+ *         in: query
+ *         description: key search
+ *         required: false
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of search
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/search", searchCommandes);
 
 /**
  * @swagger
@@ -122,7 +192,35 @@ router.post("/resend/:commandeId", authenticateCustomer, validateDto(resendComma
  *       500:
  *         description: Internal server error
  */
-router.get("/", authenticateToken, authenticateAdmin, getAllCommandes);
+
+router.get("/",getAllCommandes);
+
+/**
+ * @swagger
+ * /commande/resend/{commandeId}:
+ *   post:
+ *     summary: Resend a commande if it was canceled by the admin
+ *     tags:
+ *       - Commande
+ *     parameters:
+ *       - name: commandeId
+ *         in: path
+ *         required: true
+ *         description: ID of the commande to resend
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Commande resent successfully
+ *       400:
+ *         description: Commande cannot be resent
+ */
+router.post(
+  "/resend/:commandeId",
+  authenticateCustomer,
+  validateDto(resendCommandeSchema),
+  resendCommande
+);
 
 /**
  * @swagger
@@ -155,7 +253,12 @@ router.get("/", authenticateToken, authenticateAdmin, getAllCommandes);
  *       404:
  *         description: Commande not found
  */
-router.put("/receive/:commandeId", authenticateToken, authenticateAdmin, validateDto(receiveCommandeSchema), receiveCommande);
+router.put(
+  "/receive/:commandeId",
+  authenticateToken,
+  authenticateAdmin,
+  receiveCommande
+);
 
 /**
  * @swagger
@@ -177,6 +280,11 @@ router.put("/receive/:commandeId", authenticateToken, authenticateAdmin, validat
  *       404:
  *         description: Commande not found
  */
-router.put("/cancel/:commandeId", authenticateToken, authenticateAdmin, cancelCommande);
+router.put(
+  "/cancel/:commandeId",
+  authenticateToken,
+  authenticateAdmin,
+  cancelCommande
+);
 
 module.exports = router;

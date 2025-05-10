@@ -40,6 +40,10 @@ exports.createCommandeSchema = Joi.object({
     "number.integer": "Customer ID must be an integer",
     "any.required": "Customer ID is required",
   }),
+  shippingAddressId: Joi.number().integer().optional().messages({
+    "number.base": "Shipping Address ID must be a number",
+    "number.integer": "Shipping Address ID must be an integer",
+  }),
   details: Joi.array()
     .items(
       Joi.object({

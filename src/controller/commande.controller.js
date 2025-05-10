@@ -15,12 +15,12 @@ const commandeService = require("../services/commande.service");
 
 exports.createCommande = async (req, res) => {
   try {
-    const { customerId, details, paymentDetails } = req.body;
-    console.log("body", req.body);
+    const { customerId, details, paymentDetails, shippingAddressId } = req.body;
     const { commande, payment } = await commandeService.createCommande(
       customerId,
       details,
-      paymentDetails
+      paymentDetails,
+      shippingAddressId
     );
 
     if (payment) {
@@ -75,12 +75,12 @@ exports.getAllCommandes = async (req, res) => {
 
     const offset = (page - 1) * limit;
 
-    const { commandes, totalCommand } = await commandeService.getAllCommandes(
+    const { commandes, totalCommandes } = await commandeService.getAllCommandes(
       limit,
       offset
     );
 
-    const totalPages = Math.ceil(totalCommand / limit);
+    const totalPages = Math.ceil(totalCommandes / limit);
 
     res.status(200).json(
       createResponse("Commands fetched successfully", {
@@ -89,10 +89,67 @@ exports.getAllCommandes = async (req, res) => {
           page,
           limit,
           totalPages,
-          totalCommand,
+          totalCommand: totalCommandes,
         },
       })
     );
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.getAllCommandeByState = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const offset = (page - 1) * limit;
+
+    const { commandes, totalCommandes } =
+      await commandeService.getAllCommandeByState(
+        req.params.status,
+        limit,
+        offset
+      );
+
+    const totalPages = Math.ceil(totalCommandes / limit);
+
+    res.status(200).json(
+      createResponse("Commands fetched successfully", {
+        commandes,
+        pagination: {
+          page,
+          limit,
+          totalPages,
+          totalCommand: totalCommandes,
+        },
+      })
+    );
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.searchCommandes = async (req, res) => {
+  try {
+    const { searchTerm } = req.query;
+    const commandes = await commandeService.searchCommandes(searchTerm);
+    res
+      .status(200)
+      .json(createResponse("Commandes trouvées avec succès", commandes));
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.getLastTenCommandes = async (req, res) => {
+  try {
+    const commandes = await commandeService.getLastTenCommandes();
+    res
+      .status(200)
+      .json(
+        createResponse("Dernières commandes récupérées avec succès", commandes)
+      );
   } catch (error) {
     res.status(400).json(createResponse(null, error.message, true));
   }

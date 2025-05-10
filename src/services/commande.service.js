@@ -34,6 +34,7 @@ class CommandeService {
             (total, detail) => total + detail.quantity * detail.unit_price,
             0
           ),
+          shipping_address_id: shippingAddressId,
           details: {
             create: details.map((detail) => ({
               product_id: detail.product_id,
@@ -134,6 +135,92 @@ class CommandeService {
         `Error occurred while retrieving commandes: ${error.message}`
       );
     }
+  }
+
+  async getAllCommandeByState(status, limit, offset) {
+    try {
+      const commandes = await prisma.commande.findMany({
+        include: {
+          details: {
+            include: {
+              product: {
+                include: {
+                  productImages: true,
+                  category: true,
+                  service: true,
+                },
+              },
+            },
+          },
+          admin: true,
+          customer: true,
+        },
+        where: { status },
+        skip: offset,
+        take: limit,
+        orderBy: { created_at: "desc" },
+      });
+
+      const totalCommandes = await prisma.commande.count({
+        where: { status },
+      });
+
+      return {
+        commandes,
+        totalCommandes,
+      };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving commandes: ${error.message}`
+      );
+    }
+  }
+
+  async searchCommandes(searchTerm) {
+    const commandes = await prisma.commande.findMany({
+      where: {
+        customer: {
+          is: {
+            OR: [
+              { first_name: { contains: searchTerm } },
+              { last_name: { contains: searchTerm } },
+              { email: { contains: searchTerm } },
+            ],
+          },
+        },
+      },
+      include: {
+        details: true,
+        customer: true,
+      },
+    });
+    return commandes;
+  }
+
+  async getLastTenCommandes() {
+    const commandes = await prisma.commande.findMany({
+      include: {
+        details: {
+          include: {
+            product: {
+              include: {
+                productImages: true,
+                category: true,
+                service: true,
+              },
+            },
+          },
+        },
+        admin: true,
+        customer: true,
+      },
+      where: {
+        status: "Envoyer",
+      },
+      orderBy: { created_at: "desc" },
+      take: 10,
+    });
+    return commandes;
   }
 
   async receiveCommande(commandeId, adminId) {

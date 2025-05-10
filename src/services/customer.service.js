@@ -71,6 +71,21 @@ class CustomerService {
     }
   }
 
+  async getLastTenCustomers() {
+    try {
+      const customers = await prisma.customer.findMany({
+        orderBy: { created_at: "desc" },
+        include: { accounts: true, addresses: true, reviews: true },
+        take: 10,
+      });
+      return customers;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the last ten customers: ${error.message}`
+      );
+    }
+  }
+
   async searchCustomers(searchTerm) {
     try {
       const customers = await prisma.customer.findMany({

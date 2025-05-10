@@ -29,6 +29,21 @@ exports.getAllCustomers = async (req, res) => {
   }
 };
 
+exports.getLastTenCustomers = async (req, res) => {
+  try {
+    const customers = await customerService.getLastTenCustomers();
+    res
+      .status(200)
+      .json(
+        createResponse("Last ten customers fetched successfully", customers)
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.getCurrentCustomer = async (req, res) => {
   try {
     const customer_id = req.customer.customer_id;
@@ -173,7 +188,6 @@ exports.createCustomer = async (req, res) => {
       default_address_id,
     });
 
-    
     if (!result.status && result.message === "Utilisateur déjà existant") {
       const existingCustomer = result.data;
       return res.status(200).json(
@@ -186,7 +200,6 @@ exports.createCustomer = async (req, res) => {
       );
     }
 
-   
     const newCustomerAccount =
       await customerAccountService.createCustomerAccount({
         customer_id: result.data.customer_id,
@@ -208,7 +221,6 @@ exports.createCustomer = async (req, res) => {
       .json(createResponse("Internal server error", error.message, false));
   }
 };
-
 
 exports.updateCustomer = async (req, res) => {
   const { id } = req.params;
@@ -411,7 +423,9 @@ exports.customerGoogleLogin = async (req, res) => {
       return res.status(400).json({ message: "Token Google manquant." });
     }
 
-    const { token, customer } = await authService.authenticateGmailCustomer(id_token);
+    const { token, customer } = await authService.authenticateGmailCustomer(
+      id_token
+    );
 
     return res.json({ token, customer });
   } catch (err) {

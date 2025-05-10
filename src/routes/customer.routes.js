@@ -21,7 +21,8 @@ const {
   searchCustomers,
   login,
   getCurrentCustomer,
-  customerGoogleLogin
+  customerGoogleLogin,
+  getLastTenCustomers,
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -166,6 +167,24 @@ router.post("/login", login);
  *         description: Internal server error
  */
 router.get("/current", authenticateCustomer, getCurrentCustomer);
+
+/**
+ * @swagger
+ * /customer/last-ten:
+ *   get:
+ *     summary: Get last ten customers
+ *     tags:
+ *       - Customer
+ *     responses:
+ *       200:
+ *         description: Get last ten customers
+ */
+router.get(
+  "/last-ten",
+  authenticateToken,
+  authenticateAdmin,
+  getLastTenCustomers
+);
 
 /**
  * @swagger
@@ -417,6 +436,6 @@ router.delete(
   deleteAddress
 );
 
-router.post('/google-login',customerGoogleLogin);
+router.post("/google-login", customerGoogleLogin);
 
 module.exports = router;
