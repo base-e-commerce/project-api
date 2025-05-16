@@ -101,7 +101,7 @@ class AuthService {
     }
 
     const token = jwt.sign(
-      { customer_id: customer.customer_id, email: customer.email },
+      { customer_id: customer.customer_id},
       JWT_SECRET,
       { expiresIn: JWT_EXPIRATION }
     );
