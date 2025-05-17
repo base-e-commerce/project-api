@@ -39,7 +39,7 @@ class CommandeService {
             (total, detail) => total + detail.quantity * detail.unit_price,
             0
           ),
-          // shipping_address_id: shippingAddressId,
+          shipping_address_id: shippingAddressId,
           details: {
             create: details.map((detail) => ({
               product_id: detail.product_id,
@@ -84,6 +84,7 @@ class CommandeService {
             },
           },
         },
+        shipping_address_relation: true,
       },
       orderBy: { created_at: "desc" },
     });
