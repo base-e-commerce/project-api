@@ -11,8 +11,10 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 class AuthService {
   async authenticateCustomer(email, password) {
     try {
-      const customer = await prisma.customer.findUnique({
-        where: { email },
+      const customer = await prisma.customer.findFirst({
+        where: {
+          OR: [{ email: email }, { phone: email }],
+        },
       });
 
       if (!customer) {
