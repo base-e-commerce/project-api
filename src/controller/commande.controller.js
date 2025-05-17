@@ -58,8 +58,40 @@ exports.getCommandesByCustomer = async (req, res) => {
 
 exports.resendCommande = async (req, res) => {
   try {
+    const customer = req.customer;
     const { commandeId } = req.params;
+    const checkCommande = await commandeService.checkCommandeByCustomer(
+      customer.customer_id
+    );
+    if (checkCommande.length === 0) {
+      return res
+        .status(404)
+        .json(createResponse("Aucune commande trouvée pour ce client"));
+    }
     const commande = await commandeService.resendCommande(parseInt(commandeId));
+    res
+      .status(200)
+      .json(createResponse("Commande renvoyée avec succès", commande));
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.cancelThisCommande = async (req, res) => {
+  try {
+    const customer = req.customer;
+    const { commandeId } = req.params;
+    const checkCommande = await commandeService.checkCommandeByCustomer(
+      customer.customer_id
+    );
+    if (checkCommande.length === 0) {
+      return res
+        .status(404)
+        .json(createResponse("Aucune commande trouvée pour ce client"));
+    }
+    const commande = await commandeService.cancelThisCommande(
+      parseInt(commandeId)
+    );
     res
       .status(200)
       .json(createResponse("Commande renvoyée avec succès", commande));

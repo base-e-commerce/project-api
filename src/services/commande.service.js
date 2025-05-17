@@ -72,7 +72,26 @@ class CommandeService {
   async getCommandesByCustomer(customerId) {
     const commandes = await prisma.commande.findMany({
       where: { customer_id: customerId },
-      include: { details: true },
+      include: {
+        details: {
+          include: {
+            product: {
+              include: {
+                productImages: true,
+                category: true,
+                service: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return commandes;
+  }
+
+  async checkCommandeByCustomer(customerId) {
+    const commandes = await prisma.commande.findMany({
+      where: { customer_id: customerId },
     });
     return commandes;
   }
@@ -83,27 +102,57 @@ class CommandeService {
     });
 
     if (commande.status === "Annulé") {
-      const resendCommande = await prisma.commande.create({
-        data: {
-          customer_id: commande.customer_id,
-          status: "Envoyer",
-          order_date: new Date(),
-          total_amount: commande.total_amount,
+      const updatedCommande = await prisma.commande.update({
+        where: { commande_id: commandeId },
+        include: {
           details: {
-            create: commande.details.map((detail) => ({
-              product_id: detail.product_id,
-              quantity: detail.quantity,
-              unit_price: detail.unit_price,
-            })),
+            include: {
+              product: {
+                include: {
+                  productImages: true,
+                  category: true,
+                  service: true,
+                },
+              },
+            },
           },
         },
+        data: {
+          status: "Envoyer",
+        },
       });
-      return resendCommande;
+      return updatedCommande;
     } else {
       throw new Error(
         "La commande n'est pas annulée et ne peut pas être renvoyée."
       );
     }
+  }
+  async cancelThisCommande(commandeId) {
+    const commande = await prisma.commande.findUnique({
+      where: { commande_id: commandeId },
+    });
+
+    const updatedCommande = await prisma.commande.update({
+      where: { commande_id: commandeId },
+      include: {
+        details: {
+          include: {
+            product: {
+              include: {
+                productImages: true,
+                category: true,
+                service: true,
+              },
+            },
+          },
+        },
+      },
+      data: {
+        status: "Annulé",
+      },
+    });
+    return updatedCommande;
   }
 
   async getAllCommandes(limit, offset) {
