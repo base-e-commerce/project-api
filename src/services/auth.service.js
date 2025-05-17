@@ -19,7 +19,6 @@ class AuthService {
         throw new Error("Invalid email or password");
       }
 
-      // ✅ Cas : compte Google (pas de mot de passe)
       if (
         customer.password_hash === null &&
         customer.oauth_provider === "google"
@@ -39,11 +38,11 @@ class AuthService {
             first_name: customer.first_name,
             last_name: customer.last_name,
             email: customer.email,
+            phone: customer.phone,
           },
         };
       }
 
-      // ✅ Cas : mot de passe classique
       const isPasswordValid = await bcrypt.compare(
         password,
         customer.password_hash
@@ -68,6 +67,7 @@ class AuthService {
           first_name: customer.first_name,
           last_name: customer.last_name,
           email: customer.email,
+          phone: customer.phone,
         },
       };
     } catch (error) {
@@ -100,11 +100,9 @@ class AuthService {
       });
     }
 
-    const token = jwt.sign(
-      { customer_id: customer.customer_id},
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRATION }
-    );
+    const token = jwt.sign({ customer_id: customer.customer_id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRATION,
+    });
 
     return { token, customer };
   }
