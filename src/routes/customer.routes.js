@@ -13,6 +13,7 @@ const {
   updateCustomer,
   deleteCustomer,
   getAllAddressesForCustomer,
+  updateCurrentCustomer,
   getAddressById,
   createAddressForCustomer,
   updateAddress,
@@ -169,6 +170,8 @@ router.post("/login", login);
  *         description: Internal server error
  */
 router.get("/current", authenticateCustomer, getCurrentCustomer);
+
+router.patch("/update-current", authenticateCustomer, updateCurrentCustomer);
 
 /**
  * @swagger
