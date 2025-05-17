@@ -23,7 +23,12 @@ class CommandeService {
   //     return commande;
   //   }
 
-  async createCommande(customerId, details, paymentDetails = null) {
+  async createCommande(
+    customerId,
+    details,
+    paymentDetails = null,
+    shippingAddressId = null
+  ) {
     const commande = await prisma.$transaction(async (prisma) => {
       const newCommande = await prisma.commande.create({
         data: {
@@ -34,7 +39,7 @@ class CommandeService {
             (total, detail) => total + detail.quantity * detail.unit_price,
             0
           ),
-          shipping_address_id: shippingAddressId,
+          // shipping_address_id: shippingAddressId,
           details: {
             create: details.map((detail) => ({
               product_id: detail.product_id,
@@ -52,7 +57,7 @@ class CommandeService {
             commande_id: newCommande.commande_id,
             amount: newCommande.total_amount,
             payment_method: paymentDetails.payment_method,
-            status: "Completed",
+            status: "Pending",
             transaction_date: new Date(),
           },
         });
