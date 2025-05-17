@@ -85,6 +85,7 @@ class CommandeService {
           },
         },
       },
+      orderBy: { created_at: "desc" },
     });
     return commandes;
   }

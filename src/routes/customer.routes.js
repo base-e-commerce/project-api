@@ -23,6 +23,8 @@ const {
   getCurrentCustomer,
   customerGoogleLogin,
   getLastTenCustomers,
+  createAddressForCustomerClient,
+  getAllAddressesForCustomerClient,
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -434,6 +436,19 @@ router.delete(
   authenticateToken,
   authenticateAdmin,
   deleteAddress
+);
+
+router.post(
+  "/address/client/create/:customerId",
+  authenticateCustomer,
+  validateDto(createAddressSchema),
+  createAddressForCustomerClient
+);
+
+router.get(
+  "/address/client/get/:customerId",
+  authenticateCustomer,
+  getAllAddressesForCustomerClient
 );
 
 router.post("/google-login", customerGoogleLogin);
