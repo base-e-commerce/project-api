@@ -15,6 +15,7 @@ const {
 } = require("../controller/review.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
+const authenticateCustomer = require("../middleware/auth.client.middleware");
 
 const router = express.Router();
 
@@ -135,7 +136,7 @@ router.get("/customer/:customerId", authenticateToken, getReviewsByCustomerId);
  */
 router.post(
   "/",
-  authenticateToken,
+  authenticateCustomer,
   validateDto(createReviewSchema),
   createReview
 );
