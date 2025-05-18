@@ -197,6 +197,23 @@ class CommandeService {
     }
   }
 
+  async confirmDelivery(idCommande, idAdmin) {
+    try {
+      const commande = await prisma.commande.update({
+        where: { commande_id: idCommande },
+        data: {
+          status: "Livré",
+          admin_id: idAdmin,
+        },
+      });
+      return commande;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving commandes: ${error.message}`
+      );
+    }
+  }
+
   async getAllCommandes(limit, offset) {
     try {
       const commandes = await prisma.commande.findMany({
@@ -329,12 +346,15 @@ class CommandeService {
     return commandes;
   }
 
-  async receiveCommande(commandeId, adminId) {
+  async receiveCommande(commandeId, adminId, dateDelivery) {
     const commande = await prisma.commande.update({
       where: { commande_id: commandeId },
       data: {
         status: "Confirmé",
-        admin_id: adminId,
+        delivery_date: dateDelivery,
+        admin: {
+          connect: { user_id: parseInt(adminId) },
+        },
       },
     });
     return commande;
@@ -345,7 +365,9 @@ class CommandeService {
       where: { commande_id: commandeId },
       data: {
         status: "Annulé",
-        admin_id: adminId,
+        admin: {
+          connect: { user_id: parseInt(adminId) },
+        },
       },
     });
     return commande;

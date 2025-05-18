@@ -130,6 +130,23 @@ exports.getAllCommandes = async (req, res) => {
   }
 };
 
+exports.confirmDelivery = async (req, res) => {
+  const idCommande = req.params.idCommande;
+  const adminId = req.user.userId;
+
+  try {
+    const commande = await commandeService.confirmDelivery(
+      parseInt(idCommande),
+      parseInt(adminId)
+    );
+    res
+      .status(200)
+      .json(createResponse("Commande confirmée avec succès", commande));
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
 exports.getAllCommandesConfirmed = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -137,10 +154,8 @@ exports.getAllCommandesConfirmed = async (req, res) => {
 
     const offset = (page - 1) * limit;
 
-    const { commandes, totalCommandes } = await commandeService.getAllCommandesConfirmed(
-      limit,
-      offset
-    );
+    const { commandes, totalCommandes } =
+      await commandeService.getAllCommandesConfirmed(limit, offset);
 
     const totalPages = Math.ceil(totalCommandes / limit);
 
@@ -220,10 +235,17 @@ exports.getLastTenCommandes = async (req, res) => {
 exports.receiveCommande = async (req, res) => {
   try {
     const { commandeId } = req.params;
-    const adminId = req.user.user_id;
+    const { dateDelivery } = req.body;
+    const adminId = req.user.userId;
+    if (!adminId) {
+      return res
+        .status(400)
+        .json(createResponse("L'ID de l'administrateur est requis"));
+    }
     const commande = await commandeService.receiveCommande(
       parseInt(commandeId),
-      parseInt(adminId)
+      parseInt(adminId),
+      dateDelivery
     );
     res
       .status(200)
@@ -236,7 +258,12 @@ exports.receiveCommande = async (req, res) => {
 exports.cancelCommande = async (req, res) => {
   try {
     const { commandeId } = req.params;
-    const adminId = req.user.user_id;
+    const adminId = req.user.userId;
+    if (!adminId) {
+      return res
+        .status(400)
+        .json(createResponse("L'ID de l'administrateur est requis"));
+    }
     const commande = await commandeService.cancelCommande(
       parseInt(commandeId),
       parseInt(adminId)

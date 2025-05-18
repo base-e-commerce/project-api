@@ -17,6 +17,7 @@ const {
   getAllCommandeByState,
   cancelThisCommande,
   getAllCommandesConfirmed,
+  confirmDelivery,
 } = require("../controller/commande.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -196,6 +197,13 @@ router.get("/", getAllCommandes);
 
 router.get("/confirmed", getAllCommandesConfirmed);
 
+router.get(
+  "/confirmedelivery/:idCommande",
+  authenticateToken,
+  authenticateAdmin,
+  confirmDelivery
+);
+
 /**
  * @swagger
  * /commande/cancelbyuser/{commandeId}:
@@ -264,15 +272,6 @@ router.post(
  *         description: ID of the commande to receive
  *         schema:
  *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               adminId:
- *                 type: integer
  *     responses:
  *       200:
  *         description: Commande received successfully
