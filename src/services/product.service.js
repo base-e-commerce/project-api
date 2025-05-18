@@ -101,7 +101,16 @@ class ProductService {
   async getAllProducts(limit, offset) {
     try {
       const products = await prisma.product.findMany({
-        include: { productImages: true, category: true, service: true },
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+          reviews: {
+            include: {
+              customer: true,
+            },
+          },
+        },
         skip: offset,
         take: limit,
         orderBy: { created_at: "desc" },
@@ -124,7 +133,16 @@ class ProductService {
     try {
       const products = await prisma.product.findMany({
         where: { service_id: serviceId },
-        include: { productImages: true, category: true, service: true },
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+          reviews: {
+            include: {
+              customer: true,
+            },
+          },
+        },
         orderBy: { created_at: "desc" },
         take: 4,
       });
@@ -143,7 +161,16 @@ class ProductService {
           service_id: serviceId,
           product_id: { not: productId },
         },
-        include: { productImages: true, category: true, service: true },
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+          reviews: {
+            include: {
+              customer: true,
+            },
+          },
+        },
         orderBy: { created_at: "desc" },
       });
       return products;
@@ -158,7 +185,16 @@ class ProductService {
     try {
       const products = await prisma.product.findMany({
         where: { category_id },
-        include: { productImages: true, category: true, service: true },
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+          reviews: {
+            include: {
+              customer: true,
+            },
+          },
+        },
         skip: offset,
         take: limit,
         orderBy: { created_at: "desc" },
@@ -181,7 +217,16 @@ class ProductService {
     try {
       const products = await prisma.product.findMany({
         where: { service_id },
-        include: { productImages: true, category: true, service: true },
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+          reviews: {
+            include: {
+              customer: true,
+            },
+          },
+        },
         skip: offset,
         take: limit,
         orderBy: { created_at: "desc" },
@@ -227,7 +272,7 @@ class ProductService {
   //   try {
   //     const products = await prisma.product.findMany({
   //       where: { category_id: idCategory },
-  //       include: { productImages: true, category: true, service: true },
+  //       include: { productImages: true, category: true, service: true, reviews: true, }, },
   //       take: limit,
   //     });
   //     return products;
@@ -309,7 +354,16 @@ class ProductService {
     try {
       const product = await prisma.product.findUnique({
         where: { product_id: productId },
-        include: { productImages: true, category: true, service: true },
+        include: {
+          productImages: true,
+          category: true,
+          service: true,
+          reviews: {
+            include: {
+              customer: true,
+            },
+          },
+        },
       });
       return product;
     } catch (error) {
