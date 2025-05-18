@@ -157,6 +157,46 @@ class CommandeService {
     return updatedCommande;
   }
 
+  async getAllCommandesLivred(limit, offset) {
+    try {
+      const commandes = await prisma.commande.findMany({
+        include: {
+          details: {
+            include: {
+              product: {
+                include: {
+                  productImages: true,
+                  category: true,
+                  service: true,
+                },
+              },
+            },
+          },
+          admin: true,
+          customer: true,
+          shipping_address_relation: true,
+        },
+        skip: offset,
+        take: limit,
+        orderBy: { created_at: "desc" },
+        where: { status: "Livré" },
+      });
+
+      const totalCommandes = await prisma.commande.count({
+        where: { status: "Livré" },
+      });
+
+      return {
+        commandes,
+        totalCommandes,
+      };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving commandes: ${error.message}`
+      );
+    }
+  }
+
   async getAllCommandesConfirmed(limit, offset) {
     try {
       const commandes = await prisma.commande.findMany({

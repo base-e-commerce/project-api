@@ -18,6 +18,7 @@ const {
   cancelThisCommande,
   getAllCommandesConfirmed,
   confirmDelivery,
+  getAllCommandesLivred,
 } = require("../controller/commande.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -196,6 +197,7 @@ router.get("/search", searchCommandes);
 router.get("/", getAllCommandes);
 
 router.get("/confirmed", getAllCommandesConfirmed);
+router.get("/livred", getAllCommandesLivred);
 
 router.get(
   "/confirmedelivery/:idCommande",
