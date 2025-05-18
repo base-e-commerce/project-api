@@ -119,6 +119,29 @@ class CustomerService {
     }
   }
 
+  // async updateCustomer(customerId, data) {
+  //   try {
+  //     const updatedCustomer = await prisma.customer.update({
+  //       where: { customer_id: customerId },
+  //       data: {
+  //         first_name: data.first_name,
+  //         last_name: data.last_name,
+  //         email: data.email,
+  //         password_hash: data.password_hash,
+  //         oauth_provider: data.oauth_provider,
+  //         oauth_id: data.oauth_id,
+  //         phone: data.phone,
+  //         default_address_id: data.default_address_id,
+  //       },
+  //     });
+  //     return updatedCustomer;
+  //   } catch (error) {
+  //     throw new Error(
+  //       `Error occurred while updating the customer: ${error.message}`
+  //     );
+  //   }
+  // }
+
   async updateCustomer(customerId, data) {
     try {
       const updatedCustomer = await prisma.customer.update({
@@ -126,15 +149,34 @@ class CustomerService {
         data: {
           first_name: data.first_name,
           last_name: data.last_name,
-          email: data.email,
-          password_hash: data.password_hash,
-          oauth_provider: data.oauth_provider,
-          oauth_id: data.oauth_id,
           phone: data.phone,
-          default_address_id: data.default_address_id,
         },
       });
-      return updatedCustomer;
+
+      const updatedCustomerAccount = await prisma.customerAccount.upsert({
+        where: { customer_id: customerId },
+        create: {
+          customer_id: customerId,
+          type: data.accountType,
+          ...(data.accountType === "professionel" && {
+            entrepriseName: data.professionalDetails.entrepriseName,
+            adresseEntreprise: data.professionalDetails.adresseEntreprise,
+            phoneEntreprise: data.professionalDetails.phoneEntreprise,
+            emailEntreprise: data.professionalDetails.emailEntreprise,
+          }),
+        },
+        update: {
+          type: data.accountType,
+          ...(data.accountType === "professionel" && {
+            entrepriseName: data.professionalDetails.entrepriseName,
+            adresseEntreprise: data.professionalDetails.adresseEntreprise,
+            phoneEntreprise: data.professionalDetails.phoneEntreprise,
+            emailEntreprise: data.professionalDetails.emailEntreprise,
+          }),
+        },
+      });
+
+      return { updatedCustomer, updatedCustomerAccount };
     } catch (error) {
       throw new Error(
         `Error occurred while updating the customer: ${error.message}`

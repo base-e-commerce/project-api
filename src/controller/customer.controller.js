@@ -158,16 +158,40 @@ exports.login = async (req, res) => {
   }
 };
 
+// exports.updateCurrentCustomer = async (req, res) => {
+//   const customer_id = req.customer.customer_id;
+//   const { first_name, last_name, phone } = req.body;
+
+//   try {
+//     const updatedCustomer = await customerService.updateCustomer(customer_id, {
+//       first_name,
+//       last_name,
+//       phone,
+//     });
+//     res
+//       .status(200)
+//       .json(createResponse("Customer updated successfully", updatedCustomer));
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json(createResponse("Internal server error", error.message, false));
+//   }
+// };
+
 exports.updateCurrentCustomer = async (req, res) => {
   const customer_id = req.customer.customer_id;
-  const { first_name, last_name, phone } = req.body;
+  const { first_name, last_name, phone, accountType, professionalDetails } =
+    req.body;
 
   try {
     const updatedCustomer = await customerService.updateCustomer(customer_id, {
       first_name,
       last_name,
       phone,
+      accountType,
+      professionalDetails,
     });
+
     res
       .status(200)
       .json(createResponse("Customer updated successfully", updatedCustomer));
