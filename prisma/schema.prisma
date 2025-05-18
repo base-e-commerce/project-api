@@ -177,6 +177,7 @@ model Commande {
   customer_id               Int
   customer                  Customer         @relation(fields: [customer_id], references: [customer_id])
   order_date                DateTime
+  delivery_date             DateTime?
   status                    String
   total_amount              Decimal
   payment_method            String?

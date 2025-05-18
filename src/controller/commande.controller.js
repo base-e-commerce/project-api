@@ -130,6 +130,36 @@ exports.getAllCommandes = async (req, res) => {
   }
 };
 
+exports.getAllCommandesConfirmed = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const offset = (page - 1) * limit;
+
+    const { commandes, totalCommandes } = await commandeService.getAllCommandesConfirmed(
+      limit,
+      offset
+    );
+
+    const totalPages = Math.ceil(totalCommandes / limit);
+
+    res.status(200).json(
+      createResponse("Commands fetched successfully", {
+        commandes,
+        pagination: {
+          page,
+          limit,
+          totalPages,
+          totalCommand: totalCommandes,
+        },
+      })
+    );
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
 exports.getAllCommandeByState = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;

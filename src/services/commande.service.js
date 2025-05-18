@@ -157,6 +157,46 @@ class CommandeService {
     return updatedCommande;
   }
 
+  async getAllCommandesConfirmed(limit, offset) {
+    try {
+      const commandes = await prisma.commande.findMany({
+        include: {
+          details: {
+            include: {
+              product: {
+                include: {
+                  productImages: true,
+                  category: true,
+                  service: true,
+                },
+              },
+            },
+          },
+          admin: true,
+          customer: true,
+          shipping_address_relation: true,
+        },
+        skip: offset,
+        take: limit,
+        orderBy: { created_at: "desc" },
+        where: { status: "Confirmé" },
+      });
+
+      const totalCommandes = await prisma.commande.count({
+        where: { status: "Confirmé" },
+      });
+
+      return {
+        commandes,
+        totalCommandes,
+      };
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving commandes: ${error.message}`
+      );
+    }
+  }
+
   async getAllCommandes(limit, offset) {
     try {
       const commandes = await prisma.commande.findMany({
@@ -174,10 +214,16 @@ class CommandeService {
           },
           admin: true,
           customer: true,
+          shipping_address_relation: true,
         },
         skip: offset,
         take: limit,
         orderBy: { created_at: "desc" },
+        where: {
+          status: {
+            not: "Livré",
+          },
+        },
       });
 
       const totalCommandes = await prisma.commande.count();
@@ -210,6 +256,7 @@ class CommandeService {
           },
           admin: true,
           customer: true,
+          shipping_address_relation: true,
         },
         where: { status },
         skip: offset,
@@ -248,6 +295,8 @@ class CommandeService {
       include: {
         details: true,
         customer: true,
+        admin: true,
+        shipping_address_relation: true,
       },
     });
     return commandes;
@@ -269,6 +318,7 @@ class CommandeService {
         },
         admin: true,
         customer: true,
+        shipping_address_relation: true,
       },
       where: {
         status: "Envoyer",
