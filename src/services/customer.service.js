@@ -144,6 +144,7 @@ class CustomerService {
 
   async updateCustomer(customerId, data) {
     try {
+      // Update the customer's basic information
       const updatedCustomer = await prisma.customer.update({
         where: { customer_id: customerId },
         data: {
@@ -153,8 +154,18 @@ class CustomerService {
         },
       });
 
-      const updatedCustomerAccount = await prisma.customerAccount.upsert({
+      // Find the existing customer account
+      const existingAccount = await prisma.customerAccount.findFirst({
         where: { customer_id: customerId },
+      });
+
+      // Use the correct unique identifier for the upsert operation
+      const updatedCustomerAccount = await prisma.customerAccount.upsert({
+        where: {
+          customer_account_id: existingAccount
+            ? existingAccount.customer_account_id
+            : -1,
+        }, // Use a non-existent ID if no account exists
         create: {
           customer_id: customerId,
           type: data.accountType,

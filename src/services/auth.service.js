@@ -15,6 +15,9 @@ class AuthService {
         where: {
           OR: [{ email: email }, { phone: email }],
         },
+        include: {
+          accounts: true,
+        },
       });
 
       if (!customer) {
@@ -41,6 +44,7 @@ class AuthService {
             last_name: customer.last_name,
             email: customer.email,
             phone: customer.phone,
+            accounts: customer.accounts,
           },
         };
       }
@@ -70,6 +74,7 @@ class AuthService {
           last_name: customer.last_name,
           email: customer.email,
           phone: customer.phone,
+          accounts: customer.accounts,
         },
       };
     } catch (error) {
@@ -88,6 +93,9 @@ class AuthService {
 
     let customer = await prisma.customer.findUnique({
       where: { email },
+      include: {
+        accounts: true,
+      },
     });
 
     if (!customer) {
