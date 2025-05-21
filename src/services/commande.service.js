@@ -85,6 +85,11 @@ class CommandeService {
           },
         },
         shipping_address_relation: true,
+        customer: {
+          include: {
+            accounts: true,
+          },
+        },
       },
       orderBy: { created_at: "desc" },
     });
@@ -173,7 +178,11 @@ class CommandeService {
             },
           },
           admin: true,
-          customer: true,
+          customer: {
+            include: {
+              accounts: true,
+            },
+          },
           shipping_address_relation: true,
         },
         skip: offset,
@@ -213,7 +222,11 @@ class CommandeService {
             },
           },
           admin: true,
-          customer: true,
+          customer: {
+            include: {
+              accounts: true,
+            },
+          },
           shipping_address_relation: true,
         },
         skip: offset,
@@ -270,7 +283,11 @@ class CommandeService {
             },
           },
           admin: true,
-          customer: true,
+          customer: {
+            include: {
+              accounts: true,
+            },
+          },
           shipping_address_relation: true,
         },
         skip: offset,
@@ -312,7 +329,11 @@ class CommandeService {
             },
           },
           admin: true,
-          customer: true,
+          customer: {
+            include: {
+              accounts: true,
+            },
+          },
           shipping_address_relation: true,
         },
         where: { status },
@@ -351,7 +372,11 @@ class CommandeService {
       },
       include: {
         details: true,
-        customer: true,
+        customer: {
+          include: {
+            accounts: true,
+          },
+        },
         admin: true,
         shipping_address_relation: true,
       },
@@ -374,7 +399,11 @@ class CommandeService {
           },
         },
         admin: true,
-        customer: true,
+        customer: {
+          include: {
+            accounts: true,
+          },
+        },
         shipping_address_relation: true,
       },
       where: {
