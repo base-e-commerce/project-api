@@ -11,15 +11,19 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 class AuthService {
   async authenticateCustomer(email, password) {
     try {
-      const customer = await prisma.customer.findUnique({
-        where: { email },
+      const customer = await prisma.customer.findFirst({
+        where: {
+          OR: [{ email: email }, { phone: email }],
+        },
+        include: {
+          accounts: true,
+        },
       });
 
       if (!customer) {
         throw new Error("Invalid email or password");
       }
 
-      // ✅ Cas : compte Google (pas de mot de passe)
       if (
         customer.password_hash === null &&
         customer.oauth_provider === "google"
@@ -39,11 +43,12 @@ class AuthService {
             first_name: customer.first_name,
             last_name: customer.last_name,
             email: customer.email,
+            phone: customer.phone,
+            accounts: customer.accounts,
           },
         };
       }
 
-      // ✅ Cas : mot de passe classique
       const isPasswordValid = await bcrypt.compare(
         password,
         customer.password_hash
@@ -68,6 +73,8 @@ class AuthService {
           first_name: customer.first_name,
           last_name: customer.last_name,
           email: customer.email,
+          phone: customer.phone,
+          accounts: customer.accounts,
         },
       };
     } catch (error) {
@@ -86,6 +93,9 @@ class AuthService {
 
     let customer = await prisma.customer.findUnique({
       where: { email },
+      include: {
+        accounts: true,
+      },
     });
 
     if (!customer) {
@@ -100,11 +110,9 @@ class AuthService {
       });
     }
 
-    const token = jwt.sign(
-      { customer_id: customer.customer_id},
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRATION }
-    );
+    const token = jwt.sign({ customer_id: customer.customer_id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRATION,
+    });
 
     return { token, customer };
   }

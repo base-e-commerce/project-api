@@ -43,12 +43,18 @@ model Customer {
 }
 
 model CustomerAccount {
-  customer_account_id Int       @id @default(autoincrement())
+  customer_account_id Int      @id @default(autoincrement())
   customer_id         Int
-  customer            Customer  @relation(fields: [customer_id], references: [customer_id])
+  customer            Customer @relation(fields: [customer_id], references: [customer_id])
   type                String
-  activate_pro        DateTime?
-  disabled_pro        DateTime?
+  adresseEntreprise   String?
+  emailEntreprise     String?
+  entrepriseName      String?
+  phoneEntreprise     String?
+  countryEntreprise   String?
+
+  activate_pro DateTime?
+  disabled_pro DateTime?
 }
 
 model Adresse {
@@ -177,6 +183,7 @@ model Commande {
   customer_id               Int
   customer                  Customer         @relation(fields: [customer_id], references: [customer_id])
   order_date                DateTime
+  delivery_date             DateTime?
   status                    String
   total_amount              Decimal
   payment_method            String?

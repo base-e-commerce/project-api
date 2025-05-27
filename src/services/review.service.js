@@ -4,6 +4,19 @@ class ReviewService {
   async createReview(data) {
     const db = prisma;
 
+    // Check if review already exists for the product and customer
+    const existingReview = await db.review.findFirst({
+      where: {
+        product_id: data.product_id,
+        customer_id: data.customer_id,
+      },
+    });
+    if (existingReview) {
+      throw new Error(
+        `Review already exists for product and customer`
+      );
+    }
+
     const transaction = await db.$transaction(async (prisma) => {
       try {
         const newReview = await prisma.review.create({

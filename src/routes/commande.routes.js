@@ -15,6 +15,10 @@ const {
   searchCommandes,
   getLastTenCommandes,
   getAllCommandeByState,
+  cancelThisCommande,
+  getAllCommandesConfirmed,
+  confirmDelivery,
+  getAllCommandesLivred,
 } = require("../controller/commande.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -122,10 +126,7 @@ router.get(
  *       500:
  *         description: Internal server error
  */
-router.get(
-  "/state/:status",
-  getAllCommandeByState
-);
+router.get("/state/:status", getAllCommandeByState);
 
 /**
  * @swagger
@@ -193,7 +194,44 @@ router.get("/search", searchCommandes);
  *         description: Internal server error
  */
 
-router.get("/",getAllCommandes);
+router.get("/", getAllCommandes);
+
+router.get("/confirmed", getAllCommandesConfirmed);
+router.get("/livred", getAllCommandesLivred);
+
+router.get(
+  "/confirmedelivery/:idCommande",
+  authenticateToken,
+  authenticateAdmin,
+  confirmDelivery
+);
+
+/**
+ * @swagger
+ * /commande/cancelbyuser/{commandeId}:
+ *   post:
+ *     summary: Cancel a commande if it was canceled by the admin
+ *     tags:
+ *       - Commande
+ *     parameters:
+ *       - name: commandeId
+ *         in: path
+ *         required: true
+ *         description: ID of the commande to cancel
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Commande resent successfully
+ *       400:
+ *         description: Commande cannot be resent
+ */
+router.post(
+  "/cancelbyuser/:commandeId",
+  authenticateCustomer,
+  validateDto(resendCommandeSchema),
+  cancelThisCommande
+);
 
 /**
  * @swagger
@@ -236,15 +274,6 @@ router.post(
  *         description: ID of the commande to receive
  *         schema:
  *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               adminId:
- *                 type: integer
  *     responses:
  *       200:
  *         description: Commande received successfully

@@ -119,22 +119,75 @@ class CustomerService {
     }
   }
 
+  // async updateCustomer(customerId, data) {
+  //   try {
+  //     const updatedCustomer = await prisma.customer.update({
+  //       where: { customer_id: customerId },
+  //       data: {
+  //         first_name: data.first_name,
+  //         last_name: data.last_name,
+  //         email: data.email,
+  //         password_hash: data.password_hash,
+  //         oauth_provider: data.oauth_provider,
+  //         oauth_id: data.oauth_id,
+  //         phone: data.phone,
+  //         default_address_id: data.default_address_id,
+  //       },
+  //     });
+  //     return updatedCustomer;
+  //   } catch (error) {
+  //     throw new Error(
+  //       `Error occurred while updating the customer: ${error.message}`
+  //     );
+  //   }
+  // }
+
   async updateCustomer(customerId, data) {
     try {
+      // Update the customer's basic information
       const updatedCustomer = await prisma.customer.update({
         where: { customer_id: customerId },
         data: {
           first_name: data.first_name,
           last_name: data.last_name,
-          email: data.email,
-          password_hash: data.password_hash,
-          oauth_provider: data.oauth_provider,
-          oauth_id: data.oauth_id,
           phone: data.phone,
-          default_address_id: data.default_address_id,
         },
       });
-      return updatedCustomer;
+
+      // Find the existing customer account
+      const existingAccount = await prisma.customerAccount.findFirst({
+        where: { customer_id: customerId },
+      });
+
+      // Use the correct unique identifier for the upsert operation
+      const updatedCustomerAccount = await prisma.customerAccount.upsert({
+        where: {
+          customer_account_id: existingAccount
+            ? existingAccount.customer_account_id
+            : -1,
+        }, // Use a non-existent ID if no account exists
+        create: {
+          customer_id: customerId,
+          type: data.accountType,
+          ...(data.accountType === "professionel" && {
+            entrepriseName: data.professionalDetails.entrepriseName,
+            adresseEntreprise: data.professionalDetails.adresseEntreprise,
+            phoneEntreprise: data.professionalDetails.phoneEntreprise,
+            emailEntreprise: data.professionalDetails.emailEntreprise,
+          }),
+        },
+        update: {
+          type: data.accountType,
+          ...(data.accountType === "professionel" && {
+            entrepriseName: data.professionalDetails.entrepriseName,
+            adresseEntreprise: data.professionalDetails.adresseEntreprise,
+            phoneEntreprise: data.professionalDetails.phoneEntreprise,
+            emailEntreprise: data.professionalDetails.emailEntreprise,
+          }),
+        },
+      });
+
+      return { updatedCustomer, updatedCustomerAccount };
     } catch (error) {
       throw new Error(
         `Error occurred while updating the customer: ${error.message}`
