@@ -5,7 +5,7 @@ const { OAuth2Client } = require("google-auth-library");
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const JWT_SECRET = process.env.JWT_SECRET_CLIENT || "miaouuuuuu";
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION_CLIENT || "1h";
+const JWT_EXPIRATION = process.env.JWT_EXPIRATION_CLIENT || "5m";
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 class AuthService {
