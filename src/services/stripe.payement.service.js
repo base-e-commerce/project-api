@@ -26,6 +26,35 @@ class StripeService {
   return session;
 }
 
+ verifySignature(rawBody, signature, endpointSecret) {
+    try {
+      return stripe.webhooks.constructEvent(rawBody, signature, endpointSecret);
+    } catch (error) {
+      console.error('Erreur de signature :', error.message);
+      throw new Error(`Webhook Error: ${error.message}`);
+    }
+  }
+
+  async handleEvent(event) {
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object;
+        const paymentIntentId = session.payment_intent;
+        console.log('Paiement réussi pour session:', session.id);
+        console.log('🧾 ID de transaction :', paymentIntentId);
+        
+        break;
+
+      case 'checkout.session.async_payment_failed':
+      case 'checkout.session.expired':
+        console.log('Paiement échoué ou expiré');
+        break;
+
+      default:
+        console.log(`Événement non géré : ${event.type}`);
+    }
+  }
+
  
 }
 
