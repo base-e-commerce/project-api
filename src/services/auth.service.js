@@ -1,6 +1,7 @@
 const prisma = require("../database/database");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const customerAccountService = require("../services/customer.account.service");
 const { OAuth2Client } = require("google-auth-library");
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -107,6 +108,11 @@ class AuthService {
           oauth_provider: "google",
           oauth_id: sub,
         },
+      });
+
+      await customerAccountService.createCustomerAccount({
+        customer_id: customer.customer_id,
+        type: "standard",
       });
     }
 
