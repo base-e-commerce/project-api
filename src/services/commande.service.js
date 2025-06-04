@@ -63,7 +63,7 @@ class CommandeService {
         });
       }
 
-      return { commande: newCommande,payment: payment };
+      return { commande: newCommande, payment: payment };
     });
 
     return commande;
@@ -440,6 +440,37 @@ class CommandeService {
       },
     });
     return commande;
+  }
+
+  async getLastUnpaidCommandeIdByCustomer(customerId) {
+    const lastUnpaidCommande = await prisma.commande.findFirst({
+      where: {
+        customer_id: customerId,
+        OR: [
+          {
+            payments: {
+              some: {
+                status: "Pending",
+              },
+            },
+          },
+          {
+            payments: {
+              none: {},
+            },
+          },
+        ],
+      },
+      orderBy: {
+        order_date: "desc",
+      },
+      select: {
+        commande_id: true,
+        payment_method: true,
+      },
+    });
+
+    return lastUnpaidCommande??null;
   }
 }
 
