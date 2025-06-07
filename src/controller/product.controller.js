@@ -307,8 +307,6 @@ exports.createProduct = async (req, res) => {
       price === null ||
       price_pro === undefined ||
       price_pro === null ||
-      is_for_pro === undefined ||
-      is_for_pro === null ||
       !currency ||
       !currency_name ||
       !service_id ||

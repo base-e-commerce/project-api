@@ -99,15 +99,28 @@ class AuthService {
     });
 
     if (!customer) {
-      customer = await prisma.customer.create({
-        data: {
-          email,
-          first_name: given_name,
-          last_name: family_name,
-          oauth_provider: "google",
-          oauth_id: sub,
-        },
+      const result = await prisma.$transaction(async (prisma) => {
+        const newCustomer = await prisma.customer.create({
+          data: {
+            email,
+            first_name: given_name,
+            last_name: family_name,
+            oauth_provider: "google",
+            oauth_id: sub,
+          },
+        });
+
+        const newAccount = await prisma.customerAccount.create({
+          data: {
+            customer_id: newCustomer.customer_id,
+            type: "standard"
+          },
+        });
+
+        return newCustomer;
       });
+
+      customer = result;
     }
 
     const token = jwt.sign({ customer_id: customer.customer_id }, JWT_SECRET, {

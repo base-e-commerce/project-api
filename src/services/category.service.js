@@ -27,7 +27,9 @@ class CategoryService {
 
   async getAllCategories() {
     try {
-      const categories = await prisma.categorie.findMany();
+      const categories = await prisma.categorie.findMany({
+        orderBy: { created_at: "desc" },
+      });
       return categories;
     } catch (error) {
       throw new Error(
@@ -40,6 +42,7 @@ class CategoryService {
     try {
       const categories = await prisma.categorie.findMany({
         where: { service_id },
+        orderBy: { created_at: "desc" }
       });
       return categories;
     } catch (error) {

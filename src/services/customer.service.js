@@ -17,23 +17,34 @@ class CustomerService {
         };
       }
 
-      const newCustomer = await prisma.customer.create({
-        data: {
-          first_name: data.first_name,
-          last_name: data.last_name,
-          email: data.email,
-          password_hash: data.password_hash,
-          oauth_provider: data.oauth_provider,
-          oauth_id: data.oauth_id,
-          phone: data.phone,
-          default_address_id: data.default_address_id,
-        },
+      const result = await prisma.$transaction(async (prisma) => {
+        const newCustomer = await prisma.customer.create({
+          data: {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            password_hash: data.password_hash,
+            oauth_provider: data.oauth_provider,
+            oauth_id: data.oauth_id,
+            phone: data.phone,
+            default_address_id: data.default_address_id,
+          },
+        });
+
+        const newAccount = await prisma.customerAccount.create({
+          data: {
+            customer_id: newCustomer.customer_id,
+            type: "standard"
+          },
+        });
+
+        return { newCustomer, newAccount };
       });
 
       return {
         status: true,
-        message: "Utilisateur créé avec succès",
-        data: newCustomer,
+        message: "Utilisateur et compte créés avec succès",
+        data: result.newCustomer,
       };
     } catch (error) {
       return {
