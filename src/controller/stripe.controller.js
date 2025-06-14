@@ -4,11 +4,11 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.handlePayment = async (req, res) => {
   try {
-    const { amount, currency,commande_id} = req.body;
+    const { amount, currency, commande_id } = req.body;
     const session = await stripeService.createCheckoutSession({
       amount,
       currency,
-      commande_id
+      commande_id,
     });
     res.status(200).json({
       sessionId: session.id,
