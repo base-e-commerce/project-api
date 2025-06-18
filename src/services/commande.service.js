@@ -90,7 +90,7 @@ class CommandeService {
             accounts: true,
           },
         },
-        payments: true
+        payments: true,
       },
       orderBy: { created_at: "desc" },
     });
@@ -185,6 +185,7 @@ class CommandeService {
             },
           },
           shipping_address_relation: true,
+          payments: true,
         },
         skip: offset,
         take: limit,
@@ -229,6 +230,7 @@ class CommandeService {
             },
           },
           shipping_address_relation: true,
+          payments: true,
         },
         skip: offset,
         take: limit,
@@ -290,6 +292,7 @@ class CommandeService {
             },
           },
           shipping_address_relation: true,
+          payments: true,
         },
         skip: offset,
         take: limit,
@@ -336,6 +339,7 @@ class CommandeService {
             },
           },
           shipping_address_relation: true,
+          payments: true,
         },
         where: { status },
         skip: offset,
@@ -380,6 +384,7 @@ class CommandeService {
         },
         admin: true,
         shipping_address_relation: true,
+        payments: true,
       },
     });
     return commandes;
@@ -406,6 +411,7 @@ class CommandeService {
           },
         },
         shipping_address_relation: true,
+        payments: true,
       },
       where: {
         status: "Envoyer",
@@ -471,7 +477,7 @@ class CommandeService {
       },
     });
 
-    return lastUnpaidCommande??null;
+    return lastUnpaidCommande ?? null;
   }
 }
 
