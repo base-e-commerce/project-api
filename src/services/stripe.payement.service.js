@@ -66,20 +66,16 @@ class StripeService {
         const paymentIntentId = session.payment_intent;
         const commande_id = parseInt(session.metadata.commande_id);
 
-        console.log(" Paiement réussi pour la commande:", commande_id);
-        console.log(" ID de transaction :", paymentIntentId);
-
         try {
           await prisma.payment.updateMany({
             where: { commande_id },
             data: {
-              status: "payé",
+              status: "Payed",
               transaction_id: paymentIntentId,
               transaction_date: new Date(),
             },
           });
 
-          console.log("Paiement mis à jour dans la base de données");
         } catch (err) {
           console.error(
             "Erreur lors de la mise à jour du paiement :",

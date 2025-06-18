@@ -90,6 +90,7 @@ class CommandeService {
             accounts: true,
           },
         },
+        payments: true
       },
       orderBy: { created_at: "desc" },
     });
