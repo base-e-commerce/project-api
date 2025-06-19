@@ -303,3 +303,32 @@ exports.cancelCommande = async (req, res) => {
     res.status(400).json(createResponse(null, error.message, true));
   }
 };
+
+exports.getLastUnpaidCommande = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+
+    if (!customerId || isNaN(parseInt(customerId))) {
+      return res
+        .status(400)
+        .json(createResponse("L'ID du client est invalide ou manquant"));
+    }
+
+    const result = await commandeService.getLastUnpaidCommandeIdByCustomer(
+      parseInt(customerId)
+    );
+
+    if (!result) {
+      return res
+        .status(404)
+        .json(createResponse("Aucune commande non payée trouvée"));
+    }
+
+    res.status(200).json(createResponse("Commande non payée trouvée", result));
+  } catch (error) {
+    console.error("Erreur dans getLastUnpaidCommande:", error);
+    res
+      .status(500)
+      .json(createResponse(null, error.message || "Erreur serveur", true));
+  }
+};

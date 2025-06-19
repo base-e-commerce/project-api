@@ -19,6 +19,7 @@ const {
   getAllCommandesConfirmed,
   confirmDelivery,
   getAllCommandesLivred,
+  getLastUnpaidCommande
 } = require("../controller/commande.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -315,5 +316,7 @@ router.put(
   authenticateAdmin,
   cancelCommande
 );
+
+router.get('last-unpaid/:customerId',authenticateToken,getLastUnpaidCommande)
 
 module.exports = router;

@@ -208,5 +208,6 @@ model Payment {
   amount           Decimal
   payment_method   String
   status           String
+  transaction_id   String?
   transaction_date DateTime
 }
