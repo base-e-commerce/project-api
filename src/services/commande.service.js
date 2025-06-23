@@ -262,6 +262,15 @@ class CommandeService {
           admin_id: idAdmin,
         },
       });
+
+      const payment = await prisma.payment.updateMany({
+        where: { commande_id: idCommande },
+        data: {
+          status: "Payed",
+          transaction_date: new Date(),
+        },
+      })
+
       return commande;
     } catch (error) {
       throw new Error(
