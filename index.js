@@ -17,7 +17,7 @@ const server = express();
 server.use('/api/stripe/webhook',bodyParser.raw({type:'application/json'}));
 
 server.use(bodyParser.json());
-server.use(cors());
+server.use(cors(corsOptions));
 server.use("/api", express.static(path.join(__dirname, "uploads", "images")));
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
