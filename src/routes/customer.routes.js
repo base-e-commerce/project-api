@@ -13,6 +13,7 @@ const {
   updateCustomer,
   deleteCustomer,
   getAllAddressesForCustomer,
+  updateCurrentCustomer,
   getAddressById,
   createAddressForCustomer,
   updateAddress,
@@ -23,6 +24,8 @@ const {
   getCurrentCustomer,
   customerGoogleLogin,
   getLastTenCustomers,
+  createAddressForCustomerClient,
+  getAllAddressesForCustomerClient,
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -167,6 +170,8 @@ router.post("/login", login);
  *         description: Internal server error
  */
 router.get("/current", authenticateCustomer, getCurrentCustomer);
+
+router.patch("/update-current", authenticateCustomer, updateCurrentCustomer);
 
 /**
  * @swagger
@@ -434,6 +439,19 @@ router.delete(
   authenticateToken,
   authenticateAdmin,
   deleteAddress
+);
+
+router.post(
+  "/address/client/create/:customerId",
+  authenticateCustomer,
+  validateDto(createAddressSchema),
+  createAddressForCustomerClient
+);
+
+router.get(
+  "/address/client/get/:customerId",
+  authenticateCustomer,
+  getAllAddressesForCustomerClient
 );
 
 router.post("/google-login", customerGoogleLogin);

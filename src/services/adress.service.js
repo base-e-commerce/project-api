@@ -105,6 +105,19 @@ class AdresseService {
       );
     }
   }
+
+  async getAllAddressesForCustomerClient(customerId) {
+    try {
+      const addresses = await prisma.adresse.findMany({
+        where: { customer_id: customerId },
+      });
+      return addresses;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving addresses for the customer: ${error.message}`
+      );
+    }
+  }
 }
 
 module.exports = new AdresseService();

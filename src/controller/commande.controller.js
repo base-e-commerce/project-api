@@ -58,8 +58,40 @@ exports.getCommandesByCustomer = async (req, res) => {
 
 exports.resendCommande = async (req, res) => {
   try {
+    const customer = req.customer;
     const { commandeId } = req.params;
+    const checkCommande = await commandeService.checkCommandeByCustomer(
+      customer.customer_id
+    );
+    if (checkCommande.length === 0) {
+      return res
+        .status(404)
+        .json(createResponse("Aucune commande trouvée pour ce client"));
+    }
     const commande = await commandeService.resendCommande(parseInt(commandeId));
+    res
+      .status(200)
+      .json(createResponse("Commande renvoyée avec succès", commande));
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.cancelThisCommande = async (req, res) => {
+  try {
+    const customer = req.customer;
+    const { commandeId } = req.params;
+    const checkCommande = await commandeService.checkCommandeByCustomer(
+      customer.customer_id
+    );
+    if (checkCommande.length === 0) {
+      return res
+        .status(404)
+        .json(createResponse("Aucune commande trouvée pour ce client"));
+    }
+    const commande = await commandeService.cancelThisCommande(
+      parseInt(commandeId)
+    );
     res
       .status(200)
       .json(createResponse("Commande renvoyée avec succès", commande));
@@ -79,6 +111,79 @@ exports.getAllCommandes = async (req, res) => {
       limit,
       offset
     );
+
+    const totalPages = Math.ceil(totalCommandes / limit);
+
+    res.status(200).json(
+      createResponse("Commands fetched successfully", {
+        commandes,
+        pagination: {
+          page,
+          limit,
+          totalPages,
+          totalCommand: totalCommandes,
+        },
+      })
+    );
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.confirmDelivery = async (req, res) => {
+  const idCommande = req.params.idCommande;
+  const adminId = req.user.userId;
+
+  try {
+    const commande = await commandeService.confirmDelivery(
+      parseInt(idCommande),
+      parseInt(adminId)
+    );
+    res
+      .status(200)
+      .json(createResponse("Commande confirmée avec succès", commande));
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.getAllCommandesConfirmed = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const offset = (page - 1) * limit;
+
+    const { commandes, totalCommandes } =
+      await commandeService.getAllCommandesConfirmed(limit, offset);
+
+    const totalPages = Math.ceil(totalCommandes / limit);
+
+    res.status(200).json(
+      createResponse("Commands fetched successfully", {
+        commandes,
+        pagination: {
+          page,
+          limit,
+          totalPages,
+          totalCommand: totalCommandes,
+        },
+      })
+    );
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.getAllCommandesLivred = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const offset = (page - 1) * limit;
+
+    const { commandes, totalCommandes } =
+      await commandeService.getAllCommandesLivred(limit, offset);
 
     const totalPages = Math.ceil(totalCommandes / limit);
 
@@ -158,10 +263,17 @@ exports.getLastTenCommandes = async (req, res) => {
 exports.receiveCommande = async (req, res) => {
   try {
     const { commandeId } = req.params;
-    const adminId = req.user.user_id;
+    const { dateDelivery } = req.body;
+    const adminId = req.user.userId;
+    if (!adminId) {
+      return res
+        .status(400)
+        .json(createResponse("L'ID de l'administrateur est requis"));
+    }
     const commande = await commandeService.receiveCommande(
       parseInt(commandeId),
-      parseInt(adminId)
+      parseInt(adminId),
+      dateDelivery
     );
     res
       .status(200)
@@ -174,7 +286,12 @@ exports.receiveCommande = async (req, res) => {
 exports.cancelCommande = async (req, res) => {
   try {
     const { commandeId } = req.params;
-    const adminId = req.user.user_id;
+    const adminId = req.user.userId;
+    if (!adminId) {
+      return res
+        .status(400)
+        .json(createResponse("L'ID de l'administrateur est requis"));
+    }
     const commande = await commandeService.cancelCommande(
       parseInt(commandeId),
       parseInt(adminId)
@@ -184,5 +301,34 @@ exports.cancelCommande = async (req, res) => {
       .json(createResponse("Commande annulée avec succès", commande));
   } catch (error) {
     res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.getLastUnpaidCommande = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+
+    if (!customerId || isNaN(parseInt(customerId))) {
+      return res
+        .status(400)
+        .json(createResponse("L'ID du client est invalide ou manquant"));
+    }
+
+    const result = await commandeService.getLastUnpaidCommandeIdByCustomer(
+      parseInt(customerId)
+    );
+
+    if (!result) {
+      return res
+        .status(404)
+        .json(createResponse("Aucune commande non payée trouvée"));
+    }
+
+    res.status(200).json(createResponse("Commande non payée trouvée", result));
+  } catch (error) {
+    console.error("Erreur dans getLastUnpaidCommande:", error);
+    res
+      .status(500)
+      .json(createResponse(null, error.message || "Erreur serveur", true));
   }
 };

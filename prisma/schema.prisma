@@ -36,6 +36,7 @@ model Customer {
   default_address    Adresse?          @relation("DefaultAddress", fields: [default_address_id], references: [address_id])
   addresses          Adresse[]         @relation("CustomerAddresses")
   accounts           CustomerAccount[]
+  is_active          Boolean           @default(true)
   reviews            Review[]
   created_at         DateTime          @default(now())
   updated_at         DateTime          @updatedAt
@@ -43,12 +44,18 @@ model Customer {
 }
 
 model CustomerAccount {
-  customer_account_id Int       @id @default(autoincrement())
+  customer_account_id Int      @id @default(autoincrement())
   customer_id         Int
-  customer            Customer  @relation(fields: [customer_id], references: [customer_id])
+  customer            Customer @relation(fields: [customer_id], references: [customer_id])
   type                String
-  activate_pro        DateTime?
-  disabled_pro        DateTime?
+  adresseEntreprise   String?
+  emailEntreprise     String?
+  entrepriseName      String?
+  phoneEntreprise     String?
+  countryEntreprise   String?
+
+  activate_pro DateTime?
+  disabled_pro DateTime?
 }
 
 model Adresse {
@@ -92,6 +99,7 @@ model Service {
   image_url   String?
   description String?     @db.Text
   secure      Boolean?    @default(false)
+  is_active   Boolean     @default(true)
   created_at  DateTime    @default(now())
   updated_at  DateTime    @updatedAt
   categories  Categorie[]
@@ -103,6 +111,7 @@ model Categorie {
   name         String
   description  String?   @db.Text
   secure       Boolean?  @default(false)
+  is_active    Boolean   @default(true)
   service_id   Int
   service      Service   @relation(fields: [service_id], references: [service_id])
   created_at   DateTime  @default(now())
@@ -177,6 +186,7 @@ model Commande {
   customer_id               Int
   customer                  Customer         @relation(fields: [customer_id], references: [customer_id])
   order_date                DateTime
+  delivery_date             DateTime?
   status                    String
   total_amount              Decimal
   payment_method            String?
@@ -198,5 +208,6 @@ model Payment {
   amount           Decimal
   payment_method   String
   status           String
+  transaction_id   String?
   transaction_date DateTime
 }

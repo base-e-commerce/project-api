@@ -158,6 +158,50 @@ exports.login = async (req, res) => {
   }
 };
 
+// exports.updateCurrentCustomer = async (req, res) => {
+//   const customer_id = req.customer.customer_id;
+//   const { first_name, last_name, phone } = req.body;
+
+//   try {
+//     const updatedCustomer = await customerService.updateCustomer(customer_id, {
+//       first_name,
+//       last_name,
+//       phone,
+//     });
+//     res
+//       .status(200)
+//       .json(createResponse("Customer updated successfully", updatedCustomer));
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json(createResponse("Internal server error", error.message, false));
+//   }
+// };
+
+exports.updateCurrentCustomer = async (req, res) => {
+  const customer_id = req.customer.customer_id;
+  const { first_name, last_name, phone, accountType, professionalDetails } =
+    req.body;
+
+  try {
+    const updatedCustomer = await customerService.updateCustomer(customer_id, {
+      first_name,
+      last_name,
+      phone,
+      accountType,
+      professionalDetails,
+    });
+
+    res
+      .status(200)
+      .json(createResponse("Customer updated successfully", updatedCustomer));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.createCustomer = async (req, res) => {
   const {
     first_name,
@@ -433,5 +477,57 @@ exports.customerGoogleLogin = async (req, res) => {
     return res
       .status(401)
       .json({ message: "Échec de la connexion Google", error: err.message });
+  }
+};
+
+exports.getAllAddressesForCustomerClient = async (req, res) => {
+  const { customerId } = req.params;
+
+  if (isNaN(customerId)) {
+    return res
+      .status(400)
+      .json(createResponse("Invalid customer ID", null, false));
+  }
+
+  try {
+    const addresses = await adresseService.getAllAddressesForCustomerClient(
+      Number(customerId)
+    );
+    res
+      .status(200)
+      .json(createResponse("Addresses fetched successfully", addresses));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.createAddressForCustomerClient = async (req, res) => {
+  const { customerId } = req.params;
+  const { line1, line2, city, postal_code, country } = req.body;
+
+  if (isNaN(customerId)) {
+    return res
+      .status(400)
+      .json(createResponse("Invalid customer ID", null, false));
+  }
+
+  try {
+    const newAddress = await adresseService.createAdresse({
+      customer_id: Number(customerId),
+      line1,
+      line2,
+      city,
+      postal_code,
+      country,
+    });
+    res
+      .status(201)
+      .json(createResponse("Address created successfully", newAddress));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
   }
 };

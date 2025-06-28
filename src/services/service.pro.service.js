@@ -28,6 +28,10 @@ class ServiceProService {
     try {
       const services = await prisma.service.findMany({
         include: { categories: true },
+        orderBy: { created_at: "desc" },
+        where: {
+          is_active: true, 
+        },
       });
       return services;
     } catch (error) {
