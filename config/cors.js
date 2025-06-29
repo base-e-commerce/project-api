@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const allowedOrigins = [
+  "http://46.62.146.89:4000",
   "https://grainedevaleur.com",
   /\.grainedevaleur\.com$/, 
   "http://localhost:4200",
