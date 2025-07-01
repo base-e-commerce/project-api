@@ -4,7 +4,8 @@ dotenv.config();
 const allowedOrigins = [
   "http://46.62.146.89:4000",
   "https://grainedevaleur.com",
-  /\.grainedevaleur\.com$/, 
+  "https://dev.grainedevaleur.com",
+  /^https:\/\/.*\.grainedevaleur\.com$/, 
   "http://localhost:4200",
   "http://localhost:4300",
 ];
