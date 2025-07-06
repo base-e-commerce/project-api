@@ -126,7 +126,7 @@ router.get("/current", authenticateToken, getCurrentUser);
  *       500:
  *         description: Internal server error
  */
-router.put("/current", updateCurrentUser);
+router.put("/current", authenticateToken, updateCurrentUser);
 
 /**
  * @swagger

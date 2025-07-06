@@ -101,7 +101,6 @@ exports.updateCurrentUser = async (req, res) => {
 
     const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
 
-
     const updatedUser = await userService.updateUser(userId, {
       username,
       email,
