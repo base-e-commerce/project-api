@@ -29,6 +29,9 @@ class CategoryService {
     try {
       const categories = await prisma.categorie.findMany({
         orderBy: { created_at: "desc" },
+        where: {
+          is_active: true,
+        },
       });
       return categories;
     } catch (error) {
@@ -41,8 +44,8 @@ class CategoryService {
   async getAllCategoriesByService(service_id) {
     try {
       const categories = await prisma.categorie.findMany({
-        where: { service_id },
-        orderBy: { created_at: "desc" }
+        where: { service_id, is_active: true },
+        orderBy: { created_at: "desc" },
       });
       return categories;
     } catch (error) {
@@ -55,7 +58,7 @@ class CategoryService {
   async getCategoryById(categoryId) {
     try {
       const category = await prisma.categorie.findUnique({
-        where: { categorie_id: categoryId },
+        where: { categorie_id: categoryId, is_active: true },
       });
       return category;
     } catch (error) {

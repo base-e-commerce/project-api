@@ -3,7 +3,11 @@ const prisma = require("../database/database");
 class CommonService {
   async getCountProducts() {
     try {
-      const count = await prisma.product.count();
+      const count = await prisma.product.count({
+        where: {
+          is_active: true, 
+        },
+      });
       return count;
     } catch (error) {
       throw new Error(

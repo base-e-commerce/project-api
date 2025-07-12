@@ -30,7 +30,7 @@ class ServiceProService {
         include: { categories: true },
         orderBy: { created_at: "desc" },
         where: {
-          is_active: true, 
+          is_active: true,
         },
       });
       return services;
@@ -44,7 +44,7 @@ class ServiceProService {
   async getServiceById(serviceId) {
     try {
       const service = await prisma.service.findUnique({
-        where: { service_id: serviceId },
+        where: { service_id: serviceId, is_active: true },
         include: { categories: true },
       });
       return service;
