@@ -44,6 +44,7 @@ class ProductService {
     try {
       const product = await prisma.product.findMany({
         where: {
+          is_active: true,
           OR: [{ name: { contains: key } }, { description: { contains: key } }],
         },
         include: {
@@ -62,7 +63,7 @@ class ProductService {
   }
   async getSearchProductsWithCategorySelected(idCategory, key) {
     try {
-      const whereClause = {};
+      const whereClause = { is_active: true };
 
       if (idCategory !== 0) {
         whereClause.category_id = idCategory;
@@ -114,9 +115,12 @@ class ProductService {
         skip: offset,
         take: limit,
         orderBy: { created_at: "desc" },
+        where: { is_active: true },
       });
 
-      const totalProducts = await prisma.product.count();
+      const totalProducts = await prisma.product.count({
+        where: { is_active: true },
+      });
 
       return {
         products,
@@ -132,7 +136,7 @@ class ProductService {
   async getLastProductByServiceId(serviceId) {
     try {
       const products = await prisma.product.findMany({
-        where: { service_id: serviceId },
+        where: { service_id: serviceId, is_active: true },
         include: {
           productImages: true,
           category: true,
@@ -160,6 +164,7 @@ class ProductService {
         where: {
           service_id: serviceId,
           product_id: { not: productId },
+          is_active: true,
         },
         include: {
           productImages: true,
@@ -184,7 +189,7 @@ class ProductService {
   async getAllCategoryProducts(category_id, limit, offset) {
     try {
       const products = await prisma.product.findMany({
-        where: { category_id },
+        where: { category_id, is_active: true },
         include: {
           productImages: true,
           category: true,
@@ -201,7 +206,7 @@ class ProductService {
       });
 
       const totalProducts = await prisma.product.count({
-        where: { category_id },
+        where: { category_id, is_active: true },
       });
       return {
         products,
@@ -216,7 +221,7 @@ class ProductService {
   async getAllServiceProducts(service_id, limit, offset) {
     try {
       const products = await prisma.product.findMany({
-        where: { service_id },
+        where: { service_id, is_active: true },
         include: {
           productImages: true,
           category: true,
@@ -233,7 +238,7 @@ class ProductService {
       });
 
       const totalProducts = await prisma.product.count({
-        where: { service_id },
+        where: { service_id, is_active: true },
       });
       return {
         products,
@@ -259,6 +264,7 @@ class ProductService {
           },
         },
         take: 10,
+        where: { is_active: true },
       });
       return products;
     } catch (error) {
@@ -284,7 +290,10 @@ class ProductService {
   // }
   async getProductsCategory(idCategory, limit) {
     try {
-      const whereClause = idCategory === 0 ? {} : { category_id: idCategory };
+      const whereClause =
+        idCategory === 0
+          ? { is_active: true }
+          : { category_id: idCategory, is_active: true };
 
       const products = await prisma.product.findMany({
         where: whereClause,
