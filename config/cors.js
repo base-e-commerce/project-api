@@ -6,6 +6,7 @@ const allowedOrigins = [
   "http://46.62.146.89:4001",
   "https://grainedevaleur.com",
   "https://dev.grainedevaleur.com",
+  "https://preprod.grainedevaleur.com",
   "https://dev.admin.grainedevaleur.com",
   "https://admin.grainedevaleur.com",
   /^https:\/\/.*\.grainedevaleur\.com$/,
