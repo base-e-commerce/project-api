@@ -48,6 +48,19 @@ class PackagingService {
     }
   }
 
+  async getAllPackagingsUser(email) {
+    try {
+      const packagings = await prisma.packaging.findMany({
+        where: { email: email },
+      });
+      return packagings;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving packagings for user: ${error.message}`
+      );
+    }
+  }
+
   async updatePackaging(packagingId, data) {
     try {
       const updatedPackaging = await prisma.packaging.update({

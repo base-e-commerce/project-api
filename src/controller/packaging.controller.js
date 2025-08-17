@@ -1,10 +1,26 @@
 const createResponse = require("../utils/api.response");
 const packagingService = require("../services/packaging.service");
 
+exports.getAllPackagingUser = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const packagings = await packagingService.getAllPackagingsUser(email);
+    res
+      .status(200)
+      .json(createResponse("Packagings User fetched successfully", packagings));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.getAllPackagings = async (req, res) => {
   try {
     const packagings = await packagingService.getAllPackagings();
-    res.status(200).json(createResponse("Packagings fetched successfully", packagings));
+    res
+      .status(200)
+      .json(createResponse("Packagings fetched successfully", packagings));
   } catch (error) {
     res
       .status(500)
@@ -24,7 +40,9 @@ exports.getPackagingById = async (req, res) => {
     if (!packaging) {
       return res.status(404).json(createResponse("Packaging not found"));
     }
-    res.status(200).json(createResponse("Packaging fetched successfully", packaging));
+    res
+      .status(200)
+      .json(createResponse("Packaging fetched successfully", packaging));
   } catch (error) {
     res
       .status(500)
@@ -35,7 +53,9 @@ exports.getPackagingById = async (req, res) => {
 exports.createPackaging = async (req, res) => {
   try {
     const newPackaging = await packagingService.createPackaging(req.body);
-    res.status(201).json(createResponse("Packaging created successfully", newPackaging));
+    res
+      .status(201)
+      .json(createResponse("Packaging created successfully", newPackaging));
   } catch (error) {
     res
       .status(500)
@@ -47,13 +67,18 @@ exports.updatePackaging = async (req, res) => {
   const { id } = req.params;
 
   if (isNaN(id)) {
-    return res.status(400).json(createResponse("Invalid packaging ID", null, false));
+    return res
+      .status(400)
+      .json(createResponse("Invalid packaging ID", null, false));
   }
 
   const { name } = req.body;
 
   try {
-    const updatedPackaging = await packagingService.updatePackaging(Number(id), { name });
+    const updatedPackaging = await packagingService.updatePackaging(
+      Number(id),
+      { name }
+    );
     res
       .status(200)
       .json(createResponse("Packaging updated successfully", updatedPackaging));

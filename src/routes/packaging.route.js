@@ -1,8 +1,12 @@
 const express = require("express");
 const { validateDto } = require("../middleware/dto.validation.middleware");
-const { createPackagingSchema, updatePackagingSchema } = require("../dtos/packaging.dto");
+const {
+  createPackagingSchema,
+  updatePackagingSchema,
+} = require("../dtos/packaging.dto");
 const {
   getAllPackagings,
+  getAllPackagingUser,
   getPackagingById,
   createPackaging,
   updatePackaging,
@@ -25,6 +29,15 @@ const router = express.Router();
  *       description: ID of the packaging
  *       schema:
  *         type: integer
+ *       example: 1
+ *     PackagingEmailParam:
+ *       name: email
+ *       in: path
+ *       required: true
+ *       description: Email of the packaging
+ *       schema:
+ *         type: string
+ *       example: user@example.com
  *   requestBodies:
  *     PackagingRequestBody:
  *       content:
@@ -50,6 +63,28 @@ const router = express.Router();
  *         description: Get all packagings
  */
 router.get("/", getAllPackagings);
+
+/**
+ * @swagger
+ * /packaging/all/{email}:
+ *   get:
+ *     summary: Get packaging by email
+ *     tags:
+ *       - Packaging
+ *     parameters:
+ *       - $ref: '#/components/parameters/PackagingEmailParam'
+ *     responses:
+ *       200:
+ *         description: Get a single packaging by email
+ *       404:
+ *         description: Packaging not found
+ */
+router.get(
+  "/all/:email",
+  authenticateToken,
+  authenticateCustomer,
+  getAllPackagingUser
+);
 
 /**
  * @swagger
