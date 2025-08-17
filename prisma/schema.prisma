@@ -211,3 +211,10 @@ model Payment {
   transaction_id   String?
   transaction_date DateTime
 }
+
+model Packaging {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  information Json
+  createdAt   DateTime @default(now())
+}

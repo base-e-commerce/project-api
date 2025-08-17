@@ -12,6 +12,7 @@ const allowedOrigins = [
   /^https:\/\/.*\.grainedevaleur\.com$/,
   "http://localhost:4200",
   "http://localhost:4300",
+  "http://localhost:3000",
 ];
 
 const corsOptions = {
