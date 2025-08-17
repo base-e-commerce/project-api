@@ -79,7 +79,7 @@ router.get("/", getAllPackagings);
  *       404:
  *         description: Packaging not found
  */
-router.get("/all/:email", authenticateCustomer, getAllPackagingUser);
+router.get("/all/:email", getAllPackagingUser);
 
 /**
  * @swagger
