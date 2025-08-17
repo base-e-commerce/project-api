@@ -214,7 +214,8 @@ model Payment {
 
 model Packaging {
   id          Int      @id @default(autoincrement())
-  user_id     Int
+  user_id     Int?
+  email     String?
   information Json
   createdAt   DateTime @default(now())
 }

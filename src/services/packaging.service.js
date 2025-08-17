@@ -8,7 +8,8 @@ class PackagingService {
       try {
         const newPackaging = await prisma.packaging.create({
           data: {
-             user_id: Number(data.user_id),
+            user_id: data.user_id ? Number(data.user_id) : null,
+            email: data.email,
             information: data.information,
           },
         });
