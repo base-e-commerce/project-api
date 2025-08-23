@@ -120,7 +120,7 @@ router.post(
   "/",
   // authenticateToken,
   // authenticateAdmin,
-  authenticateCustomer,
+  // authenticateCustomer,
   validateDto(createDevisSchema),
   createDevis
 );

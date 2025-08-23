@@ -17,7 +17,6 @@ exports.createDevisSchema = Joi.object({
     "string.base": "Description must be a string",
   }),
   telephone: Joi.string()
-    .pattern(/^[0-9+\-()\s]*$/)
     .optional()
     .messages({
       "string.pattern.base":
