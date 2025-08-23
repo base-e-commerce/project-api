@@ -215,7 +215,18 @@ model Payment {
 model Packaging {
   id          Int      @id @default(autoincrement())
   user_id     Int?
-  email     String?
+  email       String?
   information Json
+  createdAt   DateTime @default(now())
+}
+
+model Devis {
+  id          Int      @id @default(autoincrement())
+  user_id     Int?
+  product_id  Int?
+  email       String?
+  description String?  @db.Text
+  telephone   String?
+  productJson Json
   createdAt   DateTime @default(now())
 }

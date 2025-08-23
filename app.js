@@ -11,6 +11,7 @@ const commandeRoutes = require("./src/routes/commande.routes");
 const stripeRoutes = require("./src/routes/stripe.routes");
 const reviewRoutes = require("./src/routes/review.routes");
 const packagingRoutes = require("./src/routes/packaging.route");
+const devisRoutes = require("./src/routes/devis.route");
 
 const app = express();
 app.use("/user", userRoutes);
@@ -25,5 +26,6 @@ app.use("/commande", commandeRoutes);
 app.use("/stripe", stripeRoutes);
 app.use("/review", reviewRoutes);
 app.use("/packaging", packagingRoutes);
+app.use("/devis", devisRoutes);
 
 module.exports = app;
