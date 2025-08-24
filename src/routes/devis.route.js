@@ -46,6 +46,8 @@ const router = express.Router();
  *                 type: integer
  *               product_id:
  *                 type: integer
+ *               nombre:
+ *                 type: integer
  *               email:
  *                 type: string
  *               telephone:

@@ -11,6 +11,7 @@ class DevisService {
             user_id: data.user_id ? Number(data.user_id) : null,
             product_id: data.product_id ? Number(data.product_id) : null,
             email: data.email,
+            nombre: data.nombre,
             description: data.description,
             telephone: data.telephone,
             productJson: data.productJson,

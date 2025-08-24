@@ -13,15 +13,17 @@ exports.createDevisSchema = Joi.object({
     "string.email": "Email must be a valid email address",
     "any.required": "Email is required",
   }),
+  nombre: Joi.number().integer().optional().messages({
+    "number.base": "Product ID must be a number",
+    "number.integer": "Product ID must be an integer",
+  }),
   description: Joi.string().optional().messages({
     "string.base": "Description must be a string",
   }),
-  telephone: Joi.string()
-    .optional()
-    .messages({
-      "string.pattern.base":
-        "Telephone must contain only numbers, spaces, or symbols (+ - ( ))",
-    }),
+  telephone: Joi.string().optional().messages({
+    "string.pattern.base":
+      "Telephone must contain only numbers, spaces, or symbols (+ - ( ))",
+  }),
   productJson: Joi.object().required().messages({
     "object.base": "Product JSON must be a valid JSON object",
     "any.required": "Product JSON is required",
@@ -34,6 +36,10 @@ exports.updateDevisSchema = Joi.object({
     "number.integer": "User ID must be an integer",
   }),
   product_id: Joi.number().integer().optional().messages({
+    "number.base": "Product ID must be a number",
+    "number.integer": "Product ID must be an integer",
+  }),
+  nombre: Joi.number().integer().optional().messages({
     "number.base": "Product ID must be a number",
     "number.integer": "Product ID must be an integer",
   }),
