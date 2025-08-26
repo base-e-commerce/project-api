@@ -67,6 +67,7 @@ class PackagingService {
         where: { id: packagingId },
         data: {
           information: data.information,
+          state: data.state,
         },
       });
       return updatedPackaging;

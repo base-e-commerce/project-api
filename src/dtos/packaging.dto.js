@@ -22,4 +22,7 @@ exports.updatePackagingSchema = Joi.object({
   information: Joi.object().optional().messages({
     "object.base": "Information must be a valid JSON object",
   }),
+  state: Joi.boolean().optional().messages({
+    "boolean.base": "Is active must be a state value",
+  }),
 });

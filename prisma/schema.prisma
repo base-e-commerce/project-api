@@ -216,6 +216,7 @@ model Packaging {
   id          Int      @id @default(autoincrement())
   user_id     Int?
   email       String?
+  state            Boolean? @default(false)
   information Json
   createdAt   DateTime @default(now())
 }
