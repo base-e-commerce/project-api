@@ -216,7 +216,7 @@ model Packaging {
   id          Int      @id @default(autoincrement())
   user_id     Int?
   email       String?
-  state            Boolean? @default(false)
+  state       Boolean? @default(false)
   information Json
   createdAt   DateTime @default(now())
 }
@@ -225,8 +225,9 @@ model Devis {
   id          Int      @id @default(autoincrement())
   user_id     Int?
   product_id  Int?
-  nombre  Int?
+  nombre      Int?
   email       String?
+  entreprise  String?
   description String?  @db.Text
   telephone   String?
   productJson Json

@@ -17,6 +17,9 @@ exports.createDevisSchema = Joi.object({
     "number.base": "Product ID must be a number",
     "number.integer": "Product ID must be an integer",
   }),
+  entreprise: Joi.string().optional().messages({
+    "string.base": "Entreprise must be a string",
+  }),
   description: Joi.string().optional().messages({
     "string.base": "Description must be a string",
   }),
@@ -44,7 +47,10 @@ exports.updateDevisSchema = Joi.object({
     "number.integer": "Product ID must be an integer",
   }),
   email: Joi.string().email().optional().messages({
-    "string.email": "Email must be a valid email address",
+    "string.base": "Description must be a string",
+  }),
+  entreprise: Joi.string().optional().messages({
+    "string.base": "Entreprise must be a string",
   }),
   description: Joi.string().optional().messages({
     "string.base": "Description must be a string",
