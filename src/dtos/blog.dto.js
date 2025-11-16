@@ -26,15 +26,8 @@ exports.createBlogSchema = Joi.object({
     "date.base": "Published date must be a valid date",
     "date.format": "Published date must be in ISO format",
   }),
-  slug: Joi.any()
-    .forbidden()
-    .messages({ "any.unknown": '"slug" is not allowed', "any.forbidden": '"slug" is not allowed' }),
-  is_active: Joi.any()
-    .forbidden()
-    .messages({
-      "any.unknown": '"is_active" is not allowed',
-      "any.forbidden": '"is_active" is not allowed',
-    }),
+  slug: Joi.any().strip(),
+  is_active: Joi.any().strip(),
 });
 
 exports.updateBlogSchema = Joi.object({
@@ -61,13 +54,6 @@ exports.updateBlogSchema = Joi.object({
     "date.base": "Published date must be a valid date",
     "date.format": "Published date must be in ISO format",
   }),
-  slug: Joi.any()
-    .forbidden()
-    .messages({ "any.unknown": '"slug" is not allowed', "any.forbidden": '"slug" is not allowed' }),
-  is_active: Joi.any()
-    .forbidden()
-    .messages({
-      "any.unknown": '"is_active" is not allowed',
-      "any.forbidden": '"is_active" is not allowed',
-    }),
+  slug: Joi.any().strip(),
+  is_active: Joi.any().strip(),
 });
