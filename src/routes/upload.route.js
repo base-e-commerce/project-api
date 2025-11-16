@@ -10,7 +10,7 @@ const router = express.Router();
  * @swagger
  * /upload/image:
  *   post:
- *     summary: Upload images
+ *     summary: Upload images for a product or a blog
  *     tags:
  *       - Image
  *     requestBody:
@@ -22,14 +22,18 @@ const router = express.Router();
  *             properties:
  *               product_id:
  *                 type: number
- *                 description: The ID of the product associated with the images
+ *                 description: The ID of the product associated with the images (required when uploading for a product)
  *                 example: 123
+ *               blog_id:
+ *                 type: number
+ *                 description: The ID of the blog that should receive the uploaded image (required when uploading for a blog)
+ *                 example: 42
  *               image_url:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
- *                 description: Array of images to upload
+ *                 description: Array of images to upload. Only the first file is used when uploading for a blog.
  *     responses:
  *       200:
  *         description: Images uploaded successfully

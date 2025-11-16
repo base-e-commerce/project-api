@@ -26,6 +26,15 @@ exports.createBlogSchema = Joi.object({
     "date.base": "Published date must be a valid date",
     "date.format": "Published date must be in ISO format",
   }),
+  slug: Joi.any()
+    .forbidden()
+    .messages({ "any.unknown": '"slug" is not allowed', "any.forbidden": '"slug" is not allowed' }),
+  is_active: Joi.any()
+    .forbidden()
+    .messages({
+      "any.unknown": '"is_active" is not allowed',
+      "any.forbidden": '"is_active" is not allowed',
+    }),
 });
 
 exports.updateBlogSchema = Joi.object({
@@ -52,7 +61,13 @@ exports.updateBlogSchema = Joi.object({
     "date.base": "Published date must be a valid date",
     "date.format": "Published date must be in ISO format",
   }),
-  is_active: Joi.boolean().optional().messages({
-    "boolean.base": "is_active must be a boolean value",
-  }),
+  slug: Joi.any()
+    .forbidden()
+    .messages({ "any.unknown": '"slug" is not allowed', "any.forbidden": '"slug" is not allowed' }),
+  is_active: Joi.any()
+    .forbidden()
+    .messages({
+      "any.unknown": '"is_active" is not allowed',
+      "any.forbidden": '"is_active" is not allowed',
+    }),
 });
