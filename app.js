@@ -12,6 +12,7 @@ const stripeRoutes = require("./src/routes/stripe.routes");
 const reviewRoutes = require("./src/routes/review.routes");
 const packagingRoutes = require("./src/routes/packaging.route");
 const devisRoutes = require("./src/routes/devis.route");
+const blogRoutes = require("./src/routes/blog.routes");
 
 const app = express();
 app.use("/user", userRoutes);
@@ -27,5 +28,6 @@ app.use("/stripe", stripeRoutes);
 app.use("/review", reviewRoutes);
 app.use("/packaging", packagingRoutes);
 app.use("/devis", devisRoutes);
+app.use("/blog", blogRoutes);
 
 module.exports = app;

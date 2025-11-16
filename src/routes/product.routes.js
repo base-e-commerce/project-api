@@ -20,6 +20,8 @@ const {
   getAllCategoryProducts,
   getAllLastEachServiceProducts,
   getSearchProductWithSelectedCategory,
+  getLatestProducts,
+  calculateProductPrice,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -256,6 +258,75 @@ router.get("/other/:id/:idProduct", getOtherProductsInService);
 
 /**
  * @swagger
+ * /product/calculate-price:
+ *   post:
+ *     summary: Calculate price based on quantity and customer type
+ *     tags:
+ *       - Product
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               product_id:
+ *                 type: integer
+ *                 example: 1
+ *               quantity:
+ *                 type: integer
+ *                 example: 25
+ *               is_pro:
+ *                 type: boolean
+ *                 example: false
+ *     responses:
+ *       200:
+ *         description: Price calculated successfully
+ */
+router.post("/calculate-price", calculateProductPrice);
+
+
+/**
+ * @swagger
+ * /product/latest:
+ *   get:
+ *     summary: Get latest products
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - name: limit
+ *         in: query
+ *         description: Number of products to return (default 10, max 50)
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           minimum: 1
+ *           maximum: 50
+ *     responses:
+ *       200:
+ *         description: List of latest products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 count:
+ *                   type: integer
+ *                   example: 10
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Invalid limit parameter
+ */
+router.get("/latest", getLatestProducts);
+
+/**
+ * @swagger
  * /product/{id}:
  *   get:
  *     summary: Get product by ID
@@ -413,5 +484,8 @@ router.delete(
 );
 
 router.get("/search-filter/:idCategory/", getSearchProductWithSelectedCategory);
+
+
+
 
 module.exports = router;
