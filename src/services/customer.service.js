@@ -3,9 +3,11 @@ const prisma = require("../database/database");
 class CustomerService {
   async createCustomer(data) {
     try {
+      const normalizedEmail = data.email?.trim().toLowerCase();
+
       const existingCustomer = await prisma.customer.findUnique({
         where: {
-          email: data.email,
+          email: normalizedEmail,
         },
       });
 
@@ -22,7 +24,7 @@ class CustomerService {
           data: {
             first_name: data.first_name,
             last_name: data.last_name,
-            email: data.email,
+            email: normalizedEmail,
             password_hash: data.password_hash,
             oauth_provider: data.oauth_provider,
             oauth_id: data.oauth_id,

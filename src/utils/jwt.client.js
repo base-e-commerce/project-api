@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 
-const secretKey = process.env.JWT_SECRET_CLIENT || "miaouuuuuuaaa";
+const secretKey = process.env.JWT_SECRET_CLIENT || "miaouuuuuu";
+const defaultExpiration = process.env.JWT_EXPIRATION_CLIENT || "1h";
 
 const generateToken = (customer) => {
   const payload = {
@@ -11,7 +12,7 @@ const generateToken = (customer) => {
   };
 
   const options = {
-    expiresIn: process.env.JWT_EXPIRATION_CLIENT || "1h",
+    expiresIn: defaultExpiration,
   };
 
   return jwt.sign(payload, secretKey, options);
