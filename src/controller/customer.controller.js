@@ -502,6 +502,34 @@ exports.customerGoogleLogin = async (req, res) => {
   }
 };
 
+exports.customerFacebookLogin = async (req, res) => {
+  try {
+    const { access_token } = req.body;
+
+    if (!access_token) {
+      return res
+        .status(400)
+        .json({ message: "Token Facebook manquant.", error: null });
+    }
+
+    const { token, customer } = await authService.authenticateFacebookCustomer(
+      access_token
+    );
+
+    return res.status(200).json({
+      message: "Authentification Facebook réussie",
+      token,
+      customer,
+    });
+  } catch (error) {
+    console.error("Erreur de login Facebook :", error.message);
+    return res.status(401).json({
+      message: "Échec de la connexion Facebook",
+      error: error.message,
+    });
+  }
+};
+
 exports.getAllAddressesForCustomerClient = async (req, res) => {
   const { customerId } = req.params;
 
