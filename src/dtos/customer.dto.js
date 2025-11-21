@@ -139,3 +139,15 @@ exports.updateAddressSchema = Joi.object({
     "string.max": "Country must not exceed 50 characters",
   }),
 });
+
+exports.updatePasswordSchema = Joi.object({
+  currentPassword: Joi.string().allow(null, "").optional().messages({
+    "string.base": "Current password must be a string",
+  }),
+  newPassword: Joi.string().min(8).required().messages({
+    "string.base": "New password must be a string",
+    "string.empty": "New password cannot be empty",
+    "string.min": "New password must have at least 8 characters",
+    "any.required": "New password is required",
+  }),
+});

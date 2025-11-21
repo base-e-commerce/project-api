@@ -5,6 +5,16 @@ const adresseService = require("../services/adress.service");
 const authService = require("../services/auth.service");
 const bcrypt = require("bcrypt");
 
+const withCustomerFlags = (customer) => {
+  if (!customer) {
+    return null;
+  }
+  return {
+    ...customer,
+    hasPassword: Boolean(customer.password_hash),
+  };
+};
+
 exports.getAllCustomers = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
@@ -58,7 +68,10 @@ exports.getCurrentCustomer = async (req, res) => {
     res
       .status(200)
       .json(
-        createResponse("Current customer retrieved successfully", customer)
+        createResponse(
+          "Current customer retrieved successfully",
+          withCustomerFlags(customer)
+        )
       );
   } catch (error) {
     res
@@ -113,7 +126,9 @@ exports.getCustomerById = async (req, res) => {
     }
     res
       .status(200)
-      .json(createResponse("Customer fetched successfully", customer));
+      .json(
+        createResponse("Customer fetched successfully", withCustomerFlags(customer))
+      );
   } catch (error) {
     res
       .status(500)
@@ -195,6 +210,113 @@ exports.updateCurrentCustomer = async (req, res) => {
     res
       .status(200)
       .json(createResponse("Customer updated successfully", updatedCustomer));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.updatePassword = async (req, res) => {
+  const customer_id = req.customer.customer_id;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!newPassword) {
+    return res
+      .status(400)
+      .json(
+        createResponse("New password is required", null, false)
+      );
+  }
+
+  try {
+    const result = await customerService.updateCustomerPassword(customer_id, {
+      currentPassword,
+      newPassword,
+    });
+
+    const message =
+      result.action === "created"
+        ? "Mot de passe cree avec succes"
+        : "Mot de passe mis a jour avec succes";
+
+    res
+      .status(200)
+      .json(
+        createResponse(message, {
+          action: result.action,
+        })
+      );
+  } catch (error) {
+    if (error.code === "CURRENT_PASSWORD_REQUIRED") {
+      return res
+        .status(400)
+        .json(
+          createResponse(
+            "Le mot de passe actuel est requis pour cette operation",
+            null,
+            false
+          )
+        );
+    }
+
+    if (error.code === "INVALID_CURRENT_PASSWORD") {
+      return res
+        .status(400)
+        .json(
+          createResponse(
+            "Le mot de passe actuel est incorrect",
+            null,
+            false
+          )
+        );
+    }
+
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.requestAccountDeletion = async (req, res) => {
+  const customer_id = req.customer.customer_id;
+
+  try {
+    const result = await customerService.requestAccountDeletion(customer_id);
+    const message = result.alreadyRequested
+      ? "Une demande de suppression est deja en cours"
+      : "Votre compte sera supprime dans un delai de 360 jours";
+
+    res.status(200).json(
+      createResponse(message, {
+        deleted_at: result.deleted_at,
+        delete_scheduled_for: result.delete_scheduled_for,
+        alreadyRequested: result.alreadyRequested,
+      })
+    );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.cancelAccountDeletion = async (req, res) => {
+  const customer_id = req.customer.customer_id;
+
+  try {
+    const result = await customerService.cancelAccountDeletion(customer_id);
+    const message = result.alreadyActive
+      ? "Aucune suppression en attente"
+      : "Votre compte est de nouveau actif";
+
+    res.status(200).json(
+      createResponse(message, {
+        deleted_at: result.deleted_at,
+        delete_scheduled_for: result.delete_scheduled_for,
+        alreadyActive: result.alreadyActive,
+      })
+    );
   } catch (error) {
     res
       .status(500)

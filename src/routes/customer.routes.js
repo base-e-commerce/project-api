@@ -5,6 +5,7 @@ const {
   updateCustomerSchema,
   createAddressSchema,
   updateAddressSchema,
+  updatePasswordSchema,
 } = require("../dtos/customer.dto");
 const {
   getAllCustomers,
@@ -26,6 +27,9 @@ const {
   getLastTenCustomers,
   createAddressForCustomerClient,
   getAllAddressesForCustomerClient,
+  updatePassword,
+  requestAccountDeletion,
+  cancelAccountDeletion,
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -172,6 +176,21 @@ router.post("/login", login);
 router.get("/current", authenticateCustomer, getCurrentCustomer);
 
 router.patch("/update-current", authenticateCustomer, updateCurrentCustomer);
+
+router.patch(
+  "/password",
+  authenticateCustomer,
+  validateDto(updatePasswordSchema),
+  updatePassword
+);
+
+router.delete("/account", authenticateCustomer, requestAccountDeletion);
+
+router.post(
+  "/account/cancel-delete",
+  authenticateCustomer,
+  cancelAccountDeletion
+);
 
 /**
  * @swagger

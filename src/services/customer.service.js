@@ -1,4 +1,5 @@
 const prisma = require("../database/database");
+const bcrypt = require("bcrypt");
 
 class CustomerService {
   async createCustomer(data) {
@@ -121,6 +122,7 @@ class CustomerService {
     try {
       const customer = await prisma.customer.findUnique({
         where: { customer_id: customerId },
+        include: { accounts: true },
       });
       return customer;
     } catch (error) {
@@ -217,6 +219,118 @@ class CustomerService {
         `Error occurred while deleting the customer: ${error.message}`
       );
     }
+  }
+
+  async updateCustomerPassword(customerId, { currentPassword, newPassword }) {
+    const customer = await prisma.customer.findUnique({
+      where: { customer_id: customerId },
+    });
+
+    if (!customer) {
+      throw new Error("Customer not found");
+    }
+
+    if (customer.password_hash) {
+      if (!currentPassword) {
+        const err = new Error("Current password is required");
+        err.code = "CURRENT_PASSWORD_REQUIRED";
+        throw err;
+      }
+
+      const isValid = await bcrypt.compare(
+        currentPassword,
+        customer.password_hash
+      );
+      if (!isValid) {
+        const err = new Error("Current password is invalid");
+        err.code = "INVALID_CURRENT_PASSWORD";
+        throw err;
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const updatedCustomer = await prisma.customer.update({
+      where: { customer_id: customerId },
+      data: {
+        password_hash: hashedPassword,
+        oauth_provider: customer.oauth_provider,
+        oauth_id: customer.oauth_id,
+      },
+    });
+
+    return {
+      customer: updatedCustomer,
+      action: customer.password_hash ? "updated" : "created",
+    };
+  }
+
+  async requestAccountDeletion(customerId) {
+    const customer = await prisma.customer.findUnique({
+      where: { customer_id: customerId },
+    });
+
+    if (!customer) {
+      throw new Error("Customer not found");
+    }
+
+    if (customer.deleted_at) {
+      return {
+        deleted_at: customer.deleted_at,
+        delete_scheduled_for: customer.delete_scheduled_for,
+        alreadyRequested: true,
+      };
+    }
+
+    const now = new Date();
+    const scheduled = new Date(now.getTime() + 360 * 24 * 60 * 60 * 1000);
+
+    const updated = await prisma.customer.update({
+      where: { customer_id: customerId },
+      data: {
+        deleted_at: now,
+        delete_scheduled_for: scheduled,
+        is_active: false,
+      },
+    });
+
+    return {
+      deleted_at: updated.deleted_at,
+      delete_scheduled_for: updated.delete_scheduled_for,
+      alreadyRequested: false,
+    };
+  }
+
+  async cancelAccountDeletion(customerId) {
+    const customer = await prisma.customer.findUnique({
+      where: { customer_id: customerId },
+    });
+
+    if (!customer) {
+      throw new Error("Customer not found");
+    }
+
+    if (!customer.deleted_at) {
+      return {
+        deleted_at: null,
+        delete_scheduled_for: null,
+        alreadyActive: true,
+      };
+    }
+
+    const updated = await prisma.customer.update({
+      where: { customer_id: customerId },
+      data: {
+        deleted_at: null,
+        delete_scheduled_for: null,
+        is_active: true,
+      },
+    });
+
+    return {
+      deleted_at: updated.deleted_at,
+      delete_scheduled_for: updated.delete_scheduled_for,
+      alreadyActive: false,
+    };
   }
 }
 

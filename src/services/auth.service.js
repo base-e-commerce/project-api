@@ -12,7 +12,7 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 class AuthService {
   async authenticateCustomer(email, password) {
     try {
-      const customer = await prisma.customer.findFirst({
+      let customer = await prisma.customer.findFirst({
         where: {
           OR: [{ email: email }, { phone: email }],
         },
@@ -23,6 +23,18 @@ class AuthService {
 
       if (!customer) {
         throw new Error("Invalid email or password");
+      }
+
+      if (customer.deleted_at) {
+        customer = await prisma.customer.update({
+          where: { customer_id: customer.customer_id },
+          data: {
+            deleted_at: null,
+            delete_scheduled_for: null,
+            is_active: true,
+          },
+          include: { accounts: true },
+        });
       }
 
       if (
@@ -46,6 +58,9 @@ class AuthService {
             email: customer.email,
             phone: customer.phone,
             accounts: customer.accounts,
+            deleted_at: customer.deleted_at,
+            delete_scheduled_for: customer.delete_scheduled_for,
+            hasPassword: Boolean(customer.password_hash),
           },
         };
       }
@@ -76,6 +91,9 @@ class AuthService {
           email: customer.email,
           phone: customer.phone,
           accounts: customer.accounts,
+          deleted_at: customer.deleted_at,
+          delete_scheduled_for: customer.delete_scheduled_for,
+          hasPassword: Boolean(customer.password_hash),
         },
       };
     } catch (error) {
@@ -124,11 +142,29 @@ class AuthService {
       customer = result;
     }
 
+    if (customer.deleted_at) {
+      customer = await prisma.customer.update({
+        where: { customer_id: customer.customer_id },
+        data: {
+          deleted_at: null,
+          delete_scheduled_for: null,
+          is_active: true,
+        },
+        include: { accounts: true },
+      });
+    }
+
     const token = jwt.sign({ customer_id: customer.customer_id }, JWT_SECRET, {
       expiresIn: JWT_EXPIRATION,
     });
 
-    return { token, customer };
+    return {
+      token,
+      customer: {
+        ...customer,
+        hasPassword: Boolean(customer.password_hash),
+      },
+    };
   }
 }
 
