@@ -2,6 +2,92 @@ const createResponse = require("../utils/api.response");
 const productService = require("../services/product.service");
 const categoryService = require("../services/category.service");
 const serviceService = require("../services/service.pro.service.js");
+const {
+  calculateTotalPrice,
+  validateTierConfig,
+} = require("../helpers/product.helper");
+
+exports.calculateProductPrice = async (req, res) => {
+  try {
+    const { product_id, quantity, is_pro } = req.body;
+
+    if (!product_id || !quantity) {
+      return res.status(400).json({
+        success: false,
+        message: "product_id and quantity are required",
+      });
+    }
+
+    if (quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be at least 1",
+      });
+    }
+
+    const product = await productService.getProductById(product_id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    const priceDetails = calculateTotalPrice(
+      product,
+      quantity,
+      is_pro || false
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        product_id: product.product_id,
+        product_name: product.name,
+        ...priceDetails,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getLatestProducts = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (limit > 50) {
+      return res.status(400).json({
+        success: false,
+        message: "Limit cannot exceed 50",
+      });
+    }
+
+    if (limit < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Limit must be at least 1",
+      });
+    }
+
+    const products = await productService.getLatestProducts(limit);
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 exports.getAllProducts = async (req, res) => {
   try {

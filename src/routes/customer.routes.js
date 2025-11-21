@@ -24,6 +24,7 @@ const {
   login,
   getCurrentCustomer,
   customerGoogleLogin,
+  customerFacebookLogin,
   getLastTenCustomers,
   createAddressForCustomerClient,
   getAllAddressesForCustomerClient,
@@ -474,5 +475,6 @@ router.get(
 );
 
 router.post("/google-login", customerGoogleLogin);
+router.post("/facebook-login", customerFacebookLogin);
 
 module.exports = router;

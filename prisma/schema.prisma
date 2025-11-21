@@ -93,6 +93,7 @@ model User {
   created_at    DateTime   @default(now())
   updated_at    DateTime   @updatedAt
   Commande      Commande[]
+  blogs         Blog[]
 }
 
 model Service {
@@ -106,6 +107,24 @@ model Service {
   updated_at  DateTime    @updatedAt
   categories  Categorie[]
   Product     Product[]
+}
+
+model Blog {
+  blog_id      Int       @id @default(autoincrement())
+  title        String
+  slug         String    @unique
+  content      String    @db.Text
+  excerpt      String?   @db.Text
+  image_url    String?
+  author_id    Int
+  author       User      @relation(fields: [author_id], references: [user_id])
+  is_active    Boolean   @default(true)
+  published_at DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([published_at])
 }
 
 model Categorie {
@@ -122,28 +141,30 @@ model Categorie {
 }
 
 model Product {
-  product_id      Int              @id @default(autoincrement())
-  name            String
-  description     String?          @db.Text
-  descriptionRich String?          @db.Text
-  currency        String
-  currency_name   String
-  price           Decimal
-  price_pro       Decimal          @default(0.00)
-  stock_quantity  Int
-  image_url       String?
-  secure          Boolean?         @default(false)
-  is_for_pro      Boolean?         @default(false)
-  service_id      Int
-  service         Service          @relation(fields: [service_id], references: [service_id])
-  category_id     Int
-  category        Categorie        @relation(fields: [category_id], references: [categorie_id])
-  is_active       Boolean          @default(true)
-  created_at      DateTime         @default(now())
-  updated_at      DateTime         @updatedAt
-  productImages   ProductImage[]
-  reviews         Review[]
-  CommandeDetail  CommandeDetail[]
+  product_id            Int              @id @default(autoincrement())
+  name                  String
+  description           String?          @db.Text
+  descriptionRich       String?          @db.Text
+  currency              String
+  currency_name         String
+  price                 Decimal
+  price_pro             Decimal          @default(0.00)
+  stock_quantity        Int
+  image_url             String?
+  secure                Boolean?         @default(false)
+  is_for_pro            Boolean?         @default(false)
+  min_commande_standard Json?            @default("{\"tiers\":[]}")
+  min_commande_prof     Json?            @default("{\"tiers\":[]}")
+  service_id            Int
+  service               Service          @relation(fields: [service_id], references: [service_id])
+  category_id           Int
+  category              Categorie        @relation(fields: [category_id], references: [categorie_id])
+  is_active             Boolean          @default(true)
+  created_at            DateTime         @default(now())
+  updated_at            DateTime         @updatedAt
+  productImages         ProductImage[]
+  reviews               Review[]
+  CommandeDetail        CommandeDetail[]
 }
 
 model ProductImage {

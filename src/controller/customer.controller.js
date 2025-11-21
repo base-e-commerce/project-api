@@ -158,16 +158,34 @@ exports.searchCustomers = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, identifier, password } = req.body;
+  const loginIdentifier = email || identifier;
+
+  if (!loginIdentifier) {
+    return res.status(400).json({
+      message: "Identifiant de connexion manquant",
+    });
+  }
 
   try {
-    const result = await authService.authenticateCustomer(email, password);
+    const { token, customer } = await authService.authenticateCustomer(
+      loginIdentifier,
+      password
+    );
+
     return res.status(200).json({
-      message: "Authentication successful",
-      data: result,
+      message: "Authentification réussie",
+      token,
+      customer,
     });
   } catch (error) {
-    return res.status(401).json({
+    const statusCode =
+      error.message === "Password is required" ||
+      error.message === "Email or phone number is required"
+        ? 400
+        : 401;
+
+    return res.status(statusCode).json({
       message: error.message,
     });
   }
@@ -593,12 +611,44 @@ exports.customerGoogleLogin = async (req, res) => {
       id_token
     );
 
-    return res.json({ token, customer });
+    return res.status(200).json({
+      message: "Authentification Google réussie",
+      token,
+      customer,
+    });
   } catch (err) {
     console.error("Erreur de login Google :", err.message);
     return res
       .status(401)
       .json({ message: "Échec de la connexion Google", error: err.message });
+  }
+};
+
+exports.customerFacebookLogin = async (req, res) => {
+  try {
+    const { access_token } = req.body;
+
+    if (!access_token) {
+      return res
+        .status(400)
+        .json({ message: "Token Facebook manquant.", error: null });
+    }
+
+    const { token, customer } = await authService.authenticateFacebookCustomer(
+      access_token
+    );
+
+    return res.status(200).json({
+      message: "Authentification Facebook réussie",
+      token,
+      customer,
+    });
+  } catch (error) {
+    console.error("Erreur de login Facebook :", error.message);
+    return res.status(401).json({
+      message: "Échec de la connexion Facebook",
+      error: error.message,
+    });
   }
 };
 
