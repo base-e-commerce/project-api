@@ -19,7 +19,8 @@ const {
   getAllCommandesConfirmed,
   confirmDelivery,
   getAllCommandesLivred,
-  getLastUnpaidCommande
+  getLastUnpaidCommande,
+  requestRefund,
 } = require("../controller/commande.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -259,6 +260,13 @@ router.post(
   authenticateCustomer,
   validateDto(resendCommandeSchema),
   resendCommande
+);
+
+router.post(
+  "/refund-request/:commandeId",
+  authenticateCustomer,
+  validateDto(resendCommandeSchema),
+  requestRefund
 );
 
 /**

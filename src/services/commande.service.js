@@ -163,6 +163,74 @@ class CommandeService {
     return updatedCommande;
   }
 
+  async requestRefund(commandeId, customerId) {
+    const commande = await prisma.commande.findUnique({
+      where: { commande_id: commandeId },
+      include: {
+        payments: true,
+      },
+    });
+
+    if (!commande) {
+      throw new Error("Commande introuvable");
+    }
+
+    if (commande.customer_id !== customerId) {
+      throw new Error("Cette commande n'appartient pas au client courant");
+    }
+
+    const normalize = (value) =>
+      (value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+
+    const hasPaid =
+      Array.isArray(commande.payments) &&
+      commande.payments.some((payment) =>
+        ["payed", "paid", "livre"].includes(normalize(payment.status))
+      );
+
+    if (!hasPaid) {
+      throw new Error(
+        "Le paiement doit Ǧtre effectuǸ avant de demander un remboursement"
+      );
+    }
+
+    if (normalize(commande.status) === "demande remboursement") {
+      return commande;
+    }
+
+    const updatedCommande = await prisma.commande.update({
+      where: { commande_id: commandeId },
+      data: {
+        status: "Demande remboursement",
+      },
+      include: {
+        details: {
+          include: {
+            product: {
+              include: {
+                productImages: true,
+                category: true,
+                service: true,
+              },
+            },
+          },
+        },
+        shipping_address_relation: true,
+        customer: {
+          include: {
+            accounts: true,
+          },
+        },
+        payments: true,
+      },
+    });
+
+    return updatedCommande;
+  }
+
   async getAllCommandesLivred(limit, offset) {
     try {
       const commandes = await prisma.commande.findMany({

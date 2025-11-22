@@ -139,6 +139,31 @@ exports.cancelThisCommande = async (req, res) => {
   }
 };
 
+exports.requestRefund = async (req, res) => {
+  try {
+    const customer = req.customer;
+    if (!customer || !customer.customer_id) {
+      return res
+        .status(401)
+        .json(createResponse("Client non authentifiǸ", null, true));
+    }
+
+    const { commandeId } = req.params;
+    const commande = await commandeService.requestRefund(
+      parseInt(commandeId),
+      parseInt(customer.customer_id)
+    );
+    res.status(200).json(
+      createResponse(
+        "Demande de remboursement enregistrǸe avec succ��s",
+        commande
+      )
+    );
+  } catch (error) {
+    res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
 exports.getAllCommandes = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
