@@ -1,5 +1,19 @@
 const createResponse = require("../utils/api.response");
 const commandeService = require("../services/commande.service");
+const brevoService = require("../services/brevo.service");
+
+const formatCommandeReference = (commande) => {
+  if (!commande || !commande.commande_id) {
+    return "";
+  }
+
+  const orderYear = new Date(
+    commande.order_date || Date.now()
+  ).getFullYear();
+
+  const paddedId = String(commande.commande_id).padStart(3, "0");
+  return `GDV-${orderYear}-${paddedId}`;
+};
 
 // exports.createCommande = async (req, res) => {
 //   try {
@@ -22,6 +36,31 @@ exports.createCommande = async (req, res) => {
       paymentDetails,
       shippingAddressId
     );
+
+    const customerForEmail = req.customer || {};
+    if (customerForEmail.email) {
+      const fallbackReference =
+        commande && commande.commande_id
+          ? `GDV-${String(commande.commande_id).padStart(3, "0")}`
+          : "";
+      const orderReference =
+        formatCommandeReference(commande) || fallbackReference;
+
+      if (orderReference) {
+        try {
+          await brevoService.sendCommandeCreatedEmail({
+            email: customerForEmail.email,
+            firstName: customerForEmail.first_name,
+            orderId: orderReference,
+          });
+        } catch (brevoError) {
+          console.error(
+            "[Brevo] Failed to send commande confirmation email:",
+            brevoError.message
+          );
+        }
+      }
+    }
 
     if (payment) {
       res

@@ -17,6 +17,9 @@ class BrevoService {
       process.env.BREVO_CUSTOMER_WELCOME_TEMPLATE_ID ||
         process.env.BREVO_WELCOME_TEMPLATE_ID
     );
+    this.commandeCreatedTemplateId = this.parseTemplateId(
+      process.env.BREVO_COMMANDE_CREATED_TEMPLATE_ID || 2
+    );
 
     if (!this.apiKey) {
       console.warn(
@@ -148,6 +151,38 @@ class BrevoService {
     };
 
     const displayName = `${firstName || ""} ${lastName || ""}`.trim() || email;
+
+    return this.sendTransactionalEmail({
+      to: [{ email, name: displayName }],
+      templateId,
+      params: mergedParams,
+    });
+  }
+
+  async sendCommandeCreatedEmail({
+    email,
+    firstName,
+    orderId,
+    params = {},
+    templateId = this.commandeCreatedTemplateId,
+  }) {
+    if (!email) {
+      throw new Error(
+        "Email is required to send a commande confirmation email."
+      );
+    }
+
+    if (!orderId) {
+      throw new Error("Order ID is required to send a commande email.");
+    }
+
+    const mergedParams = {
+      PRENOM: firstName || "",
+      ORDER_ID: orderId,
+      ...params,
+    };
+
+    const displayName = firstName?.trim() || email;
 
     return this.sendTransactionalEmail({
       to: [{ email, name: displayName }],
