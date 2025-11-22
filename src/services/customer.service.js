@@ -5,6 +5,7 @@ class CustomerService {
   async createCustomer(data) {
     try {
       const normalizedEmail = data.email?.trim().toLowerCase();
+      const normalizedCountry = data.country?.trim() || null;
 
       const existingCustomer = await prisma.customer.findUnique({
         where: {
@@ -30,7 +31,7 @@ class CustomerService {
             oauth_provider: data.oauth_provider,
             oauth_id: data.oauth_id,
             phone: data.phone,
-            country: data.country,
+            country: normalizedCountry,
             default_address_id: data.default_address_id,
           },
         });
@@ -190,7 +191,7 @@ class CustomerService {
       };
 
       if (Object.prototype.hasOwnProperty.call(data, "country")) {
-        customerData.country = data.country;
+        customerData.country = data.country?.trim() || null;
       }
 
       // Update the customer's basic information
