@@ -30,6 +30,7 @@ class CustomerService {
             oauth_provider: data.oauth_provider,
             oauth_id: data.oauth_id,
             phone: data.phone,
+            country: data.country,
             default_address_id: data.default_address_id,
           },
         });
@@ -181,14 +182,21 @@ class CustomerService {
 
   async updateCustomer(customerId, data) {
     try {
+      // Prepare fields for the customer's basic information
+      const customerData = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone,
+      };
+
+      if (Object.prototype.hasOwnProperty.call(data, "country")) {
+        customerData.country = data.country;
+      }
+
       // Update the customer's basic information
       const updatedCustomer = await prisma.customer.update({
         where: { customer_id: customerId },
-        data: {
-          first_name: data.first_name,
-          last_name: data.last_name,
-          phone: data.phone,
-        },
+        data: customerData,
       });
 
       // Find the existing customer account

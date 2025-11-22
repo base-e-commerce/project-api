@@ -77,6 +77,8 @@ const router = express.Router();
  *                 type: string
  *               email:
  *                 type: string
+ *               country:
+ *                 type: string
  *               password_hash:
  *                 type: string
  *               oauth_provider:

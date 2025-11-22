@@ -32,6 +32,7 @@ model Customer {
   oauth_provider     String?
   oauth_id           String?
   phone              String?
+  country            String?
   default_address_id Int?              @unique
   default_address    Adresse?          @relation("DefaultAddress", fields: [default_address_id], references: [address_id])
   addresses          Adresse[]         @relation("CustomerAddresses")

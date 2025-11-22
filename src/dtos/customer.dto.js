@@ -33,6 +33,11 @@ exports.createCustomerSchema = Joi.object({
   phone: Joi.string().optional().messages({
     "string.base": "Phone must be a string",
   }),
+  country: Joi.string().min(1).max(100).optional().messages({
+    "string.base": "Country must be a string",
+    "string.min": "Country must have at least 1 character",
+    "string.max": "Country must not exceed 100 characters",
+  }),
   default_address_id: Joi.number().integer().optional().messages({
     "number.base": "Default address ID must be a number",
     "number.integer": "Default address ID must be an integer",
@@ -68,6 +73,11 @@ exports.updateCustomerSchema = Joi.object({
   }),
   phone: Joi.string().optional().messages({
     "string.base": "Phone must be a string",
+  }),
+  country: Joi.string().min(1).max(100).optional().messages({
+    "string.base": "Country must be a string",
+    "string.min": "Country must have at least 1 character",
+    "string.max": "Country must not exceed 100 characters",
   }),
   default_address_id: Joi.number().integer().optional().messages({
     "number.base": "Default address ID must be a number",

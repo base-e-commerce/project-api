@@ -266,7 +266,14 @@ exports.login = async (req, res) => {
 
 exports.updateCurrentCustomer = async (req, res) => {
   const customer_id = req.customer.customer_id;
-  const { first_name, last_name, phone, accountType, professionalDetails } =
+  const {
+    first_name,
+    last_name,
+    phone,
+    country,
+    accountType,
+    professionalDetails,
+  } =
     req.body;
 
   try {
@@ -274,6 +281,7 @@ exports.updateCurrentCustomer = async (req, res) => {
       first_name,
       last_name,
       phone,
+      country,
       accountType,
       professionalDetails,
     });
@@ -404,6 +412,7 @@ exports.createCustomer = async (req, res) => {
     oauth_provider,
     oauth_id,
     phone,
+    country,
     default_address_id,
   } = req.body;
 
@@ -422,6 +431,7 @@ exports.createCustomer = async (req, res) => {
       oauth_provider,
       oauth_id,
       phone,
+      country,
       default_address_id,
     });
 
@@ -488,6 +498,7 @@ exports.updateCustomer = async (req, res) => {
     oauth_provider,
     oauth_id,
     phone,
+    country,
     default_address_id,
   } = req.body;
 
@@ -500,6 +511,7 @@ exports.updateCustomer = async (req, res) => {
       oauth_provider,
       oauth_id,
       phone,
+      country,
       default_address_id,
     });
     res
