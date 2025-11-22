@@ -47,7 +47,10 @@ class CustomerService {
       return {
         status: true,
         message: "Utilisateur et compte créés avec succès",
-        data: result.newCustomer,
+        data: {
+          customer: result.newCustomer,
+          customerAccount: result.newAccount,
+        },
       };
     } catch (error) {
       return {

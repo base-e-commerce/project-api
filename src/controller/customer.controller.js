@@ -1,6 +1,5 @@
 const createResponse = require("../utils/api.response");
 const customerService = require("../services/customer.service");
-const customerAccountService = require("../services/customer.account.service");
 const adresseService = require("../services/adress.service");
 const authService = require("../services/auth.service");
 const brevoService = require("../services/brevo.service");
@@ -438,19 +437,15 @@ exports.createCustomer = async (req, res) => {
       );
     }
 
-    const newCustomerAccount =
-      await customerAccountService.createCustomerAccount({
-        customer_id: result.data.customer_id,
-        type: "standard",
-      });
+    const { customer, customerAccount } = result.data;
 
     try {
       await brevoService.sendCustomerWelcomeEmail({
-        email: result.data.email,
-        firstName: result.data.first_name,
-        lastName: result.data.last_name,
+        email: customer.email,
+        firstName: customer.first_name,
+        lastName: customer.last_name,
         params: {
-          PHONE: result.data.phone,
+          PHONE: customer.phone,
         },
       });
     } catch (brevoError) {
@@ -462,11 +457,11 @@ exports.createCustomer = async (req, res) => {
 
     return res.status(201).json(
       createResponse("Customer created successfully", {
-        customer_id: result.data.customer_id,
-        email: result.data.email,
-        first_name: result.data.first_name,
-        last_name: result.data.last_name,
-        customerAccount: newCustomerAccount,
+        customer_id: customer.customer_id,
+        email: customer.email,
+        first_name: customer.first_name,
+        last_name: customer.last_name,
+        customerAccount,
       })
     );
   } catch (error) {
