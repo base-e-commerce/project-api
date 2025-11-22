@@ -29,12 +29,22 @@ const formatCommandeReference = (commande) => {
 
 exports.createCommande = async (req, res) => {
   try {
-    const { customerId, details, paymentDetails, shippingAddressId } = req.body;
+    const {
+      customerId,
+      details,
+      paymentDetails,
+      shippingAddressId,
+      type,
+    } = req.body;
+    const normalizedType =
+      typeof type === "string" ? type.trim().toLowerCase() : "";
+    const commandeType = normalizedType === "pro" ? "pro" : "standard";
     const { commande, payment } = await commandeService.createCommande(
       customerId,
       details,
       paymentDetails,
-      shippingAddressId
+      shippingAddressId,
+      commandeType
     );
 
     const customerForEmail = req.customer || {};

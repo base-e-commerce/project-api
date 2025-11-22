@@ -27,7 +27,8 @@ class CommandeService {
     customerId,
     details,
     paymentDetails = null,
-    shippingAddressId = null
+    shippingAddressId = null,
+    type = "standard"
   ) {
     const commande = await prisma.$transaction(async (prisma) => {
       const newCommande = await prisma.commande.create({
@@ -40,6 +41,7 @@ class CommandeService {
             0
           ),
           shipping_address_id: shippingAddressId,
+          type,
           details: {
             create: details.map((detail) => ({
               product_id: detail.product_id,

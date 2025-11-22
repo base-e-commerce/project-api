@@ -44,6 +44,9 @@ const router = express.Router();
  *             properties:
  *               customerId:
  *                 type: integer
+ *               type:
+ *                 type: string
+ *                 enum: [pro, standard]
  *               details:
  *                 type: array
  *                 items:

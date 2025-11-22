@@ -6,6 +6,13 @@ exports.createCommandeSchema = Joi.object({
     "number.integer": "Customer ID must be an integer",
     "any.required": "Customer ID is required",
   }),
+  type: Joi.string()
+    .valid("pro", "standard")
+    .optional()
+    .messages({
+      "string.base": "Type must be a string",
+      "any.only": "Type must be either 'pro' or 'standard'",
+    }),
   shippingAddressId: Joi.number().integer().required().messages({
     "number.base": "Shipping Address ID must be a number",
     "number.integer": "Shipping Address ID must be an integer",
