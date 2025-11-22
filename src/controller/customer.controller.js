@@ -3,6 +3,7 @@ const customerService = require("../services/customer.service");
 const adresseService = require("../services/adress.service");
 const authService = require("../services/auth.service");
 const brevoService = require("../services/brevo.service");
+const customerOnboardingService = require("../services/customerOnboarding.service");
 const bcrypt = require("bcrypt");
 
 const withCustomerFlags = (customer) => {
@@ -449,21 +450,7 @@ exports.createCustomer = async (req, res) => {
 
     const { customer, customerAccount } = result.data;
 
-    try {
-      await brevoService.sendCustomerWelcomeEmail({
-        email: customer.email,
-        firstName: customer.first_name,
-        lastName: customer.last_name,
-        params: {
-          PHONE: customer.phone,
-        },
-      });
-    } catch (brevoError) {
-      console.error(
-        "[Brevo] Failed to send customer welcome email:",
-        brevoError.message
-      );
-    }
+    await customerOnboardingService.sendWelcomeEmail(customer);
 
     return res.status(201).json(
       createResponse("Customer created successfully", {

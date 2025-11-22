@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const { OAuth2Client } = require("google-auth-library");
 const fetch = require("node-fetch");
 const { generateToken } = require("../utils/jwt.client");
+const customerOnboardingService = require("./customerOnboarding.service");
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -145,6 +146,7 @@ class AuthService {
       const lastNameToPersist =
         family_name || fallbackLastName || normalizedEmail.split("@")[0];
 
+      let newCustomerCreated = false;
       let customer = await prisma.customer.findUnique({
         where: { email: normalizedEmail },
         include: {
@@ -178,6 +180,7 @@ class AuthService {
           where: { customer_id: createdCustomer.customer_id },
           include: { accounts: true },
         });
+        newCustomerCreated = true;
       } else {
         const updates = {};
 
@@ -222,6 +225,10 @@ class AuthService {
           where: { customer_id: customer.customer_id },
           include: { accounts: true },
         });
+      }
+
+      if (newCustomerCreated) {
+        await customerOnboardingService.sendWelcomeEmail(customer);
       }
 
       const sanitizedCustomer = this.sanitizeCustomer(customer);
@@ -297,6 +304,8 @@ class AuthService {
       });
     }
 
+    let newCustomerCreated = false;
+
     if (!customer) {
       const fallbackEmail = `fb_${facebookId}@facebook.local`;
       const emailToPersist = normalizedEmail || fallbackEmail;
@@ -326,6 +335,7 @@ class AuthService {
         where: { customer_id: createdCustomer.customer_id },
         include: { accounts: true },
       });
+      newCustomerCreated = true;
     } else {
       const updates = {};
 
@@ -356,6 +366,10 @@ class AuthService {
           include: { accounts: true },
         });
       }
+    }
+
+    if (newCustomerCreated) {
+      await customerOnboardingService.sendWelcomeEmail(customer);
     }
 
     if (customer.deleted_at) {
