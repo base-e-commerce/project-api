@@ -13,6 +13,10 @@ class BrevoService {
     this.welcomeTemplateId = this.parseTemplateId(
       process.env.BREVO_WELCOME_TEMPLATE_ID
     );
+    this.customerWelcomeTemplateId = this.parseTemplateId(
+      process.env.BREVO_CUSTOMER_WELCOME_TEMPLATE_ID ||
+        process.env.BREVO_WELCOME_TEMPLATE_ID
+    );
 
     if (!this.apiKey) {
       console.warn(
@@ -120,6 +124,33 @@ class BrevoService {
 
     return this.sendTransactionalEmail({
       to: [{ email, name: username }],
+      templateId,
+      params: mergedParams,
+    });
+  }
+
+  async sendCustomerWelcomeEmail({
+    email,
+    firstName,
+    lastName,
+    params = {},
+    templateId = this.customerWelcomeTemplateId,
+  }) {
+    if (!email) {
+      throw new Error("Email is required to send a customer welcome email.");
+    }
+
+    const mergedParams = {
+      PRENOM: firstName,
+      NOM: lastName,
+      EMAIL: email,
+      ...params,
+    };
+
+    const displayName = `${firstName || ""} ${lastName || ""}`.trim() || email;
+
+    return this.sendTransactionalEmail({
+      to: [{ email, name: displayName }],
       templateId,
       params: mergedParams,
     });

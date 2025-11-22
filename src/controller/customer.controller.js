@@ -43,18 +43,12 @@ exports.testCustomerBrevoTemplate = async (req, res) => {
     const firstName = customer.first_name || "";
     const lastName = customer.last_name || "";
 
-    await brevoService.sendTransactionalEmail({
-      to: [
-        {
-          email: customer.email,
-          name: `${firstName} ${lastName}`.trim() || customer.email,
-        },
-      ],
+    await brevoService.sendCustomerWelcomeEmail({
+      email: customer.email,
+      firstName,
+      lastName,
       templateId: templateIdParam,
       params: {
-        PRENOM: firstName,
-        NOM: lastName,
-        EMAIL: customer.email,
         PHONE: customer.phone,
       },
     });
@@ -449,6 +443,22 @@ exports.createCustomer = async (req, res) => {
         customer_id: result.data.customer_id,
         type: "standard",
       });
+
+    try {
+      await brevoService.sendCustomerWelcomeEmail({
+        email: result.data.email,
+        firstName: result.data.first_name,
+        lastName: result.data.last_name,
+        params: {
+          PHONE: result.data.phone,
+        },
+      });
+    } catch (brevoError) {
+      console.error(
+        "[Brevo] Failed to send customer welcome email:",
+        brevoError.message
+      );
+    }
 
     return res.status(201).json(
       createResponse("Customer created successfully", {

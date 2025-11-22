@@ -218,31 +218,31 @@ exports.createUser = async (req, res) => {
 
     const { firstName, lastName } = splitFullName(newUser.username || "");
 
-    try {
-      await brevoService.importContact({
-        email: newUser.email,
-        firstName,
-        lastName,
-        attributes: {
-          FIRSTNAME: firstName || newUser.username,
-          PHONE: newUser.phone,
-        },
-      });
-    } catch (brevoError) {
-      console.error("[Brevo] Failed to import contact:", brevoError.message);
-    }
+    // try {
+    //   await brevoService.importContact({
+    //     email: newUser.email,
+    //     firstName,
+    //     lastName,
+    //     attributes: {
+    //       FIRSTNAME: firstName || newUser.username,
+    //       PHONE: newUser.phone,
+    //     },
+    //   });
+    // } catch (brevoError) {
+    //   console.error("[Brevo] Failed to import contact:", brevoError.message);
+    // }
 
-    try {
-      await brevoService.sendWelcomeEmail({
-        email: newUser.email,
-        username: newUser.username,
-        params: {
-          PHONE: newUser.phone,
-        },
-      });
-    } catch (brevoError) {
-      console.error("[Brevo] Failed to send welcome email:", brevoError.message);
-    }
+    // try {
+    //   await brevoService.sendWelcomeEmail({
+    //     email: newUser.email,
+    //     username: newUser.username,
+    //     params: {
+    //       PHONE: newUser.phone,
+    //     },
+    //   });
+    // } catch (brevoError) {
+    //   console.error("[Brevo] Failed to send welcome email:", brevoError.message);
+    // }
 
     res.status(201).json(createResponse("User created successfully", newUser));
   } catch (error) {
