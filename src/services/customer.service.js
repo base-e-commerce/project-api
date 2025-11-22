@@ -134,6 +134,25 @@ class CustomerService {
     }
   }
 
+  async getCustomerByEmail(email) {
+    if (!email) {
+      return null;
+    }
+
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const customer = await prisma.customer.findUnique({
+        where: { email: normalizedEmail },
+        include: { accounts: true },
+      });
+      return customer;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving the customer by email: ${error.message}`
+      );
+    }
+  }
+
   // async updateCustomer(customerId, data) {
   //   try {
   //     const updatedCustomer = await prisma.customer.update({

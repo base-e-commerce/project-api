@@ -3,6 +3,7 @@ const customerService = require("../services/customer.service");
 const customerAccountService = require("../services/customer.account.service");
 const adresseService = require("../services/adress.service");
 const authService = require("../services/auth.service");
+const brevoService = require("../services/brevo.service");
 const bcrypt = require("bcrypt");
 
 const withCustomerFlags = (customer) => {
@@ -13,6 +14,65 @@ const withCustomerFlags = (customer) => {
     ...customer,
     hasPassword: Boolean(customer.password_hash),
   };
+};
+
+exports.testCustomerBrevoTemplate = async (req, res) => {
+  const { template_id: templateIdParam, email } = req.query;
+
+  if (!templateIdParam || !email) {
+    return res
+      .status(400)
+      .json(
+        createResponse(
+          "Les paramètres template_id et email sont requis",
+          null,
+          false
+        )
+      );
+  }
+
+  try {
+    const customer = await customerService.getCustomerByEmail(email);
+
+    if (!customer) {
+      return res
+        .status(404)
+        .json(createResponse("Client introuvable", null, false));
+    }
+
+    const firstName = customer.first_name || "";
+    const lastName = customer.last_name || "";
+
+    await brevoService.sendTransactionalEmail({
+      to: [
+        {
+          email: customer.email,
+          name: `${firstName} ${lastName}`.trim() || customer.email,
+        },
+      ],
+      templateId: templateIdParam,
+      params: {
+        PRENOM: firstName,
+        NOM: lastName,
+        EMAIL: customer.email,
+        PHONE: customer.phone,
+      },
+    });
+
+    return res
+      .status(200)
+      .json(createResponse("Email de test client envoyé avec succès", true));
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        createResponse(
+          "Erreur lors de l'envoi de l'email client",
+          error.message,
+          false
+        )
+      );
+  }
 };
 
 exports.getAllCustomers = async (req, res) => {

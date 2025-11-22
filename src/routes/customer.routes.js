@@ -31,6 +31,7 @@ const {
   updatePassword,
   requestAccountDeletion,
   cancelAccountDeletion,
+  testCustomerBrevoTemplate,
 } = require("../controller/customer.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -156,6 +157,35 @@ router.get(
  *         description: Invalid email or password
  */
 router.post("/login", login);
+
+/**
+ * @swagger
+ * /customer/test-email:
+ *   get:
+ *     summary: Send a Brevo template email to an existing customer (test)
+ *     tags:
+ *       - Customer
+ *     parameters:
+ *       - in: query
+ *         name: template_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: email
+ *     responses:
+ *       200:
+ *         description: Email sent
+ *       400:
+ *         description: Missing parameters
+ *       404:
+ *         description: Customer not found
+ */
+router.get("/test-email", testCustomerBrevoTemplate);
 
 /**
  * @swagger

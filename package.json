@@ -27,6 +27,7 @@
     "prisma": "^6.5.0",
     "project-api": "file:",
     "sequelize": "^6.6.2",
+    "sib-api-v3-sdk": "^8.5.0",
     "stripe": "^18.1.1",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.1.6"

@@ -3,6 +3,31 @@ const userService = require("../services/user.service");
 const roleService = require("../services/role.service");
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
+const brevoService = require("../services/brevo.service");
+
+const splitFullName = (fullName = "") => {
+  if (!fullName) {
+    return { firstName: "", lastName: "" };
+  }
+
+  const parts = fullName
+    .split(" ")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) {
+    return { firstName: "", lastName: "" };
+  }
+
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: parts[0] };
+  }
+
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" "),
+  };
+};
 
 exports.login = async (req, res) => {
   try {
@@ -190,6 +215,35 @@ exports.createUser = async (req, res) => {
       password_hash,
       role_id,
     });
+
+    const { firstName, lastName } = splitFullName(newUser.username || "");
+
+    try {
+      await brevoService.importContact({
+        email: newUser.email,
+        firstName,
+        lastName,
+        attributes: {
+          FIRSTNAME: firstName || newUser.username,
+          PHONE: newUser.phone,
+        },
+      });
+    } catch (brevoError) {
+      console.error("[Brevo] Failed to import contact:", brevoError.message);
+    }
+
+    try {
+      await brevoService.sendWelcomeEmail({
+        email: newUser.email,
+        username: newUser.username,
+        params: {
+          PHONE: newUser.phone,
+        },
+      });
+    } catch (brevoError) {
+      console.error("[Brevo] Failed to send welcome email:", brevoError.message);
+    }
+
     res.status(201).json(createResponse("User created successfully", newUser));
   } catch (error) {
     res
