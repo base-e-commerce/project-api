@@ -17,11 +17,13 @@ class AuthService {
       return null;
     }
 
+    const hasPassword = Boolean(customer.password_hash);
     const { password_hash, ...safeCustomer } = customer;
     return {
       ...safeCustomer,
       email: safeCustomer.email?.toLowerCase(),
       accounts: safeCustomer.accounts || [],
+      hasPassword,
     };
   }
 
@@ -75,21 +77,12 @@ class AuthService {
         });
       }
 
-      if (
-        customer.password_hash === null &&
-        customer.oauth_provider === "google"
-      ) {
-        const sanitizedCustomer = this.sanitizeCustomer(customer);
-        const token = generateToken(sanitizedCustomer);
-
-        return {
-          token,
-          customer: sanitizedCustomer,
-        };
-      }
-
       if (!customer.password_hash) {
-        throw new Error("Invalid email or password");
+        const err = new Error(
+          "Ce compte est associé à une connexion externe. Veuillez vous connecter avec Google/Facebook ou créer un mot de passe."
+        );
+        err.code = "PASSWORD_NOT_SET";
+        throw err;
       }
 
       if (!password) {
@@ -234,7 +227,13 @@ class AuthService {
       const sanitizedCustomer = this.sanitizeCustomer(customer);
       const token = generateToken(sanitizedCustomer);
 
-      return { token, customer: sanitizedCustomer };
+      const requiresPassword = !sanitizedCustomer.hasPassword;
+
+      return {
+        token,
+        customer: sanitizedCustomer,
+        requiresPassword,
+      };
     } catch (error) {
       throw new Error(error.message || "Google authentication failed");
     }
