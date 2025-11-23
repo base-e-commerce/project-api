@@ -21,6 +21,7 @@ const {
   supportMessageSchema,
   updateTicketStatusSchema,
 } = require("../dtos/support.dto");
+const supportAttachmentUpload = require("../middleware/support.attachment.middleware");
 
 const router = express.Router();
 
@@ -129,6 +130,7 @@ const router = express.Router();
 router.post(
   "/tickets",
   authenticateCustomer,
+  supportAttachmentUpload,
   validateDto(createTicketSchema),
   createTicket
 );
@@ -217,6 +219,7 @@ router.get(
 router.post(
   "/tickets/:ticketId/messages",
   authenticateCustomer,
+  supportAttachmentUpload,
   validateDto(supportMessageSchema),
   createCustomerMessage
 );
@@ -341,6 +344,7 @@ router.post(
   "/admin/tickets/:ticketId/messages",
   authenticateToken,
   authenticateAdmin,
+  supportAttachmentUpload,
   validateDto(supportMessageSchema),
   createAdminMessage
 );

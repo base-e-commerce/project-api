@@ -30,6 +30,10 @@ server.use(
   })
 );
 server.use("/api", express.static(path.join(__dirname, "uploads", "images")));
+server.use(
+  "/support-attachments",
+  express.static(path.join(__dirname, "uploads", "support"))
+);
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 server.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));

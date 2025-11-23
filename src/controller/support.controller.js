@@ -41,15 +41,29 @@ const handleError = (res, error, fallbackMessage = "Internal server error") => {
     .json(createResponse(message, error.details ?? null, false));
 };
 
+const validateMessagePayload = (content, files = []) => {
+  const hasContent = typeof content === "string" && content.trim().length > 0;
+  const hasFiles = Array.isArray(files) && files.length > 0;
+  if (!hasContent && !hasFiles) {
+    throw Object.assign(
+      new Error("Un message ou au moins une piece jointe est requis"),
+      { statusCode: 400 }
+    );
+  }
+};
+
 exports.createTicket = async (req, res) => {
   try {
     const { subject, content } = req.body;
     const customerId = req.customer.customer_id;
+    const attachments = req.files ?? [];
+    validateMessagePayload(content, attachments);
 
     const { ticket, message } = await supportService.createTicket({
       customerId,
       subject,
       content,
+      attachments,
     });
 
     return res.status(201).json(
@@ -120,11 +134,14 @@ exports.createCustomerMessage = async (req, res) => {
     await supportService.getCustomerTicket(ticketId, customerId);
 
     const { content } = req.body;
+    const attachments = req.files ?? [];
+    validateMessagePayload(content, attachments);
     const message = await supportService.createMessage({
       ticketId,
       senderType: "CUSTOMER",
       content,
       customerId,
+      attachments,
     });
 
     return res
@@ -207,11 +224,14 @@ exports.createAdminMessage = async (req, res) => {
     await supportService.getAdminTicket(ticketId);
 
     const { content } = req.body;
+    const attachments = req.files ?? [];
+    validateMessagePayload(content, attachments);
     const message = await supportService.createMessage({
       ticketId,
       senderType: "ADMIN",
       content,
       adminId,
+      attachments,
     });
 
     return res

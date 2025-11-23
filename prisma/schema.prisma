@@ -294,4 +294,16 @@ model SupportMessage {
   admin_id    Int?
   admin       User?                @relation("MessageAdmin", fields: [admin_id], references: [user_id])
   created_at  DateTime             @default(now())
+  attachments SupportMessageAttachment[]
+}
+
+model SupportMessageAttachment {
+  attachment_id Int            @id @default(autoincrement())
+  message_id    Int
+  message       SupportMessage @relation(fields: [message_id], references: [message_id])
+  file_url      String
+  file_name     String
+  mime_type     String
+  file_size     Int
+  created_at    DateTime        @default(now())
 }

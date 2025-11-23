@@ -2,11 +2,11 @@ const Joi = require("joi");
 
 const createTicketSchema = Joi.object({
   subject: Joi.string().allow("", null).max(190).optional(),
-  content: Joi.string().min(1).max(2000).required(),
+  content: Joi.string().allow("", null).max(2000).optional(),
 });
 
 const supportMessageSchema = Joi.object({
-  content: Joi.string().min(1).max(2000).required(),
+  content: Joi.string().allow("", null).max(2000).optional(),
 });
 
 const updateTicketStatusSchema = Joi.object({

@@ -6,14 +6,34 @@ const buildHttpError = (message, statusCode = 500) => {
   return error;
 };
 
+const buildAttachmentData = (files = []) => {
+  const baseUrl = process.env.BASE_URL?.replace(/\/$/, "") || "";
+  return files.map((file) => {
+    const relativePath = `/support-attachments/${file.filename}`;
+    const fileUrl = baseUrl ? `${baseUrl}${relativePath}` : relativePath;
+    return {
+      file_url: fileUrl,
+      file_name: file.originalname,
+      mime_type: file.mimetype,
+      file_size: file.size,
+    };
+  });
+};
+
 class SupportService {
-  async createTicket({ customerId, subject, content }) {
+  async createTicket({ customerId, subject, content, attachments = [] }) {
     if (!customerId) {
       throw buildHttpError("Customer is required to create a ticket", 400);
     }
 
     const sanitizedSubject = subject?.trim() || null;
-    const sanitizedContent = content.trim();
+    const sanitizedContent = (content ?? "").trim();
+    const attachmentData = buildAttachmentData(attachments);
+    const snippet = sanitizedContent.length
+      ? sanitizedContent.slice(0, 250)
+      : attachmentData.length
+      ? "Piece jointe"
+      : "";
 
     const result = await prisma.$transaction(async (tx) => {
       const ticket = await tx.supportTicket.create({
@@ -21,7 +41,7 @@ class SupportService {
           customer_id: customerId,
           subject: sanitizedSubject,
           status: "waiting-admin",
-          last_message_snippet: sanitizedContent.slice(0, 250),
+          last_message_snippet: snippet,
         },
       });
 
@@ -34,6 +54,15 @@ class SupportService {
         },
       });
 
+      if (attachmentData.length) {
+        await tx.supportMessageAttachment.createMany({
+          data: attachmentData.map((file) => ({
+            ...file,
+            message_id: message.message_id,
+          })),
+        });
+      }
+
       const hydratedTicket = await tx.supportTicket.findUnique({
         where: { ticket_id: ticket.ticket_id },
         include: {
@@ -44,7 +73,22 @@ class SupportService {
         },
       });
 
-      return { ticket: hydratedTicket, message };
+      const hydratedMessage = await tx.supportMessage.findUnique({
+        where: { message_id: message.message_id },
+        include: {
+          customer: {
+            select: {
+              customer_id: true,
+              first_name: true,
+              last_name: true,
+              email: true,
+            },
+          },
+          attachments: true,
+        },
+      });
+
+      return { ticket: hydratedTicket, message: hydratedMessage };
     });
 
     return result;
@@ -196,6 +240,7 @@ class SupportService {
               email: true,
             },
           },
+          attachments: true,
         },
       }),
       prisma.supportMessage.count({ where: { ticket_id: ticketId } }),
@@ -212,7 +257,14 @@ class SupportService {
     };
   }
 
-  async createMessage({ ticketId, senderType, content, customerId, adminId }) {
+  async createMessage({
+    ticketId,
+    senderType,
+    content,
+    customerId,
+    adminId,
+    attachments = [],
+  }) {
     const ticket = await prisma.supportTicket.findUnique({
       where: { ticket_id: ticketId },
     });
@@ -225,7 +277,13 @@ class SupportService {
       throw buildHttpError("Ticket does not belong to this customer", 403);
     }
 
-    const trimmedContent = content.trim();
+    const trimmedContent = (content ?? "").trim();
+    const attachmentData = buildAttachmentData(attachments);
+    const snippet = trimmedContent.length
+      ? trimmedContent.slice(0, 250)
+      : attachmentData.length
+      ? "Piece jointe"
+      : ticket.last_message_snippet ?? "";
 
     const message = await prisma.$transaction(async (tx) => {
       const newMessage = await tx.supportMessage.create({
@@ -238,11 +296,20 @@ class SupportService {
         },
       });
 
+      if (attachmentData.length) {
+        await tx.supportMessageAttachment.createMany({
+          data: attachmentData.map((file) => ({
+            ...file,
+            message_id: newMessage.message_id,
+          })),
+        });
+      }
+
       await tx.supportTicket.update({
         where: { ticket_id: ticketId },
         data: {
           last_message_at: new Date(),
-          last_message_snippet: trimmedContent.slice(0, 250),
+          last_message_snippet: snippet,
           status: senderType === "CUSTOMER" ? "waiting-admin" : "answered",
           assigned_admin_id:
             senderType === "ADMIN"
@@ -269,6 +336,7 @@ class SupportService {
               email: true,
             },
           },
+          attachments: true,
         },
       });
     });

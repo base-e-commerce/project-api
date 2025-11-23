@@ -3,4 +3,5 @@ node_modules
 uploads/images/*
 uploads/invoices/*
 uploads/services/*
+uploads/support/*
 !uploads/images/readme.md
