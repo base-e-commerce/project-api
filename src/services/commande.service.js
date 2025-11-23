@@ -558,6 +558,32 @@ class CommandeService {
 
     return lastUnpaidCommande ?? null;
   }
+
+  async getCommandeWithDetails(commandeId) {
+    return prisma.commande.findUnique({
+      where: { commande_id: commandeId },
+      include: {
+        details: {
+          include: {
+            product: {
+              include: {
+                productImages: true,
+                category: true,
+                service: true,
+              },
+            },
+          },
+        },
+        customer: {
+          include: {
+            accounts: true,
+          },
+        },
+        shipping_address_relation: true,
+        payments: true,
+      },
+    });
+  }
 }
 
 module.exports = new CommandeService();

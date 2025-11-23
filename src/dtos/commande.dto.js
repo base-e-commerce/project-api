@@ -69,3 +69,7 @@ exports.receiveCommandeSchema = Joi.object({
     "any.required": "Admin ID is required",
   }),
 });
+
+exports.invoiceRequestSchema = Joi.object({
+  sendEmail: Joi.boolean().optional().default(false),
+});

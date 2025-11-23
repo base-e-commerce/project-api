@@ -20,6 +20,9 @@ class BrevoService {
     this.commandeCreatedTemplateId = this.parseTemplateId(
       process.env.BREVO_COMMANDE_CREATED_TEMPLATE_ID || 2
     );
+    this.invoiceTemplateId = this.parseTemplateId(
+      process.env.BREVO_INVOICE_TEMPLATE_ID
+    );
 
     if (!this.apiKey) {
       console.warn(
@@ -81,7 +84,15 @@ class BrevoService {
       .filter((recipient) => recipient.email);
   }
 
-  async sendTransactionalEmail({ to, templateId, params = {}, sender }) {
+  async sendTransactionalEmail({
+    to,
+    templateId,
+    params = {},
+    sender,
+    subject,
+    htmlContent,
+    attachment,
+  }) {
     this.ensureTransactionalClient();
 
     const formattedRecipients = this.formatRecipients(to);
@@ -91,17 +102,33 @@ class BrevoService {
     }
 
     const numericTemplateId = this.parseTemplateId(templateId);
+    const hasHtmlContent = typeof htmlContent === "string" && htmlContent.trim().length > 0;
 
-    if (!numericTemplateId) {
-      throw new Error("A valid templateId is required to send the email.");
+    if (!numericTemplateId && !hasHtmlContent) {
+      throw new Error(
+        "A valid templateId or htmlContent is required to send the email."
+      );
     }
 
     const payload = {
       to: formattedRecipients,
-      templateId: numericTemplateId,
-      params,
       sender: sender || this.sender,
     };
+
+    if (numericTemplateId) {
+      payload.templateId = numericTemplateId;
+      payload.params = params;
+    } else if (hasHtmlContent) {
+      payload.subject = subject || "Notification";
+      payload.htmlContent = htmlContent;
+      if (params && Object.keys(params).length > 0) {
+        payload.params = params;
+      }
+    }
+
+    if (attachment) {
+      payload.attachment = Array.isArray(attachment) ? attachment : [attachment];
+    }
 
     if (!payload.sender?.email) {
       throw new Error("A sender email is required to send the email.");
@@ -233,6 +260,70 @@ class BrevoService {
     }
 
     return this.contactsApi.createContact(payload);
+  }
+
+  async sendInvoiceEmail({
+    email,
+    firstName,
+    orderReference,
+    totalAmount,
+    attachmentName,
+    attachmentContent,
+    templateId = this.invoiceTemplateId,
+  }) {
+    if (!email) {
+      throw new Error("Email is required to send an invoice email.");
+    }
+
+    const attachment =
+      attachmentName && attachmentContent
+        ? [
+            {
+              name: attachmentName,
+              content: attachmentContent,
+            },
+          ]
+        : undefined;
+
+    const recipientName = (firstName || "").trim() || email;
+    const formattedTotal =
+      typeof totalAmount === "number"
+        ? totalAmount.toFixed(2) + " €"
+        : String(totalAmount || "");
+
+    if (templateId) {
+      return this.sendTransactionalEmail({
+        to: [{ email, name: recipientName }],
+        templateId,
+        params: {
+          PRENOM: firstName || "",
+          ORDER_REFERENCE: orderReference || "",
+          TOTAL_AMOUNT: formattedTotal,
+        },
+        attachment,
+      });
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <body style="font-family:Arial,sans-serif;color:#1a1a1a;">
+          <p>Bonjour ${recipientName},</p>
+          <p>Veuillez trouver ci-joint la facture de votre commande ${
+            orderReference || ""
+          }.</p>
+          <p>Montant total : <strong>${formattedTotal}</strong></p>
+          <p>Merci pour votre confiance.</p>
+        </body>
+      </html>
+    `;
+
+    return this.sendTransactionalEmail({
+      to: [{ email, name: recipientName }],
+      subject: `Votre facture ${orderReference || ""}`.trim(),
+      htmlContent,
+      attachment,
+    });
   }
 }
 

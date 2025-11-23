@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Facture <%= invoice.reference %></title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        color: #1f2933;
+        background: #fff;
+        font-size: 14px;
+      }
+      .invoice {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 16px;
+      }
+      .company-info h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+      .company-info p {
+        margin: 4px 0;
+      }
+      .invoice-meta {
+        text-align: right;
+      }
+      .invoice-meta h2 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: 0.08em;
+        color: #6366f1;
+      }
+      .section {
+        margin-bottom: 24px;
+      }
+      .section h3 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #6b7280;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        text-align: left;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #6b7280;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 8px;
+      }
+      td {
+        padding: 12px 8px;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .totals {
+        width: 100%;
+        margin-top: 12px;
+      }
+      .totals td {
+        border: none;
+        padding: 4px 8px;
+      }
+      .totals tr:last-child td {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .badge {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: #e0f2fe;
+        color: #0369a1;
+        margin-top: 8px;
+      }
+      .footer {
+        margin-top: 40px;
+        font-size: 12px;
+        color: #6b7280;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="invoice">
+      <header class="header">
+        <div class="company-info">
+          <% if (invoice.company.logoUrl) { %>
+          <img
+            src="<%= invoice.company.logoUrl %>"
+            alt="<%= invoice.company.name %>"
+            style="height: 48px; margin-bottom: 8px"
+          />
+          <% } %>
+          <h1><%= invoice.company.name %></h1>
+          <p><%= invoice.company.address %></p>
+          <p><%= invoice.company.email %> • <%= invoice.company.phone %></p>
+          <p><%= invoice.company.website %></p>
+        </div>
+        <div class="invoice-meta">
+          <h2>FACTURE</h2>
+          <p>R&eacute;f&eacute;rence : <strong><%= invoice.reference %></strong></p>
+          <p>
+            &Eacute;mise le :
+            <strong><%= new Date(invoice.issuedAt).toLocaleDateString("fr-FR") %></strong>
+          </p>
+        </div>
+      </header>
+
+      <section class="section">
+        <h3>Client</h3>
+        <p>
+          <strong>
+            <%= [invoice.customer.first_name, invoice.customer.last_name].filter(Boolean).join(" ") || invoice.customer.email %>
+          </strong>
+        </p>
+        <p><%= invoice.customer.email || "-" %></p>
+        <% if (invoice.customer.phone) { %>
+        <p><%= invoice.customer.phone %></p>
+        <% } %>
+        <% if (invoice.shipping && invoice.shipping.line1) { %>
+        <div class="badge">Livraison</div>
+        <p>
+          <%= invoice.shipping.line1 %><br />
+          <%= invoice.shipping.postal_code || "" %>
+          <%= invoice.shipping.city || "" %><br />
+          <%= invoice.shipping.country || "" %>
+        </p>
+        <% } %>
+      </section>
+
+      <section class="section">
+        <h3>D&eacute;tail de la commande</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Quantit&eacute;</th>
+              <th>Prix unitaire</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% invoice.items.forEach(function(item) { %>
+            <tr>
+              <td>
+                <strong><%= item.name %></strong>
+                <% if (item.sku) { %>
+                <div style="font-size: 12px; color: #6b7280">Ref. <%= item.sku %></div>
+                <% } %>
+              </td>
+              <td><%= item.quantity %></td>
+              <td><%= item.unitPrice.toFixed(2) %> &euro;</td>
+              <td><%= item.total.toFixed(2) %> &euro;</td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <table class="totals">
+          <tr>
+            <td style="text-align: right; width: 80%">Sous-total :</td>
+            <td style="text-align: right">
+              <%= invoice.totals.subTotal.toFixed(2) %> &euro;
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: right">Livraison :</td>
+            <td style="text-align: right">
+              <%= invoice.totals.shipping.toFixed(2) %> &euro;
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: right">Total :</td>
+            <td style="text-align: right">
+              <%= invoice.totals.total.toFixed(2) %> &euro;
+            </td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="section">
+        <h3>Paiement</h3>
+        <p>M&eacute;thode : <strong><%= invoice.payment.method %></strong></p>
+        <p>Statut : <strong><%= invoice.payment.status %></strong></p>
+      </section>
+
+      <p class="footer">
+        Merci pour votre confiance. Conservez cette facture pour vos
+        archives. Pour toute question, &eacute;crivez-nous sur
+        <%= invoice.company.email %>.
+      </p>
+    </div>
+  </body>
+</html>

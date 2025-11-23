@@ -4,6 +4,7 @@ const {
   createCommandeSchema,
   resendCommandeSchema,
   receiveCommandeSchema,
+  invoiceRequestSchema,
 } = require("../dtos/commande.dto");
 const {
   createCommande,
@@ -21,6 +22,7 @@ const {
   getAllCommandesLivred,
   getLastUnpaidCommande,
   requestRefund,
+  downloadInvoice,
 } = require("../controller/commande.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -270,6 +272,13 @@ router.post(
   authenticateCustomer,
   validateDto(resendCommandeSchema),
   requestRefund
+);
+
+router.post(
+  "/invoice/:commandeId",
+  authenticateCustomer,
+  validateDto(invoiceRequestSchema),
+  downloadInvoice
 );
 
 /**

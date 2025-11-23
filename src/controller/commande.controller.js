@@ -1,6 +1,7 @@
 const createResponse = require("../utils/api.response");
 const commandeService = require("../services/commande.service");
 const brevoService = require("../services/brevo.service");
+const invoiceService = require("../services/invoice.service");
 
 const formatCommandeReference = (commande) => {
   if (!commande || !commande.commande_id) {
@@ -404,5 +405,40 @@ exports.getLastUnpaidCommande = async (req, res) => {
     res
       .status(500)
       .json(createResponse(null, error.message || "Erreur serveur", true));
+  }
+};
+
+exports.downloadInvoice = async (req, res) => {
+  try {
+    const { commandeId } = req.params;
+    const { sendEmail = false } = req.body || {};
+    const customerId = req.customer?.customer_id;
+
+    if (!customerId) {
+      return res
+        .status(401)
+        .json(createResponse("Client non authentifié", null, true));
+    }
+
+    if (!commandeId) {
+      return res
+        .status(400)
+        .json(createResponse("Identifiant commande manquant"));
+    }
+
+    const invoice = await invoiceService.generateInvoice({
+      commandeId: parseInt(commandeId, 10),
+      customerId: parseInt(customerId, 10),
+      sendEmail: Boolean(sendEmail),
+    });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=\"${invoice.fileName}\"`
+    );
+    return res.send(invoice.buffer);
+  } catch (error) {
+    return res.status(400).json(createResponse(null, error.message, true));
   }
 };
