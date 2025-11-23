@@ -135,6 +135,24 @@ exports.createCustomerMessage = async (req, res) => {
   }
 };
 
+exports.closeCustomerTicket = async (req, res) => {
+  try {
+    const ticketId = parseTicketId(req.params.ticketId);
+    const customerId = req.customer.customer_id;
+
+    const ticket = await supportService.closeCustomerTicket(
+      ticketId,
+      customerId
+    );
+
+    return res
+      .status(200)
+      .json(createResponse("Ticket cloture avec succes", ticket));
+  } catch (error) {
+    return handleError(res, error, "Unable to close support ticket");
+  }
+};
+
 exports.listAdminTickets = async (req, res) => {
   try {
     const pagination = parsePaginationParams(req.query);

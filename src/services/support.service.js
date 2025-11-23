@@ -293,6 +293,44 @@ class SupportService {
       },
     });
   }
+
+  async closeCustomerTicket(ticketId, customerId) {
+    const ticket = await prisma.supportTicket.findFirst({
+      where: {
+        ticket_id: ticketId,
+        customer_id: customerId,
+      },
+    });
+
+    if (!ticket) {
+      throw buildHttpError("Support ticket not found", 404);
+    }
+
+    if (ticket.status === "closed") {
+      return ticket;
+    }
+
+    return prisma.supportTicket.update({
+      where: { ticket_id: ticketId },
+      data: {
+        status: "closed",
+        last_message_at: new Date(),
+      },
+      include: {
+        assigned_admin: {
+          select: { user_id: true, username: true, email: true },
+        },
+        customer: {
+          select: {
+            customer_id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 }
 
 module.exports = new SupportService();

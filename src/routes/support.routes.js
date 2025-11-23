@@ -5,6 +5,7 @@ const {
   getCustomerTicket,
   listCustomerMessages,
   createCustomerMessage,
+  closeCustomerTicket,
   listAdminTickets,
   getAdminTicket,
   listAdminMessages,
@@ -43,6 +44,12 @@ router.post(
   authenticateCustomer,
   validateDto(supportMessageSchema),
   createCustomerMessage
+);
+
+router.patch(
+  "/tickets/:ticketId/close",
+  authenticateCustomer,
+  closeCustomerTicket
 );
 
 router.get(
