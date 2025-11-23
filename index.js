@@ -5,16 +5,20 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const dotenv = require("dotenv");
 const path = require("path");
-const { Sequelize } = require("sequelize");
 const app = require("./app");
 const swaggerOptions = require("./config/swagger");
 const corsOptions = require("./config/cors");
+const stripeController = require("./src/controller/stripe.controller");
 
 dotenv.config();
 
 const server = express();
 
-server.use("/api/stripe/webhook", bodyParser.raw({ type: "application/json" }));
+server.post(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  stripeController.webhookHandler
+);
 
 server.use(bodyParser.json());
 // server.use(cors(corsOptions));
