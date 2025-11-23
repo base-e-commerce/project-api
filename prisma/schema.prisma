@@ -44,6 +44,8 @@ model Customer {
   deleted_at         DateTime?
   delete_scheduled_for DateTime?
   Commande           Commande[]
+  supportTickets     SupportTicket[]
+  supportMessages    SupportMessage[]
 }
 
 model CustomerAccount {
@@ -95,6 +97,8 @@ model User {
   updated_at    DateTime   @updatedAt
   Commande      Commande[]
   blogs         Blog[]
+  supportTicketsAssigned SupportTicket[] @relation("TicketAdmin")
+  supportMessages        SupportMessage[] @relation("MessageAdmin")
 }
 
 model Service {
@@ -257,4 +261,37 @@ model Devis {
   telephone   String?
   productJson Json
   createdAt   DateTime @default(now())
+}
+
+enum SupportMessageSender {
+  CUSTOMER
+  ADMIN
+}
+
+model SupportTicket {
+  ticket_id            Int               @id @default(autoincrement())
+  customer_id          Int
+  customer             Customer          @relation(fields: [customer_id], references: [customer_id])
+  assigned_admin_id    Int?
+  assigned_admin       User?             @relation("TicketAdmin", fields: [assigned_admin_id], references: [user_id])
+  subject              String?
+  status               String            @default("open")
+  last_message_at      DateTime          @default(now())
+  last_message_snippet String?           @db.Text
+  created_at           DateTime          @default(now())
+  updated_at           DateTime          @updatedAt
+  messages             SupportMessage[]
+}
+
+model SupportMessage {
+  message_id  Int                  @id @default(autoincrement())
+  ticket_id   Int
+  ticket      SupportTicket        @relation(fields: [ticket_id], references: [ticket_id])
+  sender      SupportMessageSender
+  content     String               @db.Text
+  customer_id Int?
+  customer    Customer?            @relation(fields: [customer_id], references: [customer_id])
+  admin_id    Int?
+  admin       User?                @relation("MessageAdmin", fields: [admin_id], references: [user_id])
+  created_at  DateTime             @default(now())
 }
