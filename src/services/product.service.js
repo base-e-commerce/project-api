@@ -29,6 +29,8 @@ class ProductService {
             is_for_pro: data.is_for_pro,
             min_commande_standard: data.min_commande_standard || { tiers: [] },
             min_commande_prof: data.min_commande_prof || { tiers: [] },
+            min_co_standard: data.min_co_standard ?? null,
+            min_co_pro: data.min_co_pro ?? null,
           },
         });
         return newProduct;
@@ -419,6 +421,40 @@ class ProductService {
     } catch (error) {
       throw new Error(
         `Error occurred while retrieving the product: ${error.message}`
+      );
+    }
+  }
+
+  async getProductsByIds(productIds) {
+    try {
+      const uniqueIds = Array.from(
+        new Set(
+          (productIds || [])
+            .map((id) => Number(id))
+            .filter((id) => !Number.isNaN(id))
+        )
+      );
+
+      if (uniqueIds.length === 0) {
+        return [];
+      }
+
+      const products = await prisma.product.findMany({
+        where: {
+          product_id: { in: uniqueIds },
+        },
+        select: {
+          product_id: true,
+          name: true,
+          min_co_standard: true,
+          min_co_pro: true,
+        },
+      });
+
+      return products;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving products by ids: ${error.message}`
       );
     }
   }

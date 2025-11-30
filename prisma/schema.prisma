@@ -154,6 +154,8 @@ model Product {
   currency_name         String
   price                 Decimal
   price_pro             Decimal          @default(0.00)
+  min_co_standard       Int?
+  min_co_pro            Int?
   stock_quantity        Int
   image_url             String?
   secure                Boolean?         @default(false)

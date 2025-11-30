@@ -62,6 +62,16 @@ exports.createProductSchema = Joi.object({
     "number.min": "Stock quantity must be at least 0",
     "any.required": "Stock quantity is required",
   }),
+  min_co_standard: Joi.number().integer().min(1).optional().messages({
+    "number.base": "min_co_standard must be a number",
+    "number.integer": "min_co_standard must be an integer",
+    "number.min": "min_co_standard must be at least 1",
+  }),
+  min_co_pro: Joi.number().integer().min(1).optional().messages({
+    "number.base": "min_co_pro must be a number",
+    "number.integer": "min_co_pro must be an integer",
+    "number.min": "min_co_pro must be at least 1",
+  }),
   image_url: Joi.string().uri().optional().allow(null, "").messages({
     "string.base": "Image URL must be a string",
     "string.uri": "Image URL must be a valid URI",
@@ -122,6 +132,16 @@ exports.updateProductSchema = Joi.object({
     "number.base": "Stock quantity must be a number",
     "number.integer": "Stock quantity must be an integer",
     "number.min": "Stock quantity must be at least 0",
+  }),
+  min_co_standard: Joi.number().integer().min(1).optional().messages({
+    "number.base": "min_co_standard must be a number",
+    "number.integer": "min_co_standard must be an integer",
+    "number.min": "min_co_standard must be at least 1",
+  }),
+  min_co_pro: Joi.number().integer().min(1).optional().messages({
+    "number.base": "min_co_pro must be a number",
+    "number.integer": "min_co_pro must be an integer",
+    "number.min": "min_co_pro must be at least 1",
   }),
   image_url: Joi.string().uri().optional().allow(null, "").messages({
     "string.base": "Image URL must be a string",

@@ -1,7 +1,26 @@
 const createResponse = require("../utils/api.response");
 const commandeService = require("../services/commande.service");
+const customerService = require("../services/customer.service");
+const productService = require("../services/product.service");
 const brevoService = require("../services/brevo.service");
 const invoiceService = require("../services/invoice.service");
+
+const PRO_ACCOUNT_TYPE_ALIASES = new Set([
+  "pro",
+  "professionnel",
+  "professionel",
+  "professional",
+]);
+
+const isProCustomerAccount = (customer) => {
+  const accounts = customer?.accounts || [];
+  return accounts.some((account) => {
+    const type = account?.type;
+    if (!type) return false;
+    const normalized = type.toString().trim().toLowerCase();
+    return PRO_ACCOUNT_TYPE_ALIASES.has(normalized);
+  });
+};
 
 const formatCommandeReference = (commande) => {
   if (!commande || !commande.commande_id) {
@@ -40,9 +59,116 @@ exports.createCommande = async (req, res) => {
     const normalizedType =
       typeof type === "string" ? type.trim().toLowerCase() : "";
     const commandeType = normalizedType === "pro" ? "pro" : "standard";
+    const orderDetails = Array.isArray(details) ? details : [];
+
+    const parsedCustomerId =
+      customerId !== undefined && customerId !== null
+        ? Number(customerId)
+        : null;
+
+    if (parsedCustomerId !== null && Number.isNaN(parsedCustomerId)) {
+      return res
+        .status(400)
+        .json(createResponse("Customer ID must be a valid number", null, false));
+    }
+
+    const authenticatedCustomerId = req.customer?.customer_id;
+    if (
+      authenticatedCustomerId &&
+      parsedCustomerId !== null &&
+      authenticatedCustomerId !== parsedCustomerId
+    ) {
+      return res
+        .status(403)
+        .json(
+          createResponse(
+            "Customer ID does not match authenticated user",
+            null,
+            false
+          )
+        );
+    }
+
+    const targetCustomerId = authenticatedCustomerId ?? parsedCustomerId;
+    if (!targetCustomerId) {
+      return res
+        .status(400)
+        .json(createResponse("Customer ID is required", null, false));
+    }
+
+    const customerRecord = await customerService.getCustomerById(
+      targetCustomerId
+    );
+    if (!customerRecord) {
+      return res
+        .status(404)
+        .json(createResponse("Customer not found", null, false));
+    }
+
+    const isProAccount = isProCustomerAccount(customerRecord);
+
+    const productIds = orderDetails.map((detail) => detail.product_id);
+    const retrievedProducts = await productService.getProductsByIds(productIds);
+    const productMap = new Map(
+      retrievedProducts.map((product) => [product.product_id, product])
+    );
+
+    const missingProductIds = Array.from(
+      new Set(
+        productIds.filter((productId) => !productMap.has(productId))
+      )
+    );
+    if (missingProductIds.length > 0) {
+      return res
+        .status(400)
+        .json(
+          createResponse(
+            "Some products are not available",
+            { missingProductIds },
+            false
+          )
+        );
+    }
+
+    const quantityErrors = [];
+    orderDetails.forEach((detail) => {
+      const product = productMap.get(detail.product_id);
+      if (!product) {
+        return;
+      }
+
+      const rawMin = isProAccount
+        ? product.min_co_pro
+        : product.min_co_standard;
+      const minValue =
+        typeof rawMin === "number" && Number.isFinite(rawMin)
+          ? rawMin
+          : null;
+
+      if (minValue && detail.quantity < minValue) {
+        quantityErrors.push(
+          `Minimum quantity for "${product.name}" is ${minValue} for ${
+            isProAccount ? "professional" : "standard"
+          } accounts`
+        );
+      }
+    });
+
+    if (quantityErrors.length > 0) {
+      return res
+        .status(400)
+        .json(
+          createResponse(
+            "Minimum quantity requirements not met",
+            { errors: quantityErrors },
+            false
+          )
+        );
+    }
+
     const { commande, payment } = await commandeService.createCommande(
-      customerId,
-      details,
+      targetCustomerId,
+      orderDetails,
       paymentDetails,
       shippingAddressId,
       commandeType
