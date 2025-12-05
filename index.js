@@ -30,6 +30,15 @@ server.use(
   })
 );
 server.use("/api", express.static(path.join(__dirname, "uploads", "images")));
+server.use("/api/video", express.static(path.join(__dirname, "uploads", "video")));
+server.use(
+  "/api/media/image",
+  express.static(path.join(__dirname, "uploads", "media", "image"))
+);
+server.use(
+  "/api/media/video",
+  express.static(path.join(__dirname, "uploads", "media", "video"))
+);
 server.use(
   "/support-attachments",
   express.static(path.join(__dirname, "uploads", "support"))

@@ -4,4 +4,5 @@ uploads/images/*
 uploads/invoices/*
 uploads/services/*
 uploads/support/*
+uploads/media/*
 !uploads/images/readme.md

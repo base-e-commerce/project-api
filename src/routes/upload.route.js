@@ -1,7 +1,13 @@
 const express = require("express");
 const upload = require("../middleware/upload.middleware");
+const mediaUpload = require("../middleware/media-upload.middleware");
 const createUploader = require ("../middleware/upload.test.middleware")
-const { createUploadImage } = require("../controller/image.controller");
+const {
+  createUploadImage,
+  uploadMediaAsset,
+  listMediaAssets,
+  deleteMediaAsset,
+} = require("../controller/image.controller");
 const router = express.Router();
 
 
@@ -43,6 +49,64 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.post("/image", upload.array("image_url", 5), createUploadImage);
+/**
+ * @swagger
+ * /upload/media:
+ *   post:
+ *     summary: Upload a standalone media asset (image or video)
+ *     tags:
+ *       - Image
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               media:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Media uploaded successfully
+ *       400:
+ *         description: Bad request, invalid input
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/media", mediaUpload.single("media"), uploadMediaAsset);
+router.get("/media", listMediaAssets);
+/**
+ * @swagger
+ * /upload/media:
+ *   delete:
+ *     summary: Delete a media asset
+ *     tags:
+ *       - Image
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - folder
+ *               - filename
+ *             properties:
+ *               folder:
+ *                 type: string
+ *                 enum: [image, video]
+ *               filename:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Media deleted
+ *       400:
+ *         description: Invalid request
+ *       500:
+ *         description: Internal server error
+ */
+router.delete("/media", deleteMediaAsset);
 
 // exemple utilisation middleware avec personnalisation du dossier d'upload de l'image 
 // dossier source : uploads (deja definie dans le code)
