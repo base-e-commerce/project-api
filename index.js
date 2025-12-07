@@ -5,14 +5,16 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const dotenv = require("dotenv");
 const path = require("path");
+
+dotenv.config();
+
 const app = require("./app");
 const swaggerOptions = require("./config/swagger");
 const corsOptions = require("./config/cors");
 const stripeController = require("./src/controller/stripe.controller");
 
-dotenv.config();
-
 const server = express();
+const bodySizeLimit = process.env.REQUEST_BODY_LIMIT || "200mb";
 
 server.post(
   "/api/stripe/webhook",
@@ -20,7 +22,8 @@ server.post(
   stripeController.webhookHandler
 );
 
-server.use(bodyParser.json());
+server.use(bodyParser.json({ limit: bodySizeLimit }));
+server.use(bodyParser.urlencoded({ extended: true, limit: bodySizeLimit }));
 // server.use(cors(corsOptions));
 server.use(
   cors({

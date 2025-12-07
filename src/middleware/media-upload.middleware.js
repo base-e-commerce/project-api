@@ -6,6 +6,25 @@ const ensureDirExists = (targetPath) => {
   fs.mkdirSync(targetPath, { recursive: true });
 };
 
+const ONE_MB = 1024 * 1024;
+const DEFAULT_MAX_FILE_SIZE_MB = 200;
+
+const parsePositiveNumber = (value) => {
+  if (!value) {
+    return null;
+  }
+  const parsed = Number(value);
+  if (Number.isNaN(parsed) || parsed <= 0) {
+    return null;
+  }
+  return parsed;
+};
+
+const resolveFileSizeLimit = () => {
+  const fromEnv = parsePositiveNumber(process.env.MEDIA_MAX_FILE_SIZE_MB);
+  return (fromEnv || DEFAULT_MAX_FILE_SIZE_MB) * ONE_MB;
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let destination;
@@ -34,5 +53,11 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage, fileFilter });
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: resolveFileSizeLimit(),
+  },
+});
 module.exports = upload;
