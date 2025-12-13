@@ -1,6 +1,57 @@
 const prisma = require("../database/database");
+const { slugify } = require("../utils/slug.util");
 
 class ProductService {
+  buildServiceFilter(identifier) {
+    if (identifier === undefined || identifier === null) {
+      return null;
+    }
+
+    if (typeof identifier === "number" && !Number.isNaN(identifier)) {
+      return { service_id: identifier };
+    }
+
+    if (typeof identifier === "string") {
+      const trimmed = identifier.trim();
+      if (!trimmed) {
+        return null;
+      }
+
+      if (/^\d+$/.test(trimmed)) {
+        return { service_id: Number(trimmed) };
+      }
+
+      return { service: { slug: slugify(trimmed) } };
+    }
+
+    return null;
+  }
+
+  buildCategoryFilter(identifier) {
+    if (identifier === undefined || identifier === null) {
+      return null;
+    }
+
+    if (typeof identifier === "number" && !Number.isNaN(identifier)) {
+      return { category_id: identifier };
+    }
+
+    if (typeof identifier === "string") {
+      const trimmed = identifier.trim();
+      if (!trimmed) {
+        return null;
+      }
+
+      if (/^\d+$/.test(trimmed)) {
+        return { category_id: Number(trimmed) };
+      }
+
+      return { category: { slug: slugify(trimmed) } };
+    }
+
+    return null;
+  }
+
   async createProduct(data) {
     const db = prisma;
 
@@ -190,28 +241,37 @@ class ProductService {
     }
   }
 
-  async getAllCategoryProducts(category_id, limit, offset) {
+  async getAllCategoryProducts(identifier, limit, offset) {
     try {
-      const products = await prisma.product.findMany({
-        where: { category_id, is_active: true },
-        include: {
-          productImages: true,
-          category: true,
-          service: true,
-          reviews: {
-            include: {
-              customer: true,
+      const categoryFilter = this.buildCategoryFilter(identifier);
+      if (!categoryFilter) {
+        return { products: [], totalProducts: 0 };
+      }
+
+      const whereClause = { ...categoryFilter, is_active: true };
+
+      const [products, totalProducts] = await Promise.all([
+        prisma.product.findMany({
+          where: whereClause,
+          include: {
+            productImages: true,
+            category: true,
+            service: true,
+            reviews: {
+              include: {
+                customer: true,
+              },
             },
           },
-        },
-        skip: offset,
-        take: limit,
-        orderBy: { created_at: "desc" },
-      });
+          skip: offset,
+          take: limit,
+          orderBy: { created_at: "desc" },
+        }),
+        prisma.product.count({
+          where: whereClause,
+        }),
+      ]);
 
-      const totalProducts = await prisma.product.count({
-        where: { category_id, is_active: true },
-      });
       return {
         products,
         totalProducts,
@@ -222,28 +282,38 @@ class ProductService {
       );
     }
   }
-  async getAllServiceProducts(service_id, limit, offset) {
+
+  async getAllServiceProducts(identifier, limit, offset) {
     try {
-      const products = await prisma.product.findMany({
-        where: { service_id, is_active: true },
-        include: {
-          productImages: true,
-          category: true,
-          service: true,
-          reviews: {
-            include: {
-              customer: true,
+      const serviceFilter = this.buildServiceFilter(identifier);
+      if (!serviceFilter) {
+        return { products: [], totalProducts: 0 };
+      }
+
+      const whereClause = { ...serviceFilter, is_active: true };
+
+      const [products, totalProducts] = await Promise.all([
+        prisma.product.findMany({
+          where: whereClause,
+          include: {
+            productImages: true,
+            category: true,
+            service: true,
+            reviews: {
+              include: {
+                customer: true,
+              },
             },
           },
-        },
-        skip: offset,
-        take: limit,
-        orderBy: { created_at: "desc" },
-      });
+          skip: offset,
+          take: limit,
+          orderBy: { created_at: "desc" },
+        }),
+        prisma.product.count({
+          where: whereClause,
+        }),
+      ]);
 
-      const totalProducts = await prisma.product.count({
-        where: { service_id, is_active: true },
-      });
       return {
         products,
         totalProducts,

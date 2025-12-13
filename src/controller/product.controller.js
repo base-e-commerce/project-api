@@ -123,13 +123,17 @@ exports.getAllProducts = async (req, res) => {
 
 exports.getAllCategoryProducts = async (req, res) => {
   try {
-    const categoryId = parseInt(req.params.id);
+    const categoryIdentifier = req.params.id;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
     const { products, totalProducts } =
-      await productService.getAllCategoryProducts(categoryId, limit, offset);
+      await productService.getAllCategoryProducts(
+        categoryIdentifier,
+        limit,
+        offset
+      );
 
     if (!products) {
       return res.status(404).json(createResponse("No products found", null));
@@ -186,13 +190,17 @@ exports.getAllLastEachServiceProducts = async (req, res) => {
 
 exports.getAllServiceProducts = async (req, res) => {
   try {
-    const serviceId = parseInt(req.params.id);
+    const serviceIdentifier = req.params.id;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
     const { products, totalProducts } =
-      await productService.getAllServiceProducts(serviceId, limit, offset);
+      await productService.getAllServiceProducts(
+        serviceIdentifier,
+        limit,
+        offset
+      );
 
     if (!products) {
       return res.status(404).json(createResponse("No products found", null));

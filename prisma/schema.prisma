@@ -106,12 +106,20 @@ model Service {
   name        String
   image_url   String?
   description String?     @db.Text
+  slug        String?
+  meta_title        String?
+  meta_description String? @db.Text
+  meta_keywords    String?
+  meta_image_url   String?
+  schema_markup    Json?
   secure      Boolean?    @default(false)
   is_active   Boolean     @default(true)
   created_at  DateTime    @default(now())
   updated_at  DateTime    @updatedAt
   categories  Categorie[]
   Product     Product[]
+
+  @@index([slug])
 }
 
 model Blog {
@@ -136,6 +144,12 @@ model Categorie {
   categorie_id Int       @id @default(autoincrement())
   name         String
   description  String?   @db.Text
+  slug         String?
+  meta_title        String?
+  meta_description String?   @db.Text
+  meta_keywords    String?
+  meta_image_url   String?
+  schema_markup    Json?
   secure       Boolean?  @default(false)
   is_active    Boolean   @default(true)
   service_id   Int
@@ -143,6 +157,8 @@ model Categorie {
   created_at   DateTime  @default(now())
   updated_at   DateTime  @updatedAt
   Product      Product[]
+
+  @@index([slug])
 }
 
 model Product {

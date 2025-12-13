@@ -16,8 +16,7 @@ exports.getAllServices = async (req, res) => {
 
 exports.getServiceById = async (req, res) => {
   try {
-    const serviceId = parseInt(req.params.id, 10);
-    const service = await serviceService.getServiceById(serviceId);
+    const service = await serviceService.getServiceById(req.params.id);
     if (service) {
       res
         .status(200)

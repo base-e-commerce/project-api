@@ -16,9 +16,8 @@ exports.getAllCategories = async (req, res) => {
 
 exports.getAllCategoriesByService = async (req, res) => {
   try {
-    const serviceId = parseInt(req.params.id, 10);
     const categories = await categoryService.getAllCategoriesByService(
-      serviceId
+      req.params.id
     );
     res
       .status(200)
@@ -32,8 +31,7 @@ exports.getAllCategoriesByService = async (req, res) => {
 
 exports.getCategoryById = async (req, res) => {
   try {
-    const categoryId = parseInt(req.params.id, 10);
-    const category = await categoryService.getCategoryById(categoryId);
+    const category = await categoryService.getCategoryById(req.params.id);
     if (category) {
       res
         .status(200)
