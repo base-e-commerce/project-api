@@ -13,6 +13,55 @@ class BlogService {
       .trim();
   }
 
+  normalizeNullableValue(value) {
+    if (value === undefined) {
+      return undefined;
+    }
+    if (value === null) {
+      return null;
+    }
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return trimmed === "" ? null : trimmed;
+    }
+    return value;
+  }
+
+  normalizeSchemaMarkup(value) {
+    if (value === undefined) {
+      return undefined;
+    }
+    if (value === null || value === "") {
+      return null;
+    }
+    if (typeof value === "object") {
+      return value;
+    }
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch (error) {
+        throw new Error("schema_markup must be a valid JSON object");
+      }
+    }
+    return null;
+  }
+
+  buildMetadataPayload(data) {
+    const fields = [
+      "meta_title",
+      "meta_description",
+      "meta_keywords",
+      "meta_image_url",
+    ];
+    return fields.reduce((acc, field) => {
+      if (data[field] !== undefined) {
+        acc[field] = this.normalizeNullableValue(data[field]);
+      }
+      return acc;
+    }, {});
+  }
+
   async createBlog(data, authorId) {
     const db = prisma;
 
@@ -28,15 +77,22 @@ class BlogService {
           counter++;
         }
 
+        const metadata = this.buildMetadataPayload(data);
+        const schemaMarkup = this.normalizeSchemaMarkup(data.schema_markup);
+
         const newBlog = await prisma.blog.create({
           data: {
             title: data.title,
             slug: uniqueSlug,
             content: data.content,
-            excerpt: data.excerpt,
-            image_url: data.image_url,
+            excerpt: this.normalizeNullableValue(data.excerpt),
+            image_url: this.normalizeNullableValue(data.image_url),
             author_id: authorId,
-            published_at: data.published_at || null,
+            published_at: data.published_at
+              ? new Date(data.published_at)
+              : null,
+            ...metadata,
+            schema_markup: schemaMarkup ?? null,
           },
           include: {
             author: {
@@ -157,7 +213,7 @@ class BlogService {
 
   async updateBlog(blogId, data) {
     try {
-      const updateData = { ...data };
+      const updateData = {};
 
       if (data.title) {
         const slug = this.generateSlug(data.title);
@@ -175,6 +231,52 @@ class BlogService {
           counter++;
         }
         updateData.slug = uniqueSlug;
+      }
+
+      if (data.content !== undefined) {
+        updateData.content = data.content;
+      }
+
+      if (data.excerpt !== undefined) {
+        updateData.excerpt = this.normalizeNullableValue(data.excerpt);
+      }
+
+      if (data.published_at !== undefined) {
+        updateData.published_at = data.published_at
+          ? new Date(data.published_at)
+          : null;
+      }
+
+      if (data.image_url !== undefined) {
+        updateData.image_url = this.normalizeNullableValue(data.image_url);
+      }
+
+      const metadata = this.buildMetadataPayload(data);
+      Object.assign(updateData, metadata);
+
+      if (data.schema_markup !== undefined) {
+        updateData.schema_markup = this.normalizeSchemaMarkup(
+          data.schema_markup
+        );
+      }
+
+      if (data.is_active !== undefined) {
+        updateData.is_active = data.is_active;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return await prisma.blog.findUnique({
+          where: { blog_id: blogId },
+          include: {
+            author: {
+              select: {
+                user_id: true,
+                username: true,
+                email: true,
+              },
+            },
+          },
+        });
       }
 
       const updatedBlog = await prisma.blog.update({

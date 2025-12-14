@@ -24,28 +24,28 @@ model Review {
 }
 
 model Customer {
-  customer_id        Int               @id @default(autoincrement())
-  first_name         String
-  last_name          String
-  email              String            @unique
-  password_hash      String?
-  oauth_provider     String?
-  oauth_id           String?
-  phone              String?
-  country            String?
-  default_address_id Int?              @unique
-  default_address    Adresse?          @relation("DefaultAddress", fields: [default_address_id], references: [address_id])
-  addresses          Adresse[]         @relation("CustomerAddresses")
-  accounts           CustomerAccount[]
-  is_active          Boolean           @default(true)
-  reviews            Review[]
-  created_at         DateTime          @default(now())
-  updated_at         DateTime          @updatedAt
-  deleted_at         DateTime?
+  customer_id          Int               @id @default(autoincrement())
+  first_name           String
+  last_name            String
+  email                String            @unique
+  password_hash        String?
+  oauth_provider       String?
+  oauth_id             String?
+  phone                String?
+  country              String?
+  default_address_id   Int?              @unique
+  default_address      Adresse?          @relation("DefaultAddress", fields: [default_address_id], references: [address_id])
+  addresses            Adresse[]         @relation("CustomerAddresses")
+  accounts             CustomerAccount[]
+  is_active            Boolean           @default(true)
+  reviews              Review[]
+  created_at           DateTime          @default(now())
+  updated_at           DateTime          @updatedAt
+  deleted_at           DateTime?
   delete_scheduled_for DateTime?
-  Commande           Commande[]
-  supportTickets     SupportTicket[]
-  supportMessages    SupportMessage[]
+  Commande             Commande[]
+  supportTickets       SupportTicket[]
+  supportMessages      SupportMessage[]
 }
 
 model CustomerAccount {
@@ -85,78 +85,83 @@ model Role {
 }
 
 model User {
-  user_id       Int        @id @default(autoincrement())
-  username      String?
-  email         String     @unique
-  phone         String?
-  password_hash String
-  role_id       Int
-  role          Role       @relation(fields: [role_id], references: [role_id])
-  last_login    DateTime?
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @updatedAt
-  Commande      Commande[]
-  blogs         Blog[]
-  supportTicketsAssigned SupportTicket[] @relation("TicketAdmin")
+  user_id                Int              @id @default(autoincrement())
+  username               String?
+  email                  String           @unique
+  phone                  String?
+  password_hash          String
+  role_id                Int
+  role                   Role             @relation(fields: [role_id], references: [role_id])
+  last_login             DateTime?
+  created_at             DateTime         @default(now())
+  updated_at             DateTime         @updatedAt
+  Commande               Commande[]
+  blogs                  Blog[]
+  supportTicketsAssigned SupportTicket[]  @relation("TicketAdmin")
   supportMessages        SupportMessage[] @relation("MessageAdmin")
 }
 
 model Service {
-  service_id  Int         @id @default(autoincrement())
-  name        String
-  image_url   String?
-  description String?     @db.Text
-  slug        String?
-  meta_title        String?
-  meta_description String? @db.Text
+  service_id       Int         @id @default(autoincrement())
+  name             String
+  image_url        String?
+  description      String?     @db.Text
+  slug             String?
+  meta_title       String?
+  meta_description String?     @db.Text
   meta_keywords    String?
   meta_image_url   String?
   schema_markup    Json?
-  secure      Boolean?    @default(false)
-  is_active   Boolean     @default(true)
-  created_at  DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
-  categories  Categorie[]
-  Product     Product[]
+  secure           Boolean?    @default(false)
+  is_active        Boolean     @default(true)
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
+  categories       Categorie[]
+  Product          Product[]
 
   @@index([slug])
 }
 
 model Blog {
-  blog_id      Int       @id @default(autoincrement())
-  title        String
-  slug         String    @unique
-  content      String    @db.Text
-  excerpt      String?   @db.Text
-  image_url    String?
-  author_id    Int
-  author       User      @relation(fields: [author_id], references: [user_id])
-  is_active    Boolean   @default(true)
-  published_at DateTime?
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
+  blog_id          Int       @id @default(autoincrement())
+  title            String
+  slug             String    @unique
+  content          String    @db.Text
+  excerpt          String?   @db.Text
+  image_url        String?
+  meta_title       String?
+  meta_description String?   @db.Text
+  meta_keywords    String?
+  meta_image_url   String?
+  schema_markup    Json?
+  author_id        Int
+  author           User      @relation(fields: [author_id], references: [user_id])
+  is_active        Boolean   @default(true)
+  published_at     DateTime?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
 
   @@index([slug])
   @@index([published_at])
 }
 
 model Categorie {
-  categorie_id Int       @id @default(autoincrement())
-  name         String
-  description  String?   @db.Text
-  slug         String?
-  meta_title        String?
+  categorie_id     Int       @id @default(autoincrement())
+  name             String
+  description      String?   @db.Text
+  slug             String?
+  meta_title       String?
   meta_description String?   @db.Text
   meta_keywords    String?
   meta_image_url   String?
   schema_markup    Json?
-  secure       Boolean?  @default(false)
-  is_active    Boolean   @default(true)
-  service_id   Int
-  service      Service   @relation(fields: [service_id], references: [service_id])
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-  Product      Product[]
+  secure           Boolean?  @default(false)
+  is_active        Boolean   @default(true)
+  service_id       Int
+  service          Service   @relation(fields: [service_id], references: [service_id])
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  Product          Product[]
 
   @@index([slug])
 }
@@ -236,7 +241,7 @@ model Commande {
   status                    String
   total_amount              Decimal
   payment_method            String?
-  type                      String          @default("standard")
+  type                      String           @default("standard")
   shipping_address          String?
   shipping_address_id       Int?
   shipping_address_relation Adresse?         @relation(fields: [shipping_address_id], references: [address_id])
@@ -287,31 +292,31 @@ enum SupportMessageSender {
 }
 
 model SupportTicket {
-  ticket_id            Int               @id @default(autoincrement())
+  ticket_id            Int              @id @default(autoincrement())
   customer_id          Int
-  customer             Customer          @relation(fields: [customer_id], references: [customer_id])
+  customer             Customer         @relation(fields: [customer_id], references: [customer_id])
   assigned_admin_id    Int?
-  assigned_admin       User?             @relation("TicketAdmin", fields: [assigned_admin_id], references: [user_id])
+  assigned_admin       User?            @relation("TicketAdmin", fields: [assigned_admin_id], references: [user_id])
   subject              String?
-  status               String            @default("open")
-  last_message_at      DateTime          @default(now())
-  last_message_snippet String?           @db.Text
-  created_at           DateTime          @default(now())
-  updated_at           DateTime          @updatedAt
+  status               String           @default("open")
+  last_message_at      DateTime         @default(now())
+  last_message_snippet String?          @db.Text
+  created_at           DateTime         @default(now())
+  updated_at           DateTime         @updatedAt
   messages             SupportMessage[]
 }
 
 model SupportMessage {
-  message_id  Int                  @id @default(autoincrement())
+  message_id  Int                        @id @default(autoincrement())
   ticket_id   Int
-  ticket      SupportTicket        @relation(fields: [ticket_id], references: [ticket_id])
+  ticket      SupportTicket              @relation(fields: [ticket_id], references: [ticket_id])
   sender      SupportMessageSender
-  content     String               @db.Text
+  content     String                     @db.Text
   customer_id Int?
-  customer    Customer?            @relation(fields: [customer_id], references: [customer_id])
+  customer    Customer?                  @relation(fields: [customer_id], references: [customer_id])
   admin_id    Int?
-  admin       User?                @relation("MessageAdmin", fields: [admin_id], references: [user_id])
-  created_at  DateTime             @default(now())
+  admin       User?                      @relation("MessageAdmin", fields: [admin_id], references: [user_id])
+  created_at  DateTime                   @default(now())
   attachments SupportMessageAttachment[]
 }
 
@@ -323,5 +328,5 @@ model SupportMessageAttachment {
   file_name     String
   mime_type     String
   file_size     Int
-  created_at    DateTime        @default(now())
+  created_at    DateTime       @default(now())
 }
