@@ -181,6 +181,7 @@ model Product {
   image_url             String?
   secure                Boolean?         @default(false)
   is_for_pro            Boolean?         @default(false)
+  suggest               Boolean          @default(false)
   min_commande_standard Json?            @default("{\"tiers\":[]}")
   min_commande_prof     Json?            @default("{\"tiers\":[]}")
   service_id            Int

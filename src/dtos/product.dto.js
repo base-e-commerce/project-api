@@ -82,6 +82,9 @@ exports.createProductSchema = Joi.object({
   is_for_pro: Joi.boolean().optional().default(false).messages({
     "boolean.base": "is_for_pro must be a boolean value",
   }),
+  suggest: Joi.boolean().optional().default(false).messages({
+    "boolean.base": "suggest must be a boolean value",
+  }),
   service_id: Joi.number().integer().required().messages({
     "number.base": "Service ID must be a number",
     "number.integer": "Service ID must be an integer",
@@ -152,6 +155,9 @@ exports.updateProductSchema = Joi.object({
   }),
   is_for_pro: Joi.boolean().optional().messages({
     "boolean.base": "is_for_pro must be a boolean value",
+  }),
+  suggest: Joi.boolean().optional().messages({
+    "boolean.base": "suggest must be a boolean value",
   }),
   service_id: Joi.number().integer().optional().messages({
     "number.base": "Service ID must be a number",

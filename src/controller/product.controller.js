@@ -89,6 +89,33 @@ exports.getLatestProducts = async (req, res) => {
   }
 };
 
+exports.getSuggestedProducts = async (req, res) => {
+  try {
+    let limit = 12;
+    if (req.query.limit !== undefined) {
+      const parsedLimit = parseInt(req.query.limit, 10);
+      if (!Number.isNaN(parsedLimit)) {
+        limit = Math.max(1, Math.min(parsedLimit, 30));
+      }
+    }
+
+    const products = await productService.getSuggestedProducts(limit);
+
+    res
+      .status(200)
+      .json(
+        createResponse("Suggested products fetched successfully", {
+          products,
+          count: products.length,
+        })
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.getAllProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;

@@ -78,6 +78,7 @@ class ProductService {
             service_id: data.service_id,
             is_active: data.is_active,
             is_for_pro: data.is_for_pro,
+            suggest: data.suggest ?? false,
             min_commande_standard: data.min_commande_standard || { tiers: [] },
             min_commande_prof: data.min_commande_prof || { tiers: [] },
             min_co_standard: data.min_co_standard ?? null,
@@ -422,6 +423,46 @@ class ProductService {
     } catch (error) {
       throw new Error(
         `Error occurred while retrieving latest products: ${error.message}`
+      );
+    }
+  }
+
+  async getSuggestedProducts(limit = 12) {
+    try {
+      const products = await prisma.product.findMany({
+        where: {
+          is_active: true,
+          suggest: true,
+        },
+        orderBy: {
+          updated_at: "desc",
+        },
+        take: limit,
+        include: {
+          service: {
+            select: {
+              service_id: true,
+              name: true,
+            },
+          },
+          category: {
+            select: {
+              categorie_id: true,
+              name: true,
+            },
+          },
+          productImages: {
+            select: {
+              product_image_id: true,
+              image_url: true,
+            },
+          },
+        },
+      });
+      return products;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while retrieving suggested products: ${error.message}`
       );
     }
   }

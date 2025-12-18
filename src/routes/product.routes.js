@@ -22,6 +22,7 @@ const {
   getSearchProductWithSelectedCategory,
   getLatestProducts,
   calculateProductPrice,
+  getSuggestedProducts,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -324,6 +325,25 @@ router.post("/calculate-price", calculateProductPrice);
  *         description: Invalid limit parameter
  */
 router.get("/latest", getLatestProducts);
+
+/**
+ * @swagger
+ * /product/suggested:
+ *   get:
+ *     summary: Get suggested products for spotlight experience
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - name: limit
+ *         in: query
+ *         description: Maximum suggested products to return (default 12, max 30)
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of suggested products
+ */
+router.get("/suggested", getSuggestedProducts);
 
 /**
  * @swagger
