@@ -14,6 +14,7 @@ const packagingRoutes = require("./src/routes/packaging.route");
 const devisRoutes = require("./src/routes/devis.route");
 const blogRoutes = require("./src/routes/blog.routes");
 const supportRoutes = require("./src/routes/support.routes");
+const recruitmentRoutes = require("./src/routes/recruitment.routes");
 
 const app = express();
 app.use("/user", userRoutes);
@@ -31,5 +32,6 @@ app.use("/packaging", packagingRoutes);
 app.use("/devis", devisRoutes);
 app.use("/blog", blogRoutes);
 app.use("/support", supportRoutes);
+app.use("/recruitment", recruitmentRoutes);
 
 module.exports = app;

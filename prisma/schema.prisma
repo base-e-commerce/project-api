@@ -222,6 +222,33 @@ model NewsLetter {
   created_at    DateTime @default(now())
 }
 
+model RecruitmentApplication {
+  recruitment_id   Int      @id @default(autoincrement())
+  offer_type       String
+  offer_title      String?
+  full_name        String
+  email            String
+  phone            String?
+  company          String?
+  speciality       String?
+  experience_years Int?
+  availability     String?
+  work_mode        String?
+  country          String?
+  city             String?
+  budget_range     String?
+  skills           String?  @db.Text
+  message          String?  @db.Text
+  linkedin_url     String?
+  website_url      String?
+  status           String   @default("pending")
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@index([offer_type])
+  @@index([status])
+}
+
 model CommandeDetail {
   detail_id   Int      @id @default(autoincrement())
   commande_id Int
