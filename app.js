@@ -15,6 +15,7 @@ const devisRoutes = require("./src/routes/devis.route");
 const blogRoutes = require("./src/routes/blog.routes");
 const supportRoutes = require("./src/routes/support.routes");
 const recruitmentRoutes = require("./src/routes/recruitment.routes");
+const searchRoutes = require("./src/routes/search.routes");
 
 const app = express();
 app.use("/user", userRoutes);
@@ -33,5 +34,6 @@ app.use("/devis", devisRoutes);
 app.use("/blog", blogRoutes);
 app.use("/support", supportRoutes);
 app.use("/recruitment", recruitmentRoutes);
+app.use("/search", searchRoutes);
 
 module.exports = app;
