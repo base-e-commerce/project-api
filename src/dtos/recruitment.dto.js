@@ -55,6 +55,7 @@ exports.createRecruitmentApplicationSchema = Joi.object({
   message: optionalStringField(4000),
   linkedin_url: optionalUrlField(),
   website_url: optionalUrlField(),
+  cv_url: optionalStringField(500),
 }).options({ stripUnknown: true });
 
 exports.updateRecruitmentStatusSchema = Joi.object({

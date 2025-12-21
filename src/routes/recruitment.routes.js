@@ -5,6 +5,7 @@ const {
   getRecruitmentApplication,
   updateRecruitmentApplicationStatus,
   getRecruitmentSummary,
+  uploadRecruitmentCv,
 } = require("../controller/recruitment.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -13,6 +14,8 @@ const {
   createRecruitmentApplicationSchema,
   updateRecruitmentStatusSchema,
 } = require("../dtos/recruitment.dto");
+
+const recruitmentCvUpload = require("../middleware/recruitment-cv-upload.middleware");
 
 const router = express.Router();
 
@@ -110,6 +113,31 @@ router.post(
   validateDto(createRecruitmentApplicationSchema),
   createRecruitmentApplication
 );
+
+/**
+ * @swagger
+ * /recruitment/upload-cv:
+ *   post:
+ *     summary: Télécharger un CV pour une candidature
+ *     tags:
+ *       - Recruitment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               cv:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: CV enregistré
+ *       400:
+ *         description: Fichier invalide
+ */
+router.post("/upload-cv", recruitmentCvUpload.single("cv"), uploadRecruitmentCv);
 
 /**
  * @swagger

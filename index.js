@@ -17,6 +17,8 @@ const createResponse = require("./src/utils/api.response");
 const server = express();
 const bodySizeLimit = process.env.REQUEST_BODY_LIMIT || "200mb";
 const corsMiddleware = cors();
+const resolveStoragePath = (storagePath) =>
+  path.isAbsolute(storagePath) ? storagePath : path.join(__dirname, storagePath);
 
 const parsePositiveInteger = (value) => {
   const parsed = Number(value);
@@ -57,6 +59,8 @@ server.use(
   "/support-attachments",
   express.static(path.join(__dirname, "uploads", "support"))
 );
+const recruitmentCvStorage = process.env.RECRUITMENT_CV_STORAGE || path.join("uploads", "recru");
+server.use("/api/recruitment/cv", express.static(resolveStoragePath(recruitmentCvStorage)));
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 server.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));

@@ -47,6 +47,7 @@ class RecruitmentService {
       message: normalizeString(payload.message),
       linkedin_url: normalizeString(payload.linkedin_url),
       website_url: normalizeString(payload.website_url),
+      cv_url: normalizeString(payload.cv_url),
     };
 
     const existingCount = await prisma.recruitmentApplication.count({

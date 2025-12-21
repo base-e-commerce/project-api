@@ -5,4 +5,5 @@ uploads/invoices/*
 uploads/services/*
 uploads/support/*
 uploads/media/*
+uploads/recru/*
 !uploads/images/readme.md

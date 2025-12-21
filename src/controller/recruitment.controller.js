@@ -101,10 +101,39 @@ const getRecruitmentSummary = async (req, res) => {
   }
 };
 
+const uploadRecruitmentCv = async (req, res) => {
+  if (!req.file) {
+    return res
+      .status(400)
+      .json(
+        createResponse(
+          "Aucun fichier reçu. Merci de sélectionner un CV au format PDF ou Word.",
+          null,
+          false
+        )
+      );
+  }
+
+  const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get("host")}`;
+  const filePath = `/api/recruitment/cv/${req.file.filename}`;
+  const data = {
+    url: `${baseUrl}${filePath}`,
+    filename: req.file.filename,
+    originalName: req.file.originalname,
+    mimeType: req.file.mimetype,
+    size: req.file.size,
+  };
+
+  return res
+    .status(201)
+    .json(createResponse("CV importé avec succès.", data));
+};
+
 module.exports = {
   createRecruitmentApplication,
   listRecruitmentApplications,
   getRecruitmentApplication,
   updateRecruitmentApplicationStatus,
   getRecruitmentSummary,
+  uploadRecruitmentCv,
 };

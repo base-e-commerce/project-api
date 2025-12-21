@@ -241,6 +241,7 @@ model RecruitmentApplication {
   message          String?  @db.Text
   linkedin_url     String?
   website_url      String?
+  cv_url           String?
   status           String   @default("pending")
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
