@@ -632,31 +632,47 @@ class ProductService {
     };
   }
 
-  async getAllProducts(limit, offset) {
+  async getAllProducts(limit, offset, search = "") {
     try {
-      const products = await prisma.product.findMany({
-        include: {
-          productImages: true,
-          category: true,
-          service: true,
-          reviews: {
-            include: {
-              customer: true,
+      const parsedLimit = Number.parseInt(limit, 10);
+      const parsedOffset = Number.parseInt(offset, 10);
+      const sanitizedLimit = Number.isFinite(parsedLimit)
+        ? Math.max(parsedLimit, 1)
+        : 10;
+      const sanitizedOffset = Number.isFinite(parsedOffset)
+        ? Math.max(parsedOffset, 0)
+        : 0;
+
+      const whereClause = { is_active: true };
+      const searchFilters = this.buildCatalogSearchFilter(search);
+      if (searchFilters) {
+        whereClause.OR = searchFilters;
+      }
+
+      const [products, totalProducts] = await Promise.all([
+        prisma.product.findMany({
+          include: {
+            productImages: true,
+            category: true,
+            service: true,
+            reviews: {
+              include: {
+                customer: true,
+              },
             },
           },
-        },
-        skip: offset,
-        take: limit,
-        orderBy: { created_at: "desc" },
-        where: { is_active: true },
-      });
-
-      const totalProducts = await prisma.product.count({
-        where: { is_active: true },
-      });
+          skip: sanitizedOffset,
+          take: sanitizedLimit,
+          orderBy: { created_at: "desc" },
+          where: whereClause,
+        }),
+        prisma.product.count({
+          where: whereClause,
+        }),
+      ]);
 
       return {
-        products,
+        products: this.normalizeProducts(products),
         totalProducts,
       };
     } catch (error) {

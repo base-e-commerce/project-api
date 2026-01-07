@@ -152,12 +152,15 @@ exports.getAllProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const searchQuery =
+      typeof req.query.q === "string" ? req.query.q.trim() : "";
 
     const offset = (page - 1) * limit;
 
     const { products, totalProducts } = await productService.getAllProducts(
       limit,
-      offset
+      offset,
+      searchQuery
     );
 
     const totalPages = Math.ceil(totalProducts / limit);
