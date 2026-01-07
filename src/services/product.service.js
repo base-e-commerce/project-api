@@ -2,6 +2,51 @@ const prisma = require("../database/database");
 const { slugify } = require("../utils/slug.util");
 
 class ProductService {
+  constructor() {
+    this.defaultCatalogSort = "newest";
+    this.catalogSorts = {
+      newest: {
+        label: "Nouveautés",
+        description: "Derniers produits ajoutés",
+        orderBy: [{ created_at: "desc" }],
+      },
+      "price-asc": {
+        label: "Prix croissant",
+        description: "Du moins cher au plus cher",
+        orderBy: [{ price: "asc" }],
+      },
+      "price-desc": {
+        label: "Prix décroissant",
+        description: "Du plus cher au moins cher",
+        orderBy: [{ price: "desc" }],
+      },
+      alpha: {
+        label: "Ordre alphabétique",
+        description: "De A à Z",
+        orderBy: [{ name: "asc" }],
+      },
+      stock: {
+        label: "Stock disponible",
+        description: "Priorise les références prêtes à livrer",
+        orderBy: [
+          { stock_quantity: "desc" },
+          { updated_at: "desc" },
+        ],
+      },
+    };
+
+    this.catalogProductInclude = {
+      productImages: true,
+      category: true,
+      service: true,
+      reviews: {
+        include: {
+          customer: true,
+        },
+      },
+    };
+  }
+
   buildServiceFilter(identifier) {
     if (identifier === undefined || identifier === null) {
       return null;
@@ -51,6 +96,351 @@ class ProductService {
 
     return null;
   }
+
+  normalizeIdentifier(value) {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    const normalized = String(value).trim();
+    return normalized === "" ? null : normalized;
+  }
+
+  normalizeAvailabilityValue(value) {
+    if (typeof value !== "string") {
+      return null;
+    }
+    const normalized = value.trim().toLowerCase();
+    if (["in", "instock", "available", "yes"].includes(normalized)) {
+      return "in";
+    }
+    if (["out", "outofstock", "unavailable", "no"].includes(normalized)) {
+      return "out";
+    }
+    return null;
+  }
+
+  normalizePriceBound(value) {
+    if (value === undefined || value === null || value === "") {
+      return null;
+    }
+    const parsed = Number(value);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      return null;
+    }
+    return parsed;
+  }
+
+  normalizeCatalogFilters(filters = {}) {
+    const normalized = {
+      search: typeof filters.search === "string" ? filters.search.trim() : "",
+      service: this.normalizeIdentifier(filters.service),
+      category: this.normalizeIdentifier(filters.category),
+      availability: this.normalizeAvailabilityValue(filters.availability),
+      priceMin: this.normalizePriceBound(filters.priceMin),
+      priceMax: this.normalizePriceBound(filters.priceMax),
+    };
+
+    if (
+      typeof normalized.priceMin === "number" &&
+      typeof normalized.priceMax === "number" &&
+      normalized.priceMin > normalized.priceMax
+    ) {
+      [normalized.priceMin, normalized.priceMax] = [
+        normalized.priceMax,
+        normalized.priceMin,
+      ];
+    }
+
+    return normalized;
+  }
+
+  buildCatalogSearchFilter(search) {
+    const normalized = (search || "").trim();
+    if (!normalized) {
+      return null;
+    }
+    const contains = { contains: normalized, mode: "insensitive" };
+    return [
+      { name: contains },
+      { description: contains },
+      { category: { name: contains } },
+      { service: { name: contains } },
+    ];
+  }
+
+  buildCatalogWhereClause(filters = {}) {
+    const whereClause = { is_active: true };
+    const searchFilters = this.buildCatalogSearchFilter(filters.search);
+    if (searchFilters) {
+      whereClause.OR = searchFilters;
+    }
+
+    if (filters.service) {
+      const serviceFilter = this.buildServiceFilter(filters.service);
+      if (serviceFilter) {
+        Object.assign(whereClause, serviceFilter);
+      }
+    }
+
+    if (filters.category) {
+      const categoryFilter = this.buildCategoryFilter(filters.category);
+      if (categoryFilter) {
+        Object.assign(whereClause, categoryFilter);
+      }
+    }
+
+    const availability = this.normalizeAvailabilityValue(filters.availability);
+    if (availability === "in") {
+      whereClause.stock_quantity = { gt: 0 };
+    } else if (availability === "out") {
+      whereClause.stock_quantity = 0;
+    }
+
+    const priceFilter = {};
+    if (typeof filters.priceMin === "number") {
+      priceFilter.gte = filters.priceMin;
+    }
+    if (typeof filters.priceMax === "number") {
+      priceFilter.lte = filters.priceMax;
+    }
+    if (Object.keys(priceFilter).length > 0) {
+      whereClause.price = priceFilter;
+    }
+
+    return whereClause;
+  }
+
+  resolveCatalogSort(sortKey) {
+    const key =
+      typeof sortKey === "string" && this.catalogSorts[sortKey]
+        ? sortKey
+        : this.defaultCatalogSort;
+    return {
+      key,
+      orderBy: this.catalogSorts[key].orderBy,
+    };
+  }
+
+  getCatalogSortOptions(activeKey) {
+    return Object.entries(this.catalogSorts).map(([id, meta]) => ({
+      id,
+      label: meta.label,
+      description: meta.description,
+      active: id === activeKey,
+    }));
+  }
+
+  normalizeProductPayload(product) {
+    if (!product) {
+      return product;
+    }
+
+    return {
+      ...product,
+      price: Number(product.price ?? 0),
+      price_pro: Number(product.price_pro ?? 0),
+    };
+  }
+
+  normalizeProducts(products = []) {
+    return (products || []).map((product) => this.normalizeProductPayload(product));
+  }
+
+  normalizePriceRange(aggregateResult) {
+    if (!aggregateResult) {
+      return { min: null, max: null };
+    }
+
+    const minValue =
+      aggregateResult._min?.price !== null &&
+      aggregateResult._min?.price !== undefined
+        ? Number(aggregateResult._min.price)
+        : null;
+    const maxValue =
+      aggregateResult._max?.price !== null &&
+      aggregateResult._max?.price !== undefined
+        ? Number(aggregateResult._max.price)
+        : null;
+
+    return {
+      min: minValue,
+      max: maxValue,
+    };
+  }
+
+  deriveTopCategories(categories = []) {
+    return [...(categories || [])]
+      .filter((category) => category.products > 0)
+      .sort((a, b) => b.products - a.products)
+      .slice(0, 6);
+  }
+
+  async fetchCatalogCategories() {
+    const categories = await prisma.categorie.findMany({
+      where: { is_active: true },
+      select: {
+        categorie_id: true,
+        name: true,
+        slug: true,
+        service: {
+          select: {
+            service_id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        _count: {
+          select: {
+            Product: true,
+          },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return categories.map((category) => ({
+      id: category.categorie_id,
+      name: category.name,
+      slug: category.slug,
+      service: category.service
+        ? {
+            id: category.service.service_id,
+            name: category.service.name,
+            slug: category.service.slug,
+          }
+        : null,
+      products: category._count.Product,
+    }));
+  }
+
+  async fetchCatalogServices() {
+    const services = await prisma.service.findMany({
+      where: { is_active: true },
+      select: {
+        service_id: true,
+        name: true,
+        slug: true,
+        _count: {
+          select: {
+            Product: true,
+          },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return services.map((service) => ({
+      id: service.service_id,
+      name: service.name,
+      slug: service.slug,
+      products: service._count.Product,
+    }));
+  }
+
+  async fetchPriceInsights(whereClause) {
+    const [globalAggregate, filteredAggregate] = await Promise.all([
+      prisma.product.aggregate({
+        where: { is_active: true },
+        _min: { price: true },
+        _max: { price: true },
+      }),
+      prisma.product.aggregate({
+        where: whereClause,
+        _min: { price: true },
+        _max: { price: true },
+      }),
+    ]);
+
+    return {
+      global: this.normalizePriceRange(globalAggregate),
+      filtered: this.normalizePriceRange(filteredAggregate),
+    };
+  }
+
+  async fetchAvailabilityStats(whereClause) {
+    const baseWhere = { ...whereClause };
+    delete baseWhere.stock_quantity;
+
+    const inStockWhere = { ...baseWhere, stock_quantity: { gt: 0 } };
+    const outOfStockWhere = { ...baseWhere, stock_quantity: 0 };
+
+    const [inStock, outOfStock] = await Promise.all([
+      prisma.product.count({ where: inStockWhere }),
+      prisma.product.count({ where: outOfStockWhere }),
+    ]);
+
+    return { inStock, outOfStock };
+  }
+
+  async fetchHeroMetrics() {
+    const [
+      totalProducts,
+      totalServices,
+      totalCategories,
+      inStock,
+      outOfStock,
+      lastProduct,
+    ] = await Promise.all([
+      prisma.product.count({ where: { is_active: true } }),
+      prisma.service.count({ where: { is_active: true } }),
+      prisma.categorie.count({ where: { is_active: true } }),
+      prisma.product.count({
+        where: { is_active: true, stock_quantity: { gt: 0 } },
+      }),
+      prisma.product.count({
+        where: { is_active: true, stock_quantity: 0 },
+      }),
+      prisma.product.findFirst({
+        where: { is_active: true },
+        select: { updated_at: true },
+        orderBy: { updated_at: "desc" },
+      }),
+    ]);
+
+    return {
+      totalProducts,
+      totalServices,
+      totalCategories,
+      inStock,
+      outOfStock,
+      lastUpdated: lastProduct?.updated_at
+        ? lastProduct.updated_at.toISOString()
+        : null,
+    };
+  }
+
+  async fetchFeaturedProducts(limit = 4) {
+    const featured = await prisma.product.findMany({
+      where: { is_active: true, suggest: true },
+      include: this.catalogProductInclude,
+      orderBy: { updated_at: "desc" },
+      take: limit,
+    });
+
+    if (featured.length > 0) {
+      return featured;
+    }
+
+    return prisma.product.findMany({
+      where: { is_active: true },
+      include: this.catalogProductInclude,
+      orderBy: { created_at: "desc" },
+      take: limit,
+    });
+  }
+
+  async fetchSpotlightProducts(limit = 3) {
+    return prisma.product.findMany({
+      where: { is_active: true },
+      include: this.catalogProductInclude,
+      take: limit,
+      orderBy: [
+        { reviews: { _count: "desc" } },
+        { updated_at: "desc" },
+      ],
+    });
+  }
+
 
   async createProduct(data) {
     const db = prisma;
@@ -153,6 +543,93 @@ class ProductService {
         `Error occurred while searching for product: ${error.message}`
       );
     }
+  }
+
+  async getProductCatalogView({
+    page = 1,
+    limit = 12,
+    sort = "newest",
+    filters = {},
+  } = {}) {
+    const parsedPage = Number.parseInt(page, 10);
+    const sanitizedPage =
+      Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const parsedLimit = Number.parseInt(limit, 10);
+    const sanitizedLimitRaw =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 12;
+    const sanitizedLimit = Math.min(sanitizedLimitRaw, 50);
+    const normalizedFilters = this.normalizeCatalogFilters(filters);
+    const whereClause = this.buildCatalogWhereClause(normalizedFilters);
+    const availabilityBaseFilters = {
+      ...normalizedFilters,
+      availability: null,
+    };
+    const availabilityWhere =
+      this.buildCatalogWhereClause(availabilityBaseFilters);
+
+    const { key: activeSortKey, orderBy } = this.resolveCatalogSort(sort);
+    const offset = (sanitizedPage - 1) * sanitizedLimit;
+
+    const [products, totalProducts] = await Promise.all([
+      prisma.product.findMany({
+        where: whereClause,
+        include: this.catalogProductInclude,
+        skip: offset,
+        take: sanitizedLimit,
+        orderBy,
+      }),
+      prisma.product.count({
+        where: whereClause,
+      }),
+    ]);
+
+    const [
+      categories,
+      services,
+      priceInsights,
+      availabilityStats,
+      heroMetrics,
+      featuredProducts,
+      spotlightProducts,
+    ] = await Promise.all([
+      this.fetchCatalogCategories(),
+      this.fetchCatalogServices(),
+      this.fetchPriceInsights(whereClause),
+      this.fetchAvailabilityStats(availabilityWhere),
+      this.fetchHeroMetrics(),
+      this.fetchFeaturedProducts(),
+      this.fetchSpotlightProducts(),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(totalProducts / sanitizedLimit));
+
+    return {
+      products: this.normalizeProducts(products),
+      pagination: {
+        page: sanitizedPage,
+        limit: sanitizedLimit,
+        totalPages,
+        totalProducts,
+      },
+      filters: {
+        categories,
+        services,
+        priceRange: priceInsights.global,
+        filteredPriceRange: priceInsights.filtered,
+        availability: availabilityStats,
+      },
+      hero: heroMetrics,
+      highlights: {
+        featured: this.normalizeProducts(featuredProducts),
+        spotlight: this.normalizeProducts(spotlightProducts),
+        topCategories: this.deriveTopCategories(categories),
+      },
+      appliedFilters: {
+        ...normalizedFilters,
+        sort: activeSortKey,
+      },
+      sortOptions: this.getCatalogSortOptions(activeSortKey),
+    };
   }
 
   async getAllProducts(limit, offset) {

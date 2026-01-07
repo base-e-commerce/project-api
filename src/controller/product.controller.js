@@ -116,6 +116,38 @@ exports.getSuggestedProducts = async (req, res) => {
   }
 };
 
+exports.getProductCatalog = async (req, res) => {
+  try {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 12, 1), 50);
+    const sort = typeof req.query.sort === "string" ? req.query.sort : "newest";
+
+    const filters = {
+      search: typeof req.query.q === "string" ? req.query.q : "",
+      service: req.query.service,
+      category: req.query.category,
+      availability: req.query.availability,
+      priceMin: req.query.min,
+      priceMax: req.query.max,
+    };
+
+    const catalog = await productService.getProductCatalogView({
+      page,
+      limit,
+      sort,
+      filters,
+    });
+
+    res
+      .status(200)
+      .json(createResponse("Product catalog fetched successfully", catalog));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.getAllProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;

@@ -23,6 +23,7 @@ const {
   getLatestProducts,
   calculateProductPrice,
   getSuggestedProducts,
+  getProductCatalog,
 } = require("../controller/product.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -110,6 +111,66 @@ const router = express.Router();
  *               - price
  *               - categoryId
  */
+
+/**
+ * @swagger
+ * /product/catalog:
+ *   get:
+ *     summary: Get the curated product catalog with filters, stats and pagination
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Current page (default 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of products per page (default 12, max 50)
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Keyword to search within product, category or service names
+ *       - in: query
+ *         name: service
+ *         schema:
+ *           type: string
+ *         description: Service handle (id or slug) to filter on
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Category handle (id or slug) to filter on
+ *       - in: query
+ *         name: availability
+ *         schema:
+ *           type: string
+ *           enum: [in, out]
+ *         description: Filter on in-stock or out-of-stock products
+ *       - in: query
+ *         name: min
+ *         schema:
+ *           type: number
+ *         description: Minimum price filter
+ *       - in: query
+ *         name: max
+ *         schema:
+ *           type: number
+ *         description: Maximum price filter
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: Sort identifier (newest, price-asc, price-desc, alpha, stock)
+ *     responses:
+ *       200:
+ *         description: Full catalog payload
+ */
+router.get("/catalog", getProductCatalog);
 
 /**
  * @swagger
