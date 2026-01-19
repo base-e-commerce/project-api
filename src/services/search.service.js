@@ -22,7 +22,6 @@ class SearchService {
 
     return {
       contains: normalized,
-      mode: "insensitive",
     };
   }
 
@@ -34,6 +33,7 @@ class SearchService {
       whereClause.OR = [
         { name: contains },
         { description: contains },
+        { descriptionRich: contains },
         { category: { name: contains } },
         { service: { name: contains } },
       ];

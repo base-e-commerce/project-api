@@ -154,15 +154,39 @@ class ProductService {
     return normalized;
   }
 
-  buildCatalogSearchFilter(search) {
-    const normalized = (search || "").trim();
+  buildContainsFilter(value) {
+    const normalized = (value || "").trim();
     if (!normalized) {
       return null;
     }
-    const contains = { contains: normalized, mode: "insensitive" };
+
+    return {
+      contains: normalized,
+    };
+  }
+
+  buildProductTextFiltersFromContains(contains) {
+    if (!contains) {
+      return null;
+    }
+
     return [
       { name: contains },
       { description: contains },
+      { descriptionRich: contains },
+    ];
+  }
+
+  buildCatalogSearchFilter(search) {
+    const contains = this.buildContainsFilter(search);
+    if (!contains) {
+      return null;
+    }
+    const productFilters =
+      this.buildProductTextFiltersFromContains(contains) ?? [];
+
+    return [
+      ...productFilters,
       { category: { name: contains } },
       { service: { name: contains } },
     ];
@@ -488,11 +512,16 @@ class ProductService {
 
   async getSearchProducts(key) {
     try {
+      const contains = this.buildContainsFilter(key);
+      const keywordFilters = this.buildProductTextFiltersFromContains(contains);
+
+      const whereClause = { is_active: true };
+      if (keywordFilters) {
+        whereClause.OR = keywordFilters;
+      }
+
       const product = await prisma.product.findMany({
-        where: {
-          is_active: true,
-          OR: [{ name: { contains: key } }, { description: { contains: key } }],
-        },
+        where: whereClause,
         include: {
           productImages: true,
           category: true,
@@ -515,15 +544,16 @@ class ProductService {
         whereClause.category_id = idCategory;
       }
 
-      if (key && key.trim() !== "") {
-        const keyFilter = {
-          OR: [{ name: { contains: key } }, { description: { contains: key } }],
-        };
+      const contains = this.buildContainsFilter(key);
+      const keywordFilters = this.buildProductTextFiltersFromContains(contains);
+
+      if (keywordFilters) {
+        const keywordClause = { OR: keywordFilters };
 
         if (idCategory !== 0) {
-          whereClause.AND = [keyFilter];
+          whereClause.AND = [keywordClause];
         } else {
-          Object.assign(whereClause, keyFilter);
+          Object.assign(whereClause, keywordClause);
         }
       }
 

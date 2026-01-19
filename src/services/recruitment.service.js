@@ -98,11 +98,11 @@ class RecruitmentService {
     if (searchTerm) {
       filters.push({
         OR: [
-          { full_name: { contains: searchTerm, mode: "insensitive" } },
-          { email: { contains: searchTerm, mode: "insensitive" } },
-          { offer_title: { contains: searchTerm, mode: "insensitive" } },
-          { speciality: { contains: searchTerm, mode: "insensitive" } },
-          { company: { contains: searchTerm, mode: "insensitive" } },
+          { full_name: { contains: searchTerm } },
+          { email: { contains: searchTerm } },
+          { offer_title: { contains: searchTerm } },
+          { speciality: { contains: searchTerm } },
+          { company: { contains: searchTerm } },
         ],
       });
     }
