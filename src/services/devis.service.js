@@ -1,5 +1,24 @@
 const prisma = require("../database/database");
 
+const normalizeNullableNumber = (value) => {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const normalizeOptionalNumber = (value) => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null || value === "") {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 class DevisService {
   async createDevis(data) {
     const db = prisma;
@@ -8,12 +27,14 @@ class DevisService {
       try {
         const newDevis = await prisma.devis.create({
           data: {
-            user_id: data.user_id ? Number(data.user_id) : null,
-            product_id: data.product_id ? Number(data.product_id) : null,
+            user_id: normalizeNullableNumber(data.user_id),
+            product_id: normalizeNullableNumber(data.product_id),
+            box_id: normalizeNullableNumber(data.box_id),
             email: data.email,
-            nombre: data.nombre,
-            description: data.description,
-            telephone: data.telephone,
+            nombre: normalizeNullableNumber(data.nombre),
+            description: data.description ?? null,
+            telephone: data.telephone ?? null,
+            entreprise: data.entreprise ?? null,
             productJson: data.productJson,
           },
         });
@@ -67,13 +88,26 @@ class DevisService {
 
   async updateDevis(devisId, data) {
     try {
+      const updatePayload = {
+        productJson: data.productJson ?? undefined,
+        telephone: data.telephone ?? undefined,
+        email: data.email ?? undefined,
+        entreprise: data.entreprise ?? undefined,
+        description: data.description ?? undefined,
+        nombre: normalizeOptionalNumber(data.nombre),
+        box_id: normalizeOptionalNumber(data.box_id),
+        product_id: normalizeOptionalNumber(data.product_id),
+      };
+
+      Object.keys(updatePayload).forEach((key) => {
+        if (updatePayload[key] === undefined) {
+          delete updatePayload[key];
+        }
+      });
+
       const updatedDevis = await prisma.devis.update({
         where: { id: devisId },
-        data: {
-          productJson: data.productJson,
-          telephone: data.telephone ?? undefined,
-          email: data.email ?? undefined,
-        },
+        data: updatePayload,
       });
       return updatedDevis;
     } catch (error) {
