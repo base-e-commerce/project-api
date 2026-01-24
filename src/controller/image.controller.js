@@ -11,6 +11,11 @@ const resolveMediaUrlBase = () => {
   return `${baseUrl}/api/media`;
 };
 
+const resolveBoxAssetBase = () => {
+  const baseUrl = process.env.BASE_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  return `${baseUrl}/api/box-assets`;
+};
+
 const getMediaFolderSegment = (file) =>
   file.mimetype.startsWith("video/") ? "video" : "image";
 
@@ -125,6 +130,26 @@ exports.uploadMediaAsset = async (req, res) => {
     return res
       .status(200)
       .json(createResponse("Media uploaded successfully", { url: mediaUrl }));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Error while performing upload", error.message));
+  }
+};
+
+exports.uploadBoxAssets = async (req, res) => {
+  try {
+    if (!req.files || !req.files.length) {
+      return res
+        .status(400)
+        .json(createResponse("At least one file is required", null, false));
+    }
+    const origin = resolveBoxAssetBase();
+    const urls = req.files.map((file) => `${origin}/${file.filename}`);
+
+    return res
+      .status(200)
+      .json(createResponse("Box images uploaded successfully", urls));
   } catch (error) {
     res
       .status(500)

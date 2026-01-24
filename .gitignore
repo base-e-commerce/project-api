@@ -6,4 +6,5 @@ uploads/services/*
 uploads/support/*
 uploads/media/*
 uploads/recru/*
+uploads/box/*
 !uploads/images/readme.md

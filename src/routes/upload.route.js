@@ -1,12 +1,14 @@
 const express = require("express");
 const upload = require("../middleware/upload.middleware");
 const mediaUpload = require("../middleware/media-upload.middleware");
+const boxUpload = require("../middleware/box-upload.middleware");
 const createUploader = require ("../middleware/upload.test.middleware")
 const {
   createUploadImage,
   uploadMediaAsset,
   listMediaAssets,
   deleteMediaAsset,
+  uploadBoxAssets,
 } = require("../controller/image.controller");
 const router = express.Router();
 
@@ -76,6 +78,7 @@ router.post("/image", upload.array("image_url", 5), createUploadImage);
  */
 router.post("/media", mediaUpload.single("media"), uploadMediaAsset);
 router.get("/media", listMediaAssets);
+router.post("/box", boxUpload.array("box_images", 10), uploadBoxAssets);
 /**
  * @swagger
  * /upload/media:

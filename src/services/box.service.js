@@ -46,11 +46,12 @@ class BoxService {
       return null;
     }
 
-    return [
-      { name: { contains: normalized, mode: "insensitive" } },
-      { description: { contains: normalized, mode: "insensitive" } },
-      { descriptionRich: { contains: normalized, mode: "insensitive" } },
-    ];
+    const searchField = (field) => ({
+      [field]: {
+        contains: normalized,
+      },
+    });
+    return ["name", "description", "descriptionRich"].map((field) => searchField(field));
   }
 
   parseImageArray(value) {
