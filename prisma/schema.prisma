@@ -219,6 +219,24 @@ model Box {
   is_active       Boolean  @default(true)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
+  commandBoxes    CommandBox[]
+}
+
+model CommandBox {
+  command_box_id Int      @id @default(autoincrement())
+  commande_id    Int
+  commande       Commande @relation(fields: [commande_id], references: [commande_id])
+  box_id         Int
+  box            Box      @relation(fields: [box_id], references: [box_id])
+  quantity       Int      @default(1)
+  unit_price     Decimal
+  status         String   @default("pending")
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  @@index([commande_id])
+  @@index([box_id])
+  @@index([status])
 }
 
 model ContactInfo {
@@ -297,6 +315,7 @@ model Commande {
   admin                     User?            @relation(fields: [admin_id], references: [user_id])
   details                   CommandeDetail[]
   payments                  Payment[]
+  commandBoxes              CommandBox[]
 }
 
 model Payment {
