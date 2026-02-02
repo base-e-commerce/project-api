@@ -35,7 +35,7 @@ exports.createDevisSchema = Joi.object({
     "string.pattern.base":
       "Telephone must contain only numbers, spaces, or symbols (+ - ( ))",
   }),
-  productJson: Joi.object().required().messages({
+  productJson: Joi.object().required().unknown(true).messages({
     "object.base": "Product JSON must be a valid JSON object",
     "any.required": "Product JSON is required",
   }),
@@ -78,7 +78,7 @@ exports.updateDevisSchema = Joi.object({
       "string.pattern.base":
         "Telephone must contain only numbers, spaces, or symbols (+ - ( ))",
     }),
-  productJson: Joi.object().optional().messages({
+  productJson: Joi.object().optional().unknown(true).messages({
     "object.base": "Product JSON must be a valid JSON object",
   }),
 });

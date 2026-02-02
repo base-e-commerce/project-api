@@ -13,6 +13,7 @@ const app = require("./app");
 const swaggerOptions = require("./config/swagger");
 const stripeController = require("./src/controller/stripe.controller");
 const createResponse = require("./src/utils/api.response");
+const requestLoader = require("./src/middleware/request.loader.middleware");
 
 const server = express();
 const bodySizeLimit = process.env.REQUEST_BODY_LIMIT || "200mb";
@@ -36,6 +37,8 @@ const getMediaMaxFileSizeLabel = () => {
 
 server.use(corsMiddleware);
 server.options("*", corsMiddleware);
+
+server.use(requestLoader);
 
 server.post(
   "/api/stripe/webhook",
