@@ -17,6 +17,10 @@ exports.createDevisSchema = Joi.object({
     "string.email": "Email must be a valid email address",
     "any.required": "Email is required",
   }),
+  country: Joi.string().max(100).optional().messages({
+    "string.base": "Country must be a string",
+    "string.max": "Country must not exceed 100 characters",
+  }),
   nombre: Joi.number().integer().optional().messages({
     "number.base": "Product ID must be a number",
     "number.integer": "Product ID must be an integer",
@@ -56,6 +60,10 @@ exports.updateDevisSchema = Joi.object({
   }),
   email: Joi.string().email().optional().messages({
     "string.base": "Description must be a string",
+  }),
+  country: Joi.string().max(100).optional().messages({
+    "string.base": "Country must be a string",
+    "string.max": "Country must not exceed 100 characters",
   }),
   entreprise: Joi.string().optional().messages({
     "string.base": "Entreprise must be a string",

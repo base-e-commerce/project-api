@@ -19,25 +19,38 @@ const normalizeOptionalNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-class DevisService {
-  async createDevis(data) {
-    const db = prisma;
+const normalizeText = (value) => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed === "" ? null : trimmed;
+  }
+  return String(value);
+};
 
-    const transaction = await db.$transaction(async (prisma) => {
-      try {
-        const newDevis = await prisma.devis.create({
-          data: {
-            user_id: normalizeNullableNumber(data.user_id),
-            product_id: normalizeNullableNumber(data.product_id),
-            box_id: normalizeNullableNumber(data.box_id),
-            email: data.email,
-            nombre: normalizeNullableNumber(data.nombre),
-            description: data.description ?? null,
-            telephone: data.telephone ?? null,
-            entreprise: data.entreprise ?? null,
-            productJson: data.productJson,
-          },
-        });
+class DevisService {
+async createDevis(data) {
+  const db = prisma;
+
+  const transaction = await db.$transaction(async (prisma) => {
+    try {
+      const newDevis = await prisma.devis.create({
+        data: {
+          user_id: normalizeNullableNumber(data.user_id),
+          product_id: normalizeNullableNumber(data.product_id),
+          box_id: normalizeNullableNumber(data.box_id),
+          email: data.email,
+          nombre: normalizeNullableNumber(data.nombre),
+          description: data.description ?? null,
+          telephone: data.telephone ?? null,
+          entreprise: data.entreprise ?? null,
+          country: normalizeText(data.country),
+          status: data.status ?? "pending",
+          productJson: data.productJson,
+        },
+      });
         return newDevis;
       } catch (error) {
         throw new Error(
@@ -97,6 +110,8 @@ class DevisService {
         nombre: normalizeOptionalNumber(data.nombre),
         box_id: normalizeOptionalNumber(data.box_id),
         product_id: normalizeOptionalNumber(data.product_id),
+        country: data.country !== undefined ? normalizeText(data.country) : undefined,
+        status: data.status ?? undefined,
       };
 
       Object.keys(updatePayload).forEach((key) => {

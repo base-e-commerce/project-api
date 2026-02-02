@@ -8,6 +8,7 @@ const {
   createDevis,
   updateDevis,
   deleteDevis,
+  createDevisPayment,
 } = require("../controller/devis.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -102,6 +103,29 @@ router.get("/all/:email", getAllDevisByEmail);
  *         description: Devis not found
  */
 router.get("/:id", getDevisById);
+
+/**
+ * @swagger
+ * /devis/{id}/payment:
+ *   post:
+ *     summary: Create a Stripe checkout session for a devis
+ *     tags:
+ *       - Devis
+ *     parameters:
+ *       - $ref: '#/components/parameters/DevisIdParam'
+ *     responses:
+ *       200:
+ *         description: Session created successfully
+ *       400:
+ *         description: Invalid input data
+ *       404:
+ *         description: Devis not found
+ */
+router.post(
+  "/:id/payment",
+  authenticateCustomer,
+  createDevisPayment
+);
 
 /**
  * @swagger
