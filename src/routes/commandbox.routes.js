@@ -2,6 +2,7 @@ const express = require("express");
 const { validateDto } = require("../middleware/dto.validation.middleware");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
+const authenticateCustomer = require("../middleware/auth.client.middleware");
 const {
   createCommandBoxSchema,
   updateCommandBoxSchema,
@@ -12,6 +13,7 @@ const {
   createCommandBox,
   updateCommandBox,
   deleteCommandBox,
+  createPaymentSession,
 } = require("../controller/commandbox.controller");
 
 const router = express.Router();
@@ -40,6 +42,12 @@ router.delete(
   authenticateToken,
   authenticateAdmin,
   deleteCommandBox
+);
+
+router.post(
+  "/:id/payment",
+  authenticateCustomer,
+  createPaymentSession
 );
 
 module.exports = router;
