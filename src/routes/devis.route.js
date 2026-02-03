@@ -1,6 +1,10 @@
 const express = require("express");
 const { validateDto } = require("../middleware/dto.validation.middleware");
-const { createDevisSchema, updateDevisSchema } = require("../dtos/devis.dto");
+const {
+  createDevisSchema,
+  updateDevisSchema,
+  convertDevisToCommandeSchema,
+} = require("../dtos/devis.dto");
 const {
   getAllDevis,
   getAllDevisByEmail,
@@ -9,6 +13,7 @@ const {
   updateDevis,
   deleteDevis,
   createDevisPayment,
+  convertDevisToCommande,
 } = require("../controller/devis.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -125,6 +130,53 @@ router.post(
   "/:id/payment",
   authenticateCustomer,
   createDevisPayment
+);
+
+/**
+ * @swagger
+ * /devis/{id}/commande:
+ *   post:
+ *     summary: Convert a validated devis into a commande and get a Stripe session
+ *     tags:
+ *       - Devis
+ *     parameters:
+ *       - $ref: '#/components/parameters/DevisIdParam'
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               shippingAddressId:
+ *                 type: integer
+ *               type:
+ *                 type: string
+ *                 enum: [standard, pro]
+ *               currency:
+ *                 type: string
+ *             examples:
+ *               default:
+ *                 value:
+ *                   shippingAddressId: 4
+ *                   type: standard
+ *                   currency: EUR
+ *     responses:
+ *       201:
+ *         description: Commande created and Stripe session ready
+ *       400:
+ *         description: Invalid input or unvalidated devis
+ *       401:
+ *         description: Unauthorized (authentication required)
+ *       403:
+ *         description: Forbidden (not the owner of the devis)
+ *       404:
+ *         description: Devis or customer not found
+ */
+router.post(
+  "/:id/commande",
+  authenticateCustomer,
+  validateDto(convertDevisToCommandeSchema),
+  convertDevisToCommande
 );
 
 /**

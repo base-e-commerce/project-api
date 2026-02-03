@@ -351,6 +351,7 @@ model Devis {
   country     String?
   productJson Json
   status      String   @default("pending")
+  price_final Decimal?
   createdAt   DateTime @default(now())
 }
 

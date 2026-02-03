@@ -81,4 +81,29 @@ exports.updateDevisSchema = Joi.object({
   productJson: Joi.object().optional().unknown(true).messages({
     "object.base": "Product JSON must be a valid JSON object",
   }),
+  status: Joi.string()
+    .max(50)
+    .messages({
+      "string.base": "Status must be a string",
+      "string.max": "Status must not exceed 50 characters",
+    })
+    .optional(),
+});
+
+exports.convertDevisToCommandeSchema = Joi.object({
+  shippingAddressId: Joi.number().integer().optional().messages({
+    "number.base": "Shipping Address ID must be a number",
+    "number.integer": "Shipping Address ID must be an integer",
+  }),
+  type: Joi.string()
+    .valid("pro", "standard")
+    .optional()
+    .messages({
+      "string.base": "Type must be a string",
+      "any.only": "Type must be either 'pro' or 'standard'",
+    }),
+  currency: Joi.string().max(10).optional().messages({
+    "string.base": "Currency must be a string",
+    "string.max": "Currency identifier must not exceed 10 characters",
+  }),
 });

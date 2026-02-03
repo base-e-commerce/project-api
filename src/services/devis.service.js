@@ -49,6 +49,7 @@ async createDevis(data) {
           country: normalizeText(data.country),
           status: data.status ?? "pending",
           productJson: data.productJson,
+          price_final: normalizeOptionalNumber(data.price_final),
         },
       });
         return newDevis;
@@ -112,6 +113,7 @@ async createDevis(data) {
         product_id: normalizeOptionalNumber(data.product_id),
         country: data.country !== undefined ? normalizeText(data.country) : undefined,
         status: data.status ?? undefined,
+        price_final: normalizeOptionalNumber(data.price_final),
       };
 
       Object.keys(updatePayload).forEach((key) => {
