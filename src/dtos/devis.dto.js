@@ -39,6 +39,14 @@ exports.createDevisSchema = Joi.object({
     "object.base": "Product JSON must be a valid JSON object",
     "any.required": "Product JSON is required",
   }),
+  price_final: Joi.number()
+    .precision(4)
+    .min(0)
+    .messages({
+      "number.base": "Final price must be a number",
+      "number.min": "Final price cannot be negative",
+    })
+    .optional(),
 });
 
 exports.updateDevisSchema = Joi.object({
@@ -86,6 +94,14 @@ exports.updateDevisSchema = Joi.object({
     .messages({
       "string.base": "Status must be a string",
       "string.max": "Status must not exceed 50 characters",
+    })
+    .optional(),
+  price_final: Joi.number()
+    .precision(4)
+    .min(0)
+    .messages({
+      "number.base": "Final price must be a number",
+      "number.min": "Final price cannot be negative",
     })
     .optional(),
 });
