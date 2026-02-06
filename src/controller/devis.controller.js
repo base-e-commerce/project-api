@@ -60,9 +60,22 @@ const buildCommandeConversionPayload = (devis) => {
       .map((value) => toFiniteNumber(value))
       .find((value) => value !== null && value > 0) ?? 1;
   const quantity = Math.max(1, Math.round(resolvedQuantity));
-  const finalPrice = toFiniteNumber(devis.price_final);
-  if (!finalPrice || finalPrice <= 0) {
-    throw new Error("Final price must be set by admin before converting the devis");
+  const finalPriceCandidates = [
+    devis.price_final,
+    productInfo.price_final,
+    productInfo.final_price,
+    productInfo.price_final_net,
+    productInfo.price,
+    productInfo.price_pro,
+  ];
+  const finalPrice =
+    finalPriceCandidates
+      .map((value) => toFiniteNumber(value))
+      .find((value) => value !== null && value > 0) ?? null;
+  if (!finalPrice) {
+    throw new Error(
+      "Final price must be set by admin before converting the devis"
+    );
   }
   const unitPrice = finalPrice;
 

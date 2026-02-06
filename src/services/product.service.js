@@ -600,36 +600,25 @@ class ProductService {
     const { key: activeSortKey, orderBy } = this.resolveCatalogSort(sort);
     const offset = (sanitizedPage - 1) * sanitizedLimit;
 
-    const [products, totalProducts] = await Promise.all([
-      prisma.product.findMany({
-        where: whereClause,
-        include: this.catalogProductInclude,
-        skip: offset,
-        take: sanitizedLimit,
-        orderBy,
-      }),
-      prisma.product.count({
-        where: whereClause,
-      }),
-    ]);
+    const products = await prisma.product.findMany({
+      where: whereClause,
+      include: this.catalogProductInclude,
+      skip: offset,
+      take: sanitizedLimit,
+      orderBy,
+    });
 
-    const [
-      categories,
-      services,
-      priceInsights,
-      availabilityStats,
-      heroMetrics,
-      featuredProducts,
-      spotlightProducts,
-    ] = await Promise.all([
-      this.fetchCatalogCategories(),
-      this.fetchCatalogServices(),
-      this.fetchPriceInsights(whereClause),
-      this.fetchAvailabilityStats(availabilityWhere),
-      this.fetchHeroMetrics(),
-      this.fetchFeaturedProducts(),
-      this.fetchSpotlightProducts(),
-    ]);
+    const totalProducts = await prisma.product.count({
+      where: whereClause,
+    });
+
+    const categories = await this.fetchCatalogCategories();
+    const services = await this.fetchCatalogServices();
+    const priceInsights = await this.fetchPriceInsights(whereClause);
+    const availabilityStats = await this.fetchAvailabilityStats(availabilityWhere);
+    const heroMetrics = await this.fetchHeroMetrics();
+    const featuredProducts = await this.fetchFeaturedProducts();
+    const spotlightProducts = await this.fetchSpotlightProducts();
 
     const totalPages = Math.max(1, Math.ceil(totalProducts / sanitizedLimit));
 

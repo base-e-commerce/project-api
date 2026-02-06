@@ -310,17 +310,20 @@ exports.getOtherProductsInService = async (req, res) => {
 };
 
 exports.getProductsCategory = async (req, res) => {
-  const idCategory = req.params.idCategory;
-  const product = await productService.getProductsCategory(
-    Number(idCategory),
-    4
-  );
-  if (product) {
-    res
-      .status(200)
-      .json(createResponse("Product fetched successfully", product));
-  } else {
+  try {
+    const idCategory = Number(req.params.idCategory);
+    const product = await productService.getProductsCategory(idCategory, 4);
+    if (product) {
+      return res
+        .status(200)
+        .json(createResponse("Product fetched successfully", product));
+    }
+
     res.status(404).json(createResponse("Product not found", null, false));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
   }
 };
 
