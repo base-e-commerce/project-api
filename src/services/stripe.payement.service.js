@@ -1,6 +1,14 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const prisma = require("../database/database");
 
+const parseMetadataId = (value) => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 class StripeService {
   async createCheckoutSession({
     amount,
@@ -76,27 +84,29 @@ class StripeService {
       case "checkout.session.completed": {
         const session = event.data.object;
         const paymentIntentId = session.payment_intent;
-        const parsedCommandeId = Number.isFinite(
-          Number(session.metadata?.commande_id)
-        )
-          ? Number(session.metadata.commande_id)
-          : null;
-        const parsedCommandBoxId = Number.isFinite(
-          Number(session.metadata?.command_box_id)
-        )
-          ? Number(session.metadata.command_box_id)
-          : null;
-        const parsedDevisId = Number.isFinite(
-          Number(session.metadata?.devis_id)
-        )
-          ? Number(session.metadata.devis_id)
-          : null;
+        const metadata = session.metadata || {};
+        const parsedCommandeId = parseMetadataId(metadata.commande_id);
+        const parsedCommandBoxId = parseMetadataId(metadata.command_box_id);
+        const parsedDevisId = parseMetadataId(metadata.devis_id);
 
         try {
-        if (parsedCommandeId) {
-          await prisma.payment.updateMany({
-            where: { commande_id: parsedCommandeId },
-            data: {
+          let resolvedCommandeId = parsedCommandeId;
+
+          if (!resolvedCommandeId && parsedCommandBoxId) {
+            const commandBox = await prisma.commandBox.findUnique({
+              where: { command_box_id: parsedCommandBoxId },
+              select: { commande_id: true },
+            });
+
+            if (commandBox?.commande_id) {
+              resolvedCommandeId = commandBox.commande_id;
+            }
+          }
+
+          if (resolvedCommandeId) {
+            await prisma.payment.updateMany({
+              where: { commande_id: resolvedCommandeId },
+              data: {
                 status: "Payed",
                 transaction_id: paymentIntentId,
                 transaction_date: new Date(),
@@ -104,19 +114,19 @@ class StripeService {
             });
           }
 
-        if (parsedCommandBoxId) {
-          await prisma.commandBox.update({
-            where: { command_box_id: parsedCommandBoxId },
-            data: { status: "paid" },
-          });
-        }
+          if (parsedCommandBoxId) {
+            await prisma.commandBox.update({
+              where: { command_box_id: parsedCommandBoxId },
+              data: { status: "paid" },
+            });
+          }
 
-        if (parsedDevisId) {
-          await prisma.devis.update({
-            where: { id: parsedDevisId },
-            data: { status: "paid" },
-          });
-        }
+          if (parsedDevisId) {
+            await prisma.devis.update({
+              where: { id: parsedDevisId },
+              data: { status: "paid" },
+            });
+          }
         } catch (err) {
           console.error(
             "Erreur lors de la mise à jour du paiement :",
