@@ -30,6 +30,13 @@ const toFiniteNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const resolvePositiveInteger = (value) => {
+  const normalized = toFiniteNumber(value);
+  return normalized !== null && Number.isInteger(normalized) && normalized > 0
+    ? normalized
+    : null;
+};
+
 const isConvertibleStatus = (status) => {
   if (!status) {
     return false;
@@ -79,35 +86,64 @@ const buildCommandeConversionPayload = (devis) => {
   }
   const unitPrice = finalPrice;
 
+  const currency = (productInfo.currency ?? "EUR").toString();
+  const itemName =
+    productInfo.name ||
+    productInfo.label ||
+    productInfo.title ||
+    devis.entreprise ||
+    "Devis";
+
+  const boxIdCandidates = [
+    productInfo.box_id,
+    productInfo.boxId,
+    devis.box_id,
+    productInfo.id,
+  ];
+  const resolvedBoxId = boxIdCandidates
+    .map((value) => resolvePositiveInteger(value))
+    .find((value) => value !== null);
+
+  if (resolvedBoxId !== null) {
+    return {
+      details: [],
+      commandBoxes: [
+        {
+          box_id: resolvedBoxId,
+          quantity,
+          unit_price: Number(unitPrice),
+        },
+      ],
+      currency,
+      itemName,
+    };
+  }
+
   const productIdCandidates = [
     productInfo.product_id,
     productInfo.productId,
     devis.product_id,
     productInfo.id,
   ];
-  const productId = productIdCandidates
-    .map((value) => toFiniteNumber(value))
-    .find((value) => value !== null && Number.isInteger(value) && value > 0);
+  const resolvedProductId = productIdCandidates
+    .map((value) => resolvePositiveInteger(value))
+    .find((value) => value !== null);
 
-  if (!productId) {
+  if (!resolvedProductId) {
     throw new Error("Product identifier missing on the devis");
   }
 
   return {
     details: [
       {
-        product_id: productId,
+        product_id: resolvedProductId,
         quantity,
         unit_price: Number(unitPrice),
       },
     ],
-    currency: (productInfo.currency ?? "EUR").toString(),
-    itemName:
-      productInfo.name ||
-      productInfo.label ||
-      productInfo.title ||
-      devis.entreprise ||
-      "Devis",
+    commandBoxes: [],
+    currency,
+    itemName,
   };
 };
 
@@ -369,7 +405,8 @@ exports.convertDevisToCommande = async (req, res) => {
       conversionPayload.details,
       { payment_method: "stripe" },
       resolvedAddressId,
-      commandeType
+      commandeType,
+      conversionPayload.commandBoxes
     );
 
     const totalAmount =

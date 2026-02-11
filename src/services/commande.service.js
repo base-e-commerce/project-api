@@ -28,22 +28,45 @@ class CommandeService {
     details,
     paymentDetails = null,
     shippingAddressId = null,
-    type = "standard"
+    type = "standard",
+    commandBoxes = []
   ) {
+    const normalizedDetails = Array.isArray(details) ? details : [];
+    const normalizedCommandBoxes = Array.isArray(commandBoxes)
+      ? commandBoxes
+      : [];
+
+    const lineAmount = (line) => {
+      const quantity = Number(line?.quantity ?? 0);
+      const unitPrice = Number(line?.unit_price ?? 0);
+      if (!Number.isFinite(quantity) || !Number.isFinite(unitPrice)) {
+        return 0;
+      }
+      return quantity * unitPrice;
+    };
+
+    const detailTotal = normalizedDetails.reduce(
+      (total, detail) => total + lineAmount(detail),
+      0
+    );
+    const boxTotal = normalizedCommandBoxes.reduce(
+      (total, boxEntry) => total + lineAmount(boxEntry),
+      0
+    );
+
+    const totalAmount = detailTotal + boxTotal;
+
     const commande = await prisma.$transaction(async (prisma) => {
       const newCommande = await prisma.commande.create({
         data: {
           customer_id: customerId,
           status: "Envoyer",
           order_date: new Date(),
-          total_amount: details.reduce(
-            (total, detail) => total + detail.quantity * detail.unit_price,
-            0
-          ),
+          total_amount: totalAmount,
           shipping_address_id: shippingAddressId,
           type,
           details: {
-            create: details.map((detail) => ({
+            create: normalizedDetails.map((detail) => ({
               product_id: detail.product_id,
               quantity: detail.quantity,
               unit_price: detail.unit_price,
@@ -51,6 +74,17 @@ class CommandeService {
           },
         },
       });
+
+      if (normalizedCommandBoxes.length > 0) {
+        await prisma.commandBox.createMany({
+          data: normalizedCommandBoxes.map((boxEntry) => ({
+            commande_id: newCommande.commande_id,
+            box_id: Number(boxEntry.box_id),
+            quantity: Number(boxEntry.quantity),
+            unit_price: Number(boxEntry.unit_price),
+          })),
+        });
+      }
 
       let payment = null;
       if (paymentDetails) {
