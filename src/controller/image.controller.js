@@ -16,6 +16,11 @@ const resolveBoxAssetBase = () => {
   return `${baseUrl}/api/box-assets`;
 };
 
+const resolveMachineAssetBase = () => {
+  const baseUrl = process.env.BASE_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  return `${baseUrl}/api/machine-assets`;
+};
+
 const getMediaFolderSegment = (file) =>
   file.mimetype.startsWith("video/") ? "video" : "image";
 
@@ -150,6 +155,26 @@ exports.uploadBoxAssets = async (req, res) => {
     return res
       .status(200)
       .json(createResponse("Box images uploaded successfully", urls));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Error while performing upload", error.message));
+  }
+};
+
+exports.uploadMachineAssets = async (req, res) => {
+  try {
+    if (!req.files || !req.files.length) {
+      return res
+        .status(400)
+        .json(createResponse("At least one file is required", null, false));
+    }
+    const origin = resolveMachineAssetBase();
+    const urls = req.files.map((file) => `${origin}/${file.filename}`);
+
+    return res
+      .status(200)
+      .json(createResponse("Machine images uploaded successfully", urls));
   } catch (error) {
     res
       .status(500)

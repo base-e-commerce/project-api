@@ -55,6 +55,15 @@ const isConvertibleStatus = (status) => {
 
 const buildCommandeConversionPayload = (devis) => {
   const productInfo = devis.productJson || {};
+  const quoteCategory = (
+    productInfo.quoteCategory ||
+    productInfo.type ||
+    ""
+  )
+    .toString()
+    .trim()
+    .toLowerCase();
+
   const quantityCandidates = [
     productInfo.quantity,
     productInfo.nombre,
@@ -94,11 +103,37 @@ const buildCommandeConversionPayload = (devis) => {
     devis.entreprise ||
     "Devis";
 
+  const machineIdCandidates = [
+    productInfo.machine_id,
+    productInfo.machineId,
+    devis.machine_id,
+    quoteCategory === "machine" ? productInfo.id : null,
+  ];
+  const resolvedMachineId = machineIdCandidates
+    .map((value) => resolvePositiveInteger(value))
+    .find((value) => value !== null);
+
+  if (resolvedMachineId !== null) {
+    return {
+      details: [],
+      commandBoxes: [],
+      customItems: [
+        {
+          machine_id: resolvedMachineId,
+          quantity,
+          unit_price: Number(unitPrice),
+        },
+      ],
+      currency,
+      itemName,
+    };
+  }
+
   const boxIdCandidates = [
     productInfo.box_id,
     productInfo.boxId,
     devis.box_id,
-    productInfo.id,
+    quoteCategory === "box" ? productInfo.id : null,
   ];
   const resolvedBoxId = boxIdCandidates
     .map((value) => resolvePositiveInteger(value))
@@ -123,7 +158,7 @@ const buildCommandeConversionPayload = (devis) => {
     productInfo.product_id,
     productInfo.productId,
     devis.product_id,
-    productInfo.id,
+    quoteCategory === "product" ? productInfo.id : null,
   ];
   const resolvedProductId = productIdCandidates
     .map((value) => resolvePositiveInteger(value))
@@ -406,7 +441,8 @@ exports.convertDevisToCommande = async (req, res) => {
       { payment_method: "stripe" },
       resolvedAddressId,
       commandeType,
-      conversionPayload.commandBoxes
+      conversionPayload.commandBoxes,
+      conversionPayload.customItems
     );
 
     const totalAmount =

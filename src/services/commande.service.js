@@ -29,12 +29,14 @@ class CommandeService {
     paymentDetails = null,
     shippingAddressId = null,
     type = "standard",
-    commandBoxes = []
+    commandBoxes = [],
+    customItems = []
   ) {
     const normalizedDetails = Array.isArray(details) ? details : [];
     const normalizedCommandBoxes = Array.isArray(commandBoxes)
       ? commandBoxes
       : [];
+    const normalizedCustomItems = Array.isArray(customItems) ? customItems : [];
 
     const lineAmount = (line) => {
       const quantity = Number(line?.quantity ?? 0);
@@ -49,12 +51,38 @@ class CommandeService {
       (total, detail) => total + lineAmount(detail),
       0
     );
-    const boxTotal = normalizedCommandBoxes.reduce(
+    const preparedCommandBoxes = normalizedCommandBoxes.map((boxEntry) => {
+      const boxId = Number(boxEntry?.box_id);
+      const quantity = Number(boxEntry?.quantity);
+      const unitPrice = Number(boxEntry?.unit_price);
+
+      if (!Number.isInteger(boxId) || boxId <= 0) {
+        throw new Error("Invalid box_id in command boxes payload");
+      }
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        throw new Error("Invalid quantity in command boxes payload");
+      }
+      if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
+        throw new Error("Invalid unit_price in command boxes payload");
+      }
+
+      return {
+        box_id: boxId,
+        quantity: Math.max(1, Math.round(quantity)),
+        unit_price: unitPrice,
+      };
+    });
+
+    const boxTotal = preparedCommandBoxes.reduce(
       (total, boxEntry) => total + lineAmount(boxEntry),
       0
     );
+    const customTotal = normalizedCustomItems.reduce(
+      (total, item) => total + lineAmount(item),
+      0
+    );
 
-    const totalAmount = detailTotal + boxTotal;
+    const totalAmount = detailTotal + boxTotal + customTotal;
 
     const commande = await prisma.$transaction(async (prisma) => {
       const newCommande = await prisma.commande.create({
@@ -75,13 +103,13 @@ class CommandeService {
         },
       });
 
-      if (normalizedCommandBoxes.length > 0) {
+      if (preparedCommandBoxes.length > 0) {
         await prisma.commandBox.createMany({
-          data: normalizedCommandBoxes.map((boxEntry) => ({
+          data: preparedCommandBoxes.map((boxEntry) => ({
             commande_id: newCommande.commande_id,
-            box_id: Number(boxEntry.box_id),
-            quantity: Number(boxEntry.quantity),
-            unit_price: Number(boxEntry.unit_price),
+            box_id: boxEntry.box_id,
+            quantity: boxEntry.quantity,
+            unit_price: boxEntry.unit_price,
           })),
         });
       }

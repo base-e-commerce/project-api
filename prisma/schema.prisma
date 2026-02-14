@@ -194,6 +194,7 @@ model Product {
   productImages         ProductImage[]
   reviews               Review[]
   CommandeDetail        CommandeDetail[]
+  devises               Devis[]
 }
 
 model ProductImage {
@@ -220,6 +221,25 @@ model Box {
   created_at      DateTime     @default(now())
   updated_at      DateTime     @updatedAt
   commandBoxes    CommandBox[]
+  devises         Devis[]
+}
+
+model Machine {
+  machine_id      Int      @id @default(autoincrement())
+  name            String
+  slug            String?  @unique
+  description     String?  @db.Text
+  descriptionRich String?  @db.Text
+  price           Decimal
+  currency        String   @default("EUR")
+  cover           String?
+  image_urls      Json?
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  devises         Devis[]
+
+  @@index([slug])
 }
 
 model CommandBox {
@@ -342,7 +362,11 @@ model Devis {
   id          Int      @id @default(autoincrement())
   user_id     Int?
   product_id  Int?
+  product     Product? @relation(fields: [product_id], references: [product_id])
   box_id      Int?
+  box         Box?     @relation(fields: [box_id], references: [box_id])
+  machine_id  Int?
+  machine     Machine? @relation(fields: [machine_id], references: [machine_id])
   nombre      Int?
   email       String?
   entreprise  String?
@@ -353,6 +377,10 @@ model Devis {
   status      String   @default("pending")
   price_final Decimal?
   createdAt   DateTime @default(now())
+
+  @@index([product_id])
+  @@index([box_id])
+  @@index([machine_id])
 }
 
 enum SupportMessageSender {

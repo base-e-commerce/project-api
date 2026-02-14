@@ -66,6 +66,10 @@ server.use(
   "/api/box-assets",
   express.static(path.join(__dirname, "uploads", "box"))
 );
+server.use(
+  "/api/machine-assets",
+  express.static(path.join(__dirname, "uploads", "machines"))
+);
 const recruitmentCvStorage = process.env.RECRUITMENT_CV_STORAGE || path.join("uploads", "recru");
 server.use("/api/recruitment/cv", express.static(resolveStoragePath(recruitmentCvStorage)));
 
