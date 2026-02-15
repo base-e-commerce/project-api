@@ -46,6 +46,13 @@ server.post(
   stripeController.webhookHandler
 );
 
+// Stripe dashboard may point to /api/webhook in production.
+server.post(
+  "/api/webhook",
+  express.raw({ type: "application/json" }),
+  stripeController.webhookHandler
+);
+
 server.use(bodyParser.json({ limit: bodySizeLimit }));
 server.use(bodyParser.urlencoded({ extended: true, limit: bodySizeLimit }));
 server.use("/api", express.static(path.join(__dirname, "uploads", "images")));
