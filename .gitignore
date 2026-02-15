@@ -8,5 +8,6 @@ uploads/media/*
 uploads/recru/*
 uploads/box/*
 uploads/machines/*
+uploads/demande-machines/*
 !uploads/images/readme.md
 !uploads/machines/readme.md

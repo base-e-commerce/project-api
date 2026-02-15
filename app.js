@@ -19,6 +19,7 @@ const searchRoutes = require("./src/routes/search.routes");
 const boxRoutes = require("./src/routes/box.routes");
 const commandBoxRoutes = require("./src/routes/commandbox.routes");
 const machineRoutes = require("./src/routes/machine.routes");
+const demandeMachineRoutes = require("./src/routes/demande-machine.routes");
 
 const app = express();
 app.use("/user", userRoutes);
@@ -40,6 +41,7 @@ app.use("/recruitment", recruitmentRoutes);
 app.use("/box", boxRoutes);
 app.use("/commandbox", commandBoxRoutes);
 app.use("/machines", machineRoutes);
+app.use("/demande-machine", demandeMachineRoutes);
 app.use("/search", searchRoutes);
 
 module.exports = app;

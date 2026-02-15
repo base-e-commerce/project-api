@@ -46,6 +46,7 @@ model Customer {
   Commande             Commande[]
   supportTickets       SupportTicket[]
   supportMessages      SupportMessage[]
+  demandeMachines      DemandeMachine[]
 }
 
 model CustomerAccount {
@@ -426,4 +427,28 @@ model SupportMessageAttachment {
   mime_type     String
   file_size     Int
   created_at    DateTime       @default(now())
+}
+
+model DemandeMachine {
+  id          Int                 @id @default(autoincrement())
+  customerId  Int
+  customer    Customer            @relation(fields: [customerId], references: [customer_id])
+  description String              @db.Text
+  image       String
+  image_urls  Json?
+  price       Decimal?
+  status      DemandeMachineStatus @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+  @@map("demande_machine")
+}
+
+enum DemandeMachineStatus {
+  PENDING
+  PRICED
+  APPROVED
+  REJECTED
 }
