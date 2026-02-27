@@ -11,7 +11,9 @@ const {
   updateProduct,
   deleteProduct,
   addImageToProduct,
+  addVideoToProduct,
   deleteProductImage,
+  deleteProductVideo,
   getSearchProducts,
   getProductsCategory,
   getLastTenProducts,
@@ -475,6 +477,7 @@ router.post(
  *         description: Internal server error
  */
 router.post("/image", authenticateToken, authenticateAdmin, addImageToProduct);
+router.post("/video", authenticateToken, authenticateAdmin, addVideoToProduct);
 
 /**
  * @swagger
@@ -540,6 +543,12 @@ router.delete(
   authenticateToken,
   authenticateAdmin,
   deleteProductImage
+);
+router.delete(
+  "/video/:productIdVideo",
+  authenticateToken,
+  authenticateAdmin,
+  deleteProductVideo
 );
 
 /**

@@ -408,6 +408,47 @@ exports.addImageToProduct = async (req, res) => {
   }
 };
 
+exports.addVideoToProduct = async (req, res) => {
+  const { productId, videoUrl, videoUrls } = req.body;
+
+  if (!productId) {
+    return res
+      .status(400)
+      .json(createResponse("Bad Request", "Product ID is required"));
+  }
+
+  const payloadUrls = Array.isArray(videoUrls)
+    ? videoUrls
+    : videoUrl
+    ? [videoUrl]
+    : [];
+
+  if (!payloadUrls.length) {
+    return res
+      .status(400)
+      .json(
+        createResponse(
+          "Bad Request",
+          "At least one video URL is required"
+        )
+      );
+  }
+
+  try {
+    const productVideos = await productService.addVideosToProduct(
+      Number(productId),
+      payloadUrls
+    );
+    res
+      .status(201)
+      .json(createResponse("Video(s) added successfully", productVideos));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
 exports.deleteProductImage = async (req, res) => {
   try {
     const id = parseInt(req.params.productIdImage, 10);
@@ -420,6 +461,27 @@ exports.deleteProductImage = async (req, res) => {
     res
       .status(200)
       .json(createResponse("Product image deleted successfully", productImage));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Internal server error", error.message, false));
+  }
+};
+
+exports.deleteProductVideo = async (req, res) => {
+  try {
+    const id = parseInt(req.params.productIdVideo, 10);
+    const productVideo = await productService.deleteVideoProduct(id);
+    if (!productVideo) {
+      return res
+        .status(404)
+        .json(createResponse("Product video not deleted", null, false));
+    }
+    res
+      .status(200)
+      .json(
+        createResponse("Product video deleted successfully", productVideo)
+      );
   } catch (error) {
     res
       .status(500)

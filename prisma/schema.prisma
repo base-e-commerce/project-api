@@ -193,6 +193,7 @@ model Product {
   created_at            DateTime         @default(now())
   updated_at            DateTime         @updatedAt
   productImages         ProductImage[]
+  productVideos         ProductVideo[]
   reviews               Review[]
   CommandeDetail        CommandeDetail[]
   devises               Devis[]
@@ -203,6 +204,14 @@ model ProductImage {
   product_id       Int
   product          Product  @relation(fields: [product_id], references: [product_id])
   image_url        String
+  created_at       DateTime @default(now())
+}
+
+model ProductVideo {
+  product_video_id Int      @id @default(autoincrement())
+  product_id       Int
+  product          Product  @relation(fields: [product_id], references: [product_id])
+  video_url        String
   created_at       DateTime @default(now())
 }
 

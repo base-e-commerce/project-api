@@ -37,6 +37,7 @@ class ProductService {
 
     this.catalogProductInclude = {
       productImages: true,
+      productVideos: true,
       category: true,
       service: true,
       reviews: {
@@ -1004,6 +1005,77 @@ class ProductService {
     }
   }
 
+  normalizeVideoUrls(videoUrls) {
+    if (!Array.isArray(videoUrls)) {
+      return [];
+    }
+
+    const cleaned = videoUrls
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+
+    return Array.from(new Set(cleaned));
+  }
+
+  async addVideosToProduct(productId, videoUrls) {
+    try {
+      const productExists = await prisma.product.findUnique({
+        where: { product_id: productId },
+        select: { product_id: true },
+      });
+
+      if (!productExists) {
+        throw new Error(`Product with ID ${productId} does not exist`);
+      }
+
+      const normalizedUrls = this.normalizeVideoUrls(videoUrls);
+      if (!normalizedUrls.length) {
+        throw new Error("At least one valid video URL is required");
+      }
+
+      const createdItems = await prisma.$transaction(
+        normalizedUrls.map((url) =>
+          prisma.productVideo.create({
+            data: {
+              product_id: productId,
+              video_url: url,
+            },
+          })
+        )
+      );
+
+      return createdItems;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while adding videos to product: ${error.message}`
+      );
+    }
+  }
+
+  async deleteVideoProduct(productVideoId) {
+    try {
+      const videoExists = await prisma.productVideo.findUnique({
+        where: { product_video_id: productVideoId },
+      });
+
+      if (!videoExists) {
+        throw new Error(
+          `Product video with ID ${productVideoId} does not exist`
+        );
+      }
+
+      await prisma.productVideo.delete({
+        where: { product_video_id: productVideoId },
+      });
+
+      return videoExists;
+    } catch (error) {
+      throw new Error(
+        `Error occurred while deleting product video: ${error.message}`
+      );
+    }
+  }
+
   async deleteImageProduct(productImageId) {
     try {
       const productImageExists = await prisma.productImage.findUnique({
@@ -1031,6 +1103,7 @@ class ProductService {
         where: { product_id: productId },
         include: {
           productImages: true,
+          productVideos: true,
           category: true,
           service: true,
           reviews: {

@@ -7,6 +7,7 @@ const createUploader = require ("../middleware/upload.test.middleware")
 const {
   createUploadImage,
   uploadMediaAsset,
+  uploadVideoAssets,
   listMediaAssets,
   deleteMediaAsset,
   uploadBoxAssets,
@@ -79,6 +80,7 @@ router.post("/image", upload.array("image_url", 5), createUploadImage);
  *         description: Internal server error
  */
 router.post("/media", mediaUpload.single("media"), uploadMediaAsset);
+router.post("/video", mediaUpload.array("videos", 10), uploadVideoAssets);
 router.get("/media", listMediaAssets);
 router.post("/box", boxUpload.array("box_images", 10), uploadBoxAssets);
 router.post("/machine", machineUpload.array("machine_images", 10), uploadMachineAssets);

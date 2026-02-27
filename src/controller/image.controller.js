@@ -142,6 +142,33 @@ exports.uploadMediaAsset = async (req, res) => {
   }
 };
 
+exports.uploadVideoAssets = async (req, res) => {
+  try {
+    const files = req.files;
+    if (!files || !files.length) {
+      return res
+        .status(400)
+        .json(createResponse("At least one video file is required", null, false));
+    }
+
+    const invalidFile = files.find((file) => !file.mimetype.startsWith("video/"));
+    if (invalidFile) {
+      return res
+        .status(400)
+        .json(createResponse("Only video files are allowed", null, false));
+    }
+
+    const urls = files.map((file) => buildMediaUrl(file));
+    return res
+      .status(200)
+      .json(createResponse("Videos uploaded successfully", { urls }));
+  } catch (error) {
+    res
+      .status(500)
+      .json(createResponse("Error while performing upload", error.message));
+  }
+};
+
 exports.uploadBoxAssets = async (req, res) => {
   try {
     if (!req.files || !req.files.length) {
