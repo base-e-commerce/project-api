@@ -100,6 +100,7 @@ model User {
   blogs                  Blog[]
   supportTicketsAssigned SupportTicket[]  @relation("TicketAdmin")
   supportMessages        SupportMessage[] @relation("MessageAdmin")
+  notificationReads      AdminNotificationRead[]
 }
 
 model Service {
@@ -391,6 +392,35 @@ model Devis {
   @@index([product_id])
   @@index([box_id])
   @@index([machine_id])
+}
+
+model AdminNotification {
+  notification_id Int                     @id @default(autoincrement())
+  type            String
+  title           String
+  message         String                  @db.Text
+  route           String                  @default("/dashboard")
+  entity_type     String?                 @default("notification")
+  entity_id       Int?
+  customer        Json?
+  meta            Json?
+  created_at      DateTime                @default(now())
+  reads           AdminNotificationRead[]
+
+  @@index([created_at])
+  @@index([type])
+}
+
+model AdminNotificationRead {
+  notification_read_id Int               @id @default(autoincrement())
+  notification_id      Int
+  notification         AdminNotification @relation(fields: [notification_id], references: [notification_id], onDelete: Cascade)
+  user_id              Int
+  user                 User              @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  read_at              DateTime          @default(now())
+
+  @@unique([notification_id, user_id])
+  @@index([user_id])
 }
 
 enum SupportMessageSender {

@@ -20,6 +20,7 @@ const boxRoutes = require("./src/routes/box.routes");
 const commandBoxRoutes = require("./src/routes/commandbox.routes");
 const machineRoutes = require("./src/routes/machine.routes");
 const demandeMachineRoutes = require("./src/routes/demande-machine.routes");
+const realtimeRoutes = require("./src/routes/realtime.routes");
 
 const app = express();
 app.use("/user", userRoutes);
@@ -43,5 +44,6 @@ app.use("/commandbox", commandBoxRoutes);
 app.use("/machines", machineRoutes);
 app.use("/demande-machine", demandeMachineRoutes);
 app.use("/search", searchRoutes);
+app.use("/realtime", realtimeRoutes);
 
 module.exports = app;

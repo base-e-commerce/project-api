@@ -4,6 +4,7 @@ const stripeService = require("../services/stripe.payement.service");
 const commandeService = require("../services/commande.service");
 const customerService = require("../services/customer.service");
 const adresseService = require("../services/adress.service");
+const realtimeNotificationService = require("../services/realtime-notification.service");
 
 const toFiniteNumber = (value) => {
   if (value === undefined || value === null || value === "") {
@@ -232,6 +233,30 @@ exports.getDevisById = async (req, res) => {
 exports.createDevis = async (req, res) => {
   try {
     const newDevis = await devisService.createDevis(req.body);
+
+    try {
+      await realtimeNotificationService.notifyAdmins({
+        type: "devis_created",
+        title: "Nouveau devis client",
+        message: `Devis #${newDevis.id} cree par ${newDevis.email || "client"}`,
+        route: "/dashboard/gestion/devis",
+        entityType: "devis",
+        entityId: newDevis.id,
+        customer: {
+          id: newDevis.user_id || null,
+          email: newDevis.email || null,
+        },
+        meta: {
+          telephone: newDevis.telephone || null,
+        },
+      });
+    } catch (notificationError) {
+      console.error(
+        "[Realtime] Failed to persist/broadcast devis notification:",
+        notificationError.message
+      );
+    }
+
     res
       .status(201)
       .json(createResponse("Devis created successfully", newDevis));
@@ -444,6 +469,34 @@ exports.convertDevisToCommande = async (req, res) => {
       conversionPayload.commandBoxes,
       conversionPayload.customItems
     );
+
+    try {
+      await realtimeNotificationService.notifyAdmins({
+        type: "commande_created",
+        title: "Nouvelle commande client",
+        message: `Commande #${commande.commande_id} creee depuis devis #${devis.id}`,
+        route: "/dashboard/gestion/orders",
+        entityType: "commande",
+        entityId: commande.commande_id,
+        customer: {
+          id: customerRecord.customer_id,
+          firstName: customerRecord.first_name || null,
+          lastName: customerRecord.last_name || null,
+          email: customerRecord.email || null,
+        },
+        meta: {
+          fromDevisId: devis.id,
+          totalAmount: commande.total_amount || null,
+          currency: commande.currency || null,
+          type: commandeType,
+        },
+      });
+    } catch (notificationError) {
+      console.error(
+        "[Realtime] Failed to persist/broadcast commande notification from devis:",
+        notificationError.message
+      );
+    }
 
     const totalAmount =
       Number(commande.total_amount ?? commande.totalAmount ?? 0);

@@ -1,5 +1,6 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const prisma = require("../database/database");
+const realtimeNotificationService = require("./realtime-notification.service");
 
 const parseMetadataId = (value) => {
   if (value === undefined || value === null) {
@@ -91,6 +92,7 @@ class StripeService {
 
         try {
           let resolvedCommandeId = parsedCommandeId;
+          let paymentUpdatedCount = 0;
 
           if (!resolvedCommandeId && parsedCommandBoxId) {
             const commandBox = await prisma.commandBox.findUnique({
@@ -104,14 +106,20 @@ class StripeService {
           }
 
           if (resolvedCommandeId) {
-            await prisma.payment.updateMany({
-              where: { commande_id: resolvedCommandeId },
+            const paymentUpdateResult = await prisma.payment.updateMany({
+              where: {
+                commande_id: resolvedCommandeId,
+                status: {
+                  notIn: ["Payed", "paid", "PAID"],
+                },
+              },
               data: {
                 status: "Payed",
                 transaction_id: paymentIntentId,
                 transaction_date: new Date(),
               },
             });
+            paymentUpdatedCount = paymentUpdateResult.count || 0;
           }
 
           if (parsedCommandBoxId) {
@@ -126,6 +134,58 @@ class StripeService {
               where: { id: parsedDevisId },
               data: { status: "paid" },
             });
+          }
+
+          if (resolvedCommandeId && paymentUpdatedCount > 0) {
+            const commande = await prisma.commande.findUnique({
+              where: { commande_id: resolvedCommandeId },
+              select: {
+                commande_id: true,
+                total_amount: true,
+                payment_method: true,
+                customer: {
+                  select: {
+                    customer_id: true,
+                    first_name: true,
+                    last_name: true,
+                    email: true,
+                  },
+                },
+              },
+            });
+
+            try {
+              await realtimeNotificationService.notifyAdmins({
+                type: "payment_validated",
+                title: "Paiement client valide",
+                message: `Paiement confirme pour la commande #${resolvedCommandeId}`,
+                route: "/dashboard/finance/payments",
+                entityType: "payment",
+                entityId: resolvedCommandeId,
+                customer: {
+                  id: commande?.customer?.customer_id || null,
+                  firstName: commande?.customer?.first_name || null,
+                  lastName: commande?.customer?.last_name || null,
+                  email: commande?.customer?.email || null,
+                },
+                meta: {
+                  commandeId: resolvedCommandeId,
+                  paymentIntentId,
+                  amount: commande?.total_amount ?? null,
+                  paymentMethod: commande?.payment_method ?? "card",
+                  source: parsedDevisId
+                    ? "devis"
+                    : parsedCommandBoxId
+                      ? "command_box"
+                      : "commande",
+                },
+              });
+            } catch (notificationError) {
+              console.error(
+                "[Realtime] Failed to persist/broadcast payment notification:",
+                notificationError.message
+              );
+            }
           }
         } catch (err) {
           console.error(

@@ -4,6 +4,7 @@ const customerService = require("../services/customer.service");
 const productService = require("../services/product.service");
 const brevoService = require("../services/brevo.service");
 const invoiceService = require("../services/invoice.service");
+const realtimeNotificationService = require("../services/realtime-notification.service");
 
 const PRO_ACCOUNT_TYPE_ALIASES = new Set([
   "pro",
@@ -173,6 +174,33 @@ exports.createCommande = async (req, res) => {
       shippingAddressId,
       commandeType
     );
+
+    try {
+      await realtimeNotificationService.notifyAdmins({
+        type: "commande_created",
+        title: "Nouvelle commande client",
+        message: `Commande #${commande.commande_id} creee par ${customerRecord.first_name || "Client"} ${customerRecord.last_name || ""}`.trim(),
+        route: "/dashboard/gestion/orders",
+        entityType: "commande",
+        entityId: commande.commande_id,
+        customer: {
+          id: customerRecord.customer_id,
+          firstName: customerRecord.first_name || null,
+          lastName: customerRecord.last_name || null,
+          email: customerRecord.email || null,
+        },
+        meta: {
+          totalAmount: commande.total_amount || null,
+          currency: commande.currency || null,
+          type: commandeType,
+        },
+      });
+    } catch (notificationError) {
+      console.error(
+        "[Realtime] Failed to persist/broadcast commande notification:",
+        notificationError.message
+      );
+    }
 
     const customerForEmail = req.customer || {};
     if (customerForEmail.email) {
