@@ -90,6 +90,47 @@ const computeOrderWeight = (orderDetails, productMap) => {
   };
 };
 
+const resolveShippingQuoteWithFallback = async ({
+  country,
+  totalWeightKg,
+  missingWeightProducts,
+}) => {
+  const hasMissingWeight = Array.isArray(missingWeightProducts)
+    ? missingWeightProducts.length > 0
+    : false;
+
+  if (hasMissingWeight || !Number.isFinite(totalWeightKg) || totalWeightKg <= 0) {
+    return {
+      shippingFee: 0,
+      shippingFeeAr: null,
+      shippingZone: null,
+      shippingWeightKg: Number.isFinite(totalWeightKg) ? totalWeightKg : 0,
+      shippingWeightTierKg: null,
+      manualShippingFee: true,
+      missingWeightProducts: Array.isArray(missingWeightProducts)
+        ? missingWeightProducts
+        : [],
+      note: "Shipping fee will be added manually by admin.",
+    };
+  }
+
+  const quote = await deliveryPricingService.quoteByCountryAndWeight({
+    country,
+    totalWeightKg,
+  });
+
+  return {
+    shippingFee: quote.priceEuro,
+    shippingFeeAr: quote.priceAr,
+    shippingZone: quote.destination,
+    shippingWeightKg: quote.totalWeightKg,
+    shippingWeightTierKg: quote.billedWeightKg,
+    manualShippingFee: false,
+    missingWeightProducts: [],
+    note: null,
+  };
+};
+
 const resolveValidatedShippingAddress = async (
   customerId,
   shippingAddressId
@@ -255,21 +296,12 @@ exports.createCommande = async (req, res) => {
       productMap
     );
 
-    if (missingWeightProducts.length > 0) {
-      return res.status(400).json(
-        createResponse(
-          "Some products are missing weight_kg and cannot be shipped",
-          { missingWeightProducts },
-          false
-        )
-      );
-    }
-
     let shippingQuote;
     try {
-      shippingQuote = await deliveryPricingService.quoteByCountryAndWeight({
+      shippingQuote = await resolveShippingQuoteWithFallback({
         country: shippingAddress.country,
         totalWeightKg,
+        missingWeightProducts,
       });
     } catch (shippingError) {
       return res
@@ -286,10 +318,10 @@ exports.createCommande = async (req, res) => {
       [],
       [],
       {
-        shippingFee: shippingQuote.priceEuro,
-        shippingWeightKg: shippingQuote.totalWeightKg,
-        shippingWeightTierKg: shippingQuote.billedWeightKg,
-        shippingZone: shippingQuote.destination,
+        shippingFee: shippingQuote.shippingFee,
+        shippingWeightKg: shippingQuote.shippingWeightKg,
+        shippingWeightTierKg: shippingQuote.shippingWeightTierKg,
+        shippingZone: shippingQuote.shippingZone,
       }
     );
 
@@ -429,28 +461,22 @@ exports.getShippingQuote = async (req, res) => {
       productMap
     );
 
-    if (missingWeightProducts.length > 0) {
-      return res.status(400).json(
-        createResponse(
-          "Some products are missing weight_kg and cannot be shipped",
-          { missingWeightProducts },
-          false
-        )
-      );
-    }
-
-    const quote = await deliveryPricingService.quoteByCountryAndWeight({
+    const quote = await resolveShippingQuoteWithFallback({
       country: shippingAddress.country,
       totalWeightKg,
+      missingWeightProducts,
     });
 
     return res.json(
       createResponse("Shipping quote calculated successfully", {
-        shippingFee: quote.priceEuro,
-        shippingFeeAr: quote.priceAr,
-        shippingZone: quote.destination,
-        shippingWeightKg: quote.totalWeightKg,
-        shippingWeightTierKg: quote.billedWeightKg,
+        shippingFee: quote.shippingFee,
+        shippingFeeAr: quote.shippingFeeAr,
+        shippingZone: quote.shippingZone,
+        shippingWeightKg: quote.shippingWeightKg,
+        shippingWeightTierKg: quote.shippingWeightTierKg,
+        manualShippingFee: quote.manualShippingFee,
+        missingWeightProducts: quote.missingWeightProducts,
+        note: quote.note,
         country: shippingAddress.country,
       })
     );
