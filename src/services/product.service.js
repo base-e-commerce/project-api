@@ -264,6 +264,10 @@ class ProductService {
       ...product,
       price: Number(product.price ?? 0),
       price_pro: Number(product.price_pro ?? 0),
+      weight_kg:
+        product.weight_kg === null || product.weight_kg === undefined
+          ? null
+          : Number(product.weight_kg),
     };
   }
 
@@ -487,6 +491,10 @@ class ProductService {
             currency_name: data.currency_name,
             price: data.price,
             price_pro: price_final_pro,
+            weight_kg:
+              data.weight_kg === null || data.weight_kg === undefined
+                ? null
+                : Number(data.weight_kg),
             stock_quantity: data.stock_quantity,
             image_url: data.image_url,
             category_id: data.category_id,
@@ -1144,6 +1152,7 @@ class ProductService {
           name: true,
           min_co_standard: true,
           min_co_pro: true,
+          weight_kg: true,
         },
       });
 
@@ -1160,6 +1169,16 @@ class ProductService {
       const updateData = Object.fromEntries(
         Object.entries(data).filter(([_, value]) => value !== undefined)
       );
+      if (Object.prototype.hasOwnProperty.call(updateData, "weight_kg")) {
+        if (updateData.weight_kg === "" || updateData.weight_kg === null) {
+          updateData.weight_kg = null;
+        } else {
+          const parsedWeight = Number(updateData.weight_kg);
+          updateData.weight_kg = Number.isFinite(parsedWeight)
+            ? parsedWeight
+            : null;
+        }
+      }
 
       const updatedProduct = await prisma.product.update({
         where: { product_id: productId },

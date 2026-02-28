@@ -30,7 +30,8 @@ class CommandeService {
     shippingAddressId = null,
     type = "standard",
     commandBoxes = [],
-    customItems = []
+    customItems = [],
+    shippingMeta = null
   ) {
     const normalizedDetails = Array.isArray(details) ? details : [];
     const normalizedCommandBoxes = Array.isArray(commandBoxes)
@@ -82,7 +83,13 @@ class CommandeService {
       0
     );
 
+    const shippingFee = Number(shippingMeta?.shippingFee ?? 0);
+    const normalizedShippingFee = Number.isFinite(shippingFee)
+      ? Math.max(0, shippingFee)
+      : 0;
+
     const totalAmount = detailTotal + boxTotal + customTotal;
+    const totalWithShipping = totalAmount + normalizedShippingFee;
 
     const commande = await prisma.$transaction(async (prisma) => {
       const newCommande = await prisma.commande.create({
@@ -90,8 +97,20 @@ class CommandeService {
           customer_id: customerId,
           status: "Envoyer",
           order_date: new Date(),
-          total_amount: totalAmount,
+          total_amount: totalWithShipping,
           shipping_address_id: shippingAddressId,
+          shipping_fee: normalizedShippingFee,
+          shipping_weight_kg:
+            shippingMeta?.shippingWeightKg === null ||
+            shippingMeta?.shippingWeightKg === undefined
+              ? null
+              : Number(shippingMeta.shippingWeightKg),
+          shipping_weight_tier_kg:
+            shippingMeta?.shippingWeightTierKg === null ||
+            shippingMeta?.shippingWeightTierKg === undefined
+              ? null
+              : Number(shippingMeta.shippingWeightTierKg),
+          shipping_zone: shippingMeta?.shippingZone || null,
           type,
           details: {
             create: normalizedDetails.map((detail) => ({
@@ -642,6 +661,100 @@ class CommandeService {
           },
         },
         shipping_address_relation: true,
+        payments: true,
+      },
+    });
+  }
+
+  async updateShippingFee(commandeId, shippingFee) {
+    const parsedCommandeId = Number(commandeId);
+    const parsedFee = Number(shippingFee);
+    if (!Number.isInteger(parsedCommandeId) || parsedCommandeId <= 0) {
+      throw new Error("Invalid commande ID");
+    }
+    if (!Number.isFinite(parsedFee) || parsedFee < 0) {
+      throw new Error("shipping_fee must be greater than or equal to 0");
+    }
+
+    const normalize = (value) =>
+      (value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+
+    const commande = await prisma.commande.findUnique({
+      where: { commande_id: parsedCommandeId },
+      include: {
+        payments: {
+          select: {
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!commande) {
+      throw new Error("Commande introuvable");
+    }
+
+    const hasPaid = (commande.payments || []).some((payment) =>
+      ["payed", "paid", "livre"].includes(normalize(payment.status))
+    );
+    if (hasPaid) {
+      throw new Error(
+        "Impossible de modifier le frais de livraison pour une commande deja payee"
+      );
+    }
+
+    const currentShippingFee = Number(commande.shipping_fee || 0);
+    const baseAmount = Number(commande.total_amount || 0) - currentShippingFee;
+    const safeBaseAmount = Number.isFinite(baseAmount) ? Math.max(0, baseAmount) : 0;
+    const newTotalAmount = safeBaseAmount + parsedFee;
+
+    await prisma.$transaction(
+      async (tx) => {
+        await tx.commande.update({
+          where: { commande_id: parsedCommandeId },
+          data: {
+            shipping_fee: parsedFee,
+            total_amount: newTotalAmount,
+          },
+        });
+
+        await tx.payment.updateMany({
+          where: {
+            commande_id: parsedCommandeId,
+            status: "Pending",
+          },
+          data: {
+            amount: newTotalAmount,
+          },
+        });
+      },
+      { timeout: 15000 }
+    );
+
+    return prisma.commande.findUnique({
+      where: { commande_id: parsedCommandeId },
+      include: {
+        details: {
+          include: {
+            product: {
+              include: {
+                productImages: true,
+                category: true,
+                service: true,
+              },
+            },
+          },
+        },
+        shipping_address_relation: true,
+        customer: {
+          include: {
+            accounts: true,
+          },
+        },
         payments: true,
       },
     });

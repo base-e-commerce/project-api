@@ -56,6 +56,10 @@ exports.createProductSchema = Joi.object({
     "number.base": "Pro price must be a number",
     "number.min": "Pro price must be at least 0",
   }),
+  weight_kg: Joi.number().positive().optional().allow(null).messages({
+    "number.base": "Weight must be a number",
+    "number.positive": "Weight must be a positive number",
+  }),
   stock_quantity: Joi.number().integer().min(0).required().messages({
     "number.base": "Stock quantity must be a number",
     "number.integer": "Stock quantity must be an integer",
@@ -130,6 +134,10 @@ exports.updateProductSchema = Joi.object({
   price_pro: Joi.number().min(0).optional().messages({
     "number.base": "Pro price must be a number",
     "number.min": "Pro price must be at least 0",
+  }),
+  weight_kg: Joi.number().positive().optional().allow(null).messages({
+    "number.base": "Weight must be a number",
+    "number.positive": "Weight must be a positive number",
   }),
   stock_quantity: Joi.number().integer().min(0).optional().messages({
     "number.base": "Stock quantity must be a number",

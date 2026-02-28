@@ -5,9 +5,12 @@ const {
   resendCommandeSchema,
   receiveCommandeSchema,
   invoiceRequestSchema,
+  shippingQuoteSchema,
+  updateShippingFeeSchema,
 } = require("../dtos/commande.dto");
 const {
   createCommande,
+  getShippingQuote,
   getCommandesByCustomer,
   resendCommande,
   getAllCommandes,
@@ -23,6 +26,7 @@ const {
   getLastUnpaidCommande,
   requestRefund,
   downloadInvoice,
+  updateShippingFee,
 } = require("../controller/commande.controller");
 const authenticateToken = require("../middleware/auth.middleware");
 const authenticateAdmin = require("../middleware/auth.admin.middleware");
@@ -71,6 +75,12 @@ router.post(
   authenticateCustomer,
   validateDto(createCommandeSchema),
   createCommande
+);
+router.post(
+  "/shipping-quote",
+  authenticateCustomer,
+  validateDto(shippingQuoteSchema),
+  getShippingQuote
 );
 
 /**
@@ -335,6 +345,14 @@ router.put(
   authenticateToken,
   authenticateAdmin,
   cancelCommande
+);
+
+router.patch(
+  "/shipping-fee/:commandeId",
+  authenticateToken,
+  authenticateAdmin,
+  validateDto(updateShippingFeeSchema),
+  updateShippingFee
 );
 
 router.get('last-unpaid/:customerId',authenticateToken,getLastUnpaidCommande)

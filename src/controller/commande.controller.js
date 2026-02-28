@@ -2,6 +2,8 @@ const createResponse = require("../utils/api.response");
 const commandeService = require("../services/commande.service");
 const customerService = require("../services/customer.service");
 const productService = require("../services/product.service");
+const adresseService = require("../services/adress.service");
+const deliveryPricingService = require("../services/delivery-pricing.service");
 const brevoService = require("../services/brevo.service");
 const invoiceService = require("../services/invoice.service");
 const realtimeNotificationService = require("../services/realtime-notification.service");
@@ -34,6 +36,75 @@ const formatCommandeReference = (commande) => {
 
   const paddedId = String(commande.commande_id).padStart(3, "0");
   return `GDV-${orderYear}-${paddedId}`;
+};
+
+const parsePositiveQuantity = (value) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+  return parsed;
+};
+
+const normalizeProductWeightKg = (value) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+
+  // Legacy products may store grams in weight_kg (e.g. 4000 => 4kg).
+  if (Number.isInteger(parsed) && parsed >= 1000) {
+    return parsed / 1000;
+  }
+
+  return parsed;
+};
+
+const computeOrderWeight = (orderDetails, productMap) => {
+  const missingWeightProducts = [];
+  const totalWeightKg = (orderDetails || []).reduce((acc, detail) => {
+    const product = productMap.get(Number(detail.product_id));
+    if (!product) {
+      return acc;
+    }
+    const quantity = parsePositiveQuantity(detail.quantity);
+    if (!quantity) {
+      return acc;
+    }
+
+    const productWeightKg = normalizeProductWeightKg(product.weight_kg);
+    if (!Number.isFinite(productWeightKg) || productWeightKg <= 0) {
+      missingWeightProducts.push({
+        product_id: product.product_id,
+        name: product.name,
+      });
+      return acc;
+    }
+
+    return acc + productWeightKg * quantity;
+  }, 0);
+
+  return {
+    totalWeightKg,
+    missingWeightProducts,
+  };
+};
+
+const resolveValidatedShippingAddress = async (
+  customerId,
+  shippingAddressId
+) => {
+  const parsedAddressId = Number(shippingAddressId);
+  if (!Number.isInteger(parsedAddressId) || parsedAddressId <= 0) {
+    throw new Error("Shipping address is required");
+  }
+
+  const shippingAddress = await adresseService.getAdresseById(parsedAddressId);
+  if (!shippingAddress || shippingAddress.customer_id !== Number(customerId)) {
+    throw new Error("Shipping address does not belong to this customer");
+  }
+
+  return shippingAddress;
 };
 
 // exports.createCommande = async (req, res) => {
@@ -167,12 +238,59 @@ exports.createCommande = async (req, res) => {
         );
     }
 
+    let shippingAddress;
+    try {
+      shippingAddress = await resolveValidatedShippingAddress(
+        targetCustomerId,
+        shippingAddressId
+      );
+    } catch (addressError) {
+      return res
+        .status(400)
+        .json(createResponse(addressError.message, null, false));
+    }
+
+    const { totalWeightKg, missingWeightProducts } = computeOrderWeight(
+      orderDetails,
+      productMap
+    );
+
+    if (missingWeightProducts.length > 0) {
+      return res.status(400).json(
+        createResponse(
+          "Some products are missing weight_kg and cannot be shipped",
+          { missingWeightProducts },
+          false
+        )
+      );
+    }
+
+    let shippingQuote;
+    try {
+      shippingQuote = await deliveryPricingService.quoteByCountryAndWeight({
+        country: shippingAddress.country,
+        totalWeightKg,
+      });
+    } catch (shippingError) {
+      return res
+        .status(400)
+        .json(createResponse(shippingError.message, null, false));
+    }
+
     const { commande, payment } = await commandeService.createCommande(
       targetCustomerId,
       orderDetails,
       paymentDetails,
       shippingAddressId,
-      commandeType
+      commandeType,
+      [],
+      [],
+      {
+        shippingFee: shippingQuote.priceEuro,
+        shippingWeightKg: shippingQuote.totalWeightKg,
+        shippingWeightTierKg: shippingQuote.billedWeightKg,
+        shippingZone: shippingQuote.destination,
+      }
     );
 
     try {
@@ -243,6 +361,103 @@ exports.createCommande = async (req, res) => {
     }
   } catch (error) {
     res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.getShippingQuote = async (req, res) => {
+  try {
+    const { customerId, shippingAddressId, details } = req.body || {};
+    const parsedCustomerId =
+      customerId !== undefined && customerId !== null
+        ? Number(customerId)
+        : null;
+    const authenticatedCustomerId = req.customer?.customer_id;
+    const targetCustomerId = authenticatedCustomerId ?? parsedCustomerId;
+
+    if (!targetCustomerId) {
+      return res
+        .status(400)
+        .json(createResponse("Customer ID is required", null, false));
+    }
+
+    const orderDetails = Array.isArray(details) ? details : [];
+    if (orderDetails.length === 0) {
+      return res
+        .status(400)
+        .json(createResponse("Details are required", null, false));
+    }
+
+    let shippingAddress;
+    try {
+      shippingAddress = await resolveValidatedShippingAddress(
+        targetCustomerId,
+        shippingAddressId
+      );
+    } catch (addressError) {
+      return res
+        .status(400)
+        .json(createResponse(addressError.message, null, false));
+    }
+
+    const productIds = orderDetails.map((detail) => detail.product_id);
+    const retrievedProducts = await productService.getProductsByIds(productIds);
+    const productMap = new Map(
+      retrievedProducts.map((product) => [product.product_id, product])
+    );
+
+    const missingProductIds = Array.from(
+      new Set(
+        productIds
+          .map((id) => Number(id))
+          .filter((productId) => !productMap.has(productId))
+      )
+    );
+    if (missingProductIds.length > 0) {
+      return res
+        .status(400)
+        .json(
+          createResponse(
+            "Some products are not available",
+            { missingProductIds },
+            false
+          )
+        );
+    }
+
+    const { totalWeightKg, missingWeightProducts } = computeOrderWeight(
+      orderDetails,
+      productMap
+    );
+
+    if (missingWeightProducts.length > 0) {
+      return res.status(400).json(
+        createResponse(
+          "Some products are missing weight_kg and cannot be shipped",
+          { missingWeightProducts },
+          false
+        )
+      );
+    }
+
+    const quote = await deliveryPricingService.quoteByCountryAndWeight({
+      country: shippingAddress.country,
+      totalWeightKg,
+    });
+
+    return res.json(
+      createResponse("Shipping quote calculated successfully", {
+        shippingFee: quote.priceEuro,
+        shippingFeeAr: quote.priceAr,
+        shippingZone: quote.destination,
+        shippingWeightKg: quote.totalWeightKg,
+        shippingWeightTierKg: quote.billedWeightKg,
+        country: shippingAddress.country,
+      })
+    );
+  } catch (error) {
+    return res
+      .status(400)
+      .json(createResponse(error.message || "Unable to calculate shipping quote", null, false));
   }
 };
 
@@ -530,6 +745,26 @@ exports.cancelCommande = async (req, res) => {
       .json(createResponse("Commande annulée avec succès", commande));
   } catch (error) {
     res.status(400).json(createResponse(null, error.message, true));
+  }
+};
+
+exports.updateShippingFee = async (req, res) => {
+  try {
+    const { commandeId } = req.params;
+    const { shipping_fee } = req.body;
+    const updated = await commandeService.updateShippingFee(
+      Number(commandeId),
+      Number(shipping_fee)
+    );
+    return res
+      .status(200)
+      .json(
+        createResponse("Frais de livraison mis a jour avec succes", updated)
+      );
+  } catch (error) {
+    return res
+      .status(400)
+      .json(createResponse(error.message || "Erreur de mise a jour", null, false));
   }
 };
 

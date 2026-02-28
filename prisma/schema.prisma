@@ -179,6 +179,7 @@ model Product {
   price_pro             Decimal          @default(0.00)
   min_co_standard       Int?
   min_co_pro            Int?
+  weight_kg             Float?
   stock_quantity        Int
   image_url             String?
   secure                Boolean?         @default(false)
@@ -354,6 +355,10 @@ model Commande {
   type                      String           @default("standard")
   shipping_address          String?
   shipping_address_id       Int?
+  shipping_fee              Decimal?          @default(0.00) @db.Decimal(10, 2)
+  shipping_weight_kg        Float?
+  shipping_weight_tier_kg   Int?
+  shipping_zone             String?
   shipping_address_relation Adresse?         @relation(fields: [shipping_address_id], references: [address_id])
   created_at                DateTime         @default(now())
   updated_at                DateTime         @updatedAt

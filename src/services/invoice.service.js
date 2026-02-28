@@ -167,7 +167,8 @@ class InvoiceService {
     });
 
     const subTotal = items.reduce((sum, item) => sum + item.total, 0);
-    const shippingAmount = Number(commande.shipping_amount) || 0;
+    const shippingAmount =
+      Number(commande.shipping_fee ?? commande.shipping_amount) || 0;
     const totalAmount =
       Number(commande.total_amount) || subTotal + shippingAmount;
 

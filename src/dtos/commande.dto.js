@@ -73,3 +73,34 @@ exports.receiveCommandeSchema = Joi.object({
 exports.invoiceRequestSchema = Joi.object({
   sendEmail: Joi.boolean().optional().default(false),
 });
+
+exports.shippingQuoteSchema = Joi.object({
+  customerId: Joi.number().integer().optional(),
+  shippingAddressId: Joi.number().integer().required().messages({
+    "number.base": "Shipping Address ID must be a number",
+    "number.integer": "Shipping Address ID must be an integer",
+    "any.required": "Shipping Address ID is required",
+  }),
+  details: Joi.array()
+    .items(
+      Joi.object({
+        product_id: Joi.number().integer().required(),
+        quantity: Joi.number().integer().min(1).required(),
+      })
+    )
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Details must be an array",
+      "array.min": "At least one detail is required",
+      "any.required": "Details are required",
+    }),
+});
+
+exports.updateShippingFeeSchema = Joi.object({
+  shipping_fee: Joi.number().min(0).required().messages({
+    "number.base": "shipping_fee must be a number",
+    "number.min": "shipping_fee must be greater than or equal to 0",
+    "any.required": "shipping_fee is required",
+  }),
+});
