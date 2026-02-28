@@ -282,6 +282,21 @@ model ContactInfo {
   updated_at      DateTime @updatedAt
 }
 
+model DeliveryPricing {
+  delivery_pricing_id Int                 @id @default(autoincrement())
+  carrier             String              @default("GDV")
+  destination         DeliveryDestination
+  weight_kg           Int
+  price_eur           Decimal             @db.Decimal(10, 2)
+  price_ariary        Decimal?            @db.Decimal(14, 2)
+  is_active           Boolean             @default(true)
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+
+  @@unique([carrier, destination, weight_kg])
+  @@index([destination, is_active])
+}
+
 model NewsLetter {
   newsletter_id Int      @id @default(autoincrement())
   email         String   @unique
@@ -490,4 +505,9 @@ enum DemandeMachineStatus {
   PRICED
   APPROVED
   REJECTED
+}
+
+enum DeliveryDestination {
+  EUROPE
+  MADAGASCAR
 }
