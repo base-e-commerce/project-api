@@ -142,6 +142,20 @@
           <%= invoice.shipping.country || "" %>
         </p>
         <% } %>
+        <% if (invoice.shippingMeta && (invoice.shippingMeta.zone || invoice.shippingMeta.billedWeightKg || invoice.shippingMeta.weightKg)) { %>
+        <p style="margin-top: 8px; color: #4b5563">
+          <strong>Informations de livraison:</strong>
+          <% if (invoice.shippingMeta.zone) { %>
+          Zone <%= invoice.shippingMeta.zone %>
+          <% } %>
+          <% if (invoice.shippingMeta.billedWeightKg) { %>
+          â€¢ Poids facturÃ© <%= invoice.shippingMeta.billedWeightKg %> KG
+          <% } %>
+          <% if (invoice.shippingMeta.weightKg) { %>
+          â€¢ Poids total <%= invoice.shippingMeta.weightKg %> KG
+          <% } %>
+        </p>
+        <% } %>
       </section>
 
       <section class="section">
@@ -177,7 +191,7 @@
             <td style="text-align: right"><%= invoice.totals.subTotalFormatted %></td>
           </tr>
           <tr>
-            <td style="text-align: right">Livraison :</td>
+            <td style="text-align: right">Frais de livraison :</td>
             <td style="text-align: right"><%= invoice.totals.shippingFormatted %></td>
           </tr>
           <tr>

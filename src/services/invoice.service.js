@@ -176,6 +176,7 @@ class InvoiceService {
       reference,
       customer: commande.customer || {},
       shipping: commande.shipping_address_relation || {},
+      shippingMeta: this.buildSafeShippingMeta(commande),
       items,
       totals: {
         subTotal,
@@ -201,10 +202,66 @@ class InvoiceService {
     };
   }
 
+  buildSafeShippingMeta(commande) {
+    try {
+      return {
+        zone: commande?.shipping_zone || null,
+        weightKg:
+          commande?.shipping_weight_kg === null ||
+          commande?.shipping_weight_kg === undefined
+            ? null
+            : Number(commande.shipping_weight_kg),
+        billedWeightKg:
+          commande?.shipping_weight_tier_kg === null ||
+          commande?.shipping_weight_tier_kg === undefined
+            ? null
+            : Number(commande.shipping_weight_tier_kg),
+      };
+    } catch (error) {
+      console.error("[Invoice] Unable to map shipping meta:", error);
+      return {
+        zone: null,
+        weightKg: null,
+        billedWeightKg: null,
+      };
+    }
+  }
+
   async renderInvoiceHtml(invoiceData) {
-    return ejs.renderFile(this.templatePath, { invoice: invoiceData }, {
-      async: true,
-    });
+    try {
+      return await ejs.renderFile(this.templatePath, { invoice: invoiceData }, {
+        async: true,
+      });
+    } catch (error) {
+      console.error("[Invoice] EJS rendering failed, using fallback template:", error);
+      return this.renderFallbackHtml(invoiceData);
+    }
+  }
+
+  renderFallbackHtml(invoiceData) {
+    const reference = invoiceData?.reference || "N/A";
+    const customerName =
+      [invoiceData?.customer?.first_name, invoiceData?.customer?.last_name]
+        .filter(Boolean)
+        .join(" ") || invoiceData?.customer?.email || "Client";
+    const total = invoiceData?.totals?.totalFormatted || this.formatCurrency(0);
+    const shipping = invoiceData?.totals?.shippingFormatted || this.formatCurrency(0);
+    const subTotal = invoiceData?.totals?.subTotalFormatted || this.formatCurrency(0);
+
+    return `<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Facture ${reference}</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; padding: 24px;">
+    <h1>Facture ${reference}</h1>
+    <p>Client: ${customerName}</p>
+    <p>Sous-total: ${subTotal}</p>
+    <p>Frais de livraison: ${shipping}</p>
+    <p><strong>Total: ${total}</strong></p>
+  </body>
+</html>`;
   }
 
   async generateInvoice({ commandeId, customerId, sendEmail }) {
